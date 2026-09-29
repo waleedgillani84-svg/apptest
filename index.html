@@ -1,0 +1,476 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My PDF Drive</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background-color: #f1f3f4; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        
+        /* Mobile App Container (Desktop par phone ki tarah dikhega) */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            height: 100dvh; /* Mobile browser ke address bar ko handle karne ke liye */
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Top Bar (App Bar) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #fff;
+            border-bottom: 1px solid #dadce0;
+            z-index: 10;
+        }
+        .top-bar h2 { font-size: 18px; color: #3c4043; }
+        .logout-btn { background: #fce8e6; color: #d93025; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+
+        /* Search Bar */
+        .search-container { padding: 10px 15px; background: #fff; }
+        .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 24px;
+            border: 1px solid #dadce0;
+            background: #f1f3f4;
+            outline: none;
+            font-size: 14px;
+        }
+        .search-bar:focus { background: #fff; border-color: #1a73e8; }
+
+        /* Main Content Area (Scrollable) */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; /* FAB ke liye jagah */
+        }
+
+        /* File Grid (Mobile ke liye 2 columns) */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        /* File Card */
+        .file-card {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 160px;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .file-card:active { transform: scale(0.98); }
+        .file-name { font-weight: 600; font-size: 13px; margin-bottom: 5px; word-break: break-all; color: #202124; }
+        .pdf-icon { font-size: 40px; text-align: center; margin-bottom: 5px; }
+        .file-note { font-size: 10px; color: #5f6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Actions inside Card */
+        .file-actions { margin-top: 10px; display: flex; gap: 5px; }
+        .file-actions a, .file-actions button {
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 11px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-weight: 500;
+        }
+        .btn-download { background: #e6f4ea; color: #137333; }
+        .btn-delete { background: #fce8e6; color: #d93025; flex: 0.4 !important; }
+
+        /* Floating Action Button (FAB) */
+        .fab {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(26,115,232,0.4);
+            cursor: pointer;
+            z-index: 20;
+            transition: 0.2s;
+        }
+        .fab:active { transform: scale(0.9); }
+
+        /* Modal Overlay (Bottom Sheet Style) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 100;
+        }
+        .modal-content {
+            background: #fff;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 20px 20px 0 0;
+            padding: 25px 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-content h3 { margin-bottom: 20px; color: #202124; font-size: 18px; }
+        .modal-content input[type="text"], .modal-content textarea {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            background: #f8f9fa;
+        }
+        .modal-content input[type="text"]:focus, .modal-content textarea:focus { border-color: #1a73e8; background: #fff; }
+        .modal-content textarea { height: 80px; resize: none; }
+        
+        /* File Upload Button */
+        .file-upload-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #e8f0fe;
+            color: #1a73e8;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            border: 1px dashed #1a73e8;
+        }
+        .file-upload-btn input { display: none; }
+
+        /* Modal Buttons */
+        .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .modal-actions button { flex: 1; padding: 14px; border-radius: 10px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .btn-cancel { background: #f1f3f4; color: #3c4043; }
+        .btn-save { background: #1a73e8; color: white; }
+        .btn-save:active { background: #1557b0; }
+
+        /* Login Overlay */
+        .login-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 200;
+        }
+        .login-box { width: 100%; max-width: 300px; text-align: center; }
+        .login-box h2 { margin-bottom: 10px; color: #1a73e8; }
+        .login-box p { font-size: 14px; color: #5f6368; margin-bottom: 20px; }
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Login Overlay -->
+        <div class="login-overlay" id="loginOverlay">
+            <div class="login-box">
+                <h2>📁 My PDF Drive</h2>
+                <p>Apna phone number daal kar login karein</p>
+                <input type="tel" id="phoneInput" placeholder="0300 1234567">
+                <button id="loginBtn">Login</button>
+            </div>
+        </div>
+
+        <!-- Top App Bar -->
+        <div class="top-bar">
+            <h2>My PDF Drive</h2>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" class="search-bar" id="searchBar" placeholder="Search PDFs...">
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="file-grid" id="fileGrid">
+                <!-- Files will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab" id="newFileBtn">+</button>
+    </div>
+
+    <!-- Upload Modal (Bottom Sheet) -->
+    <div class="modal-overlay" id="fileModal">
+        <div class="modal-content">
+            <h3>Upload New PDF</h3>
+            
+            <input type="text" id="fileName" placeholder="PDF ka naam (e.g., Azaan ki report)">
+            
+            <label class="file-upload-btn">
+                📂 PDF File Choose Karein
+                <input type="file" id="fileUpload" accept="application/pdf">
+            </label>
+            <div id="fileSelectedText" style="font-size: 12px; color: green; margin-bottom: 10px; text-align: center; display: none;">✅ File Selected</div>
+
+            <textarea id="fileContent" placeholder="Notes (Optional)..."></textarea>
+            
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancelBtn">Cancel</button>
+                <button class="btn-save" id="saveBtn">Save PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Turso Client Library -->
+    <script type="module">
+        import { createClient } from "https://esm.sh/@libsql/client/web";
+
+        // ==========================================
+        // 1. APNI TURSO KEYS YAHAN LAGAYEIN
+        // ==========================================
+        const TURSO_URL = "libsql://junaid-waleedgillani84-svg.aws-ap-south-1.turso.io";
+        const TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTA3MjQwNjYsImlkIjoiMDFhMGVmNzctOTIwMS03OTRmLThiZmUtNTc2ZmQxYWE2NmM4Iiwia2lkIjoiY2ZFdHp0VTl3SFFEcWI4WV9ZX2hzcGVITUsxbkxkQ0I5NjVBaXRwS0ZaVSIsInJpZCI6IjljYTE2ODA2LWM0NmQtNGM2YS1iNWY0LWI2N2Y3MWU4NjhiMSJ9.J-xUoZJR0DhhI6EStEGje_Wn2bZYR7luOAtNHcVIh_vi3UGC8qcWAMse7p01BQfXJ3iScFy2AQg_o1eJ1sqcDQ";
+
+        const db = createClient({ url: TURSO_URL, authToken: TURSO_TOKEN });
+
+        // Global Variables
+        let currentUserPhone = "";
+        let uploadedFileBase64 = null; 
+
+        // Elements
+        const loginOverlay = document.getElementById("loginOverlay");
+        const phoneInput = document.getElementById("phoneInput");
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const fileModal = document.getElementById("fileModal");
+        const fileGrid = document.getElementById("fileGrid");
+
+        // ==========================================
+        // 2. DATABASE INITIALIZATION
+        // ==========================================
+        async function initDB() {
+            try {
+                await db.execute(`
+                    CREATE TABLE IF NOT EXISTS drive_items (
+                        id TEXT PRIMARY KEY,
+                        user_phone TEXT,
+                        name TEXT,
+                        content TEXT,
+                        file_data TEXT,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                    );
+                `);
+                console.log("Database ready!");
+            } catch (error) { console.error("DB Error:", error); }
+        }
+
+        // ==========================================
+        // 3. LOGIN SYSTEM
+        // ==========================================
+        function checkLogin() {
+            const savedPhone = localStorage.getItem("user_phone");
+            if (savedPhone) {
+                currentUserPhone = savedPhone;
+                loginOverlay.style.display = "none";
+                loadFiles();
+            } else {
+                loginOverlay.style.display = "flex";
+            }
+        }
+
+        loginBtn.addEventListener("click", () => {
+            const phone = phoneInput.value.trim();
+            if (!phone) return alert("Phone number daalein!");
+            localStorage.setItem("user_phone", phone);
+            currentUserPhone = phone;
+            loginOverlay.style.display = "none";
+            loadFiles();
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("user_phone");
+            location.reload();
+        });
+
+        // ==========================================
+        // 4. PDF UPLOAD LOGIC
+        // ==========================================
+        document.getElementById("fileUpload").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type !== "application/pdf") return alert("Sirf PDF file allowed hai!");
+            if (file.size > 2 * 1024 * 1024) return alert("PDF 2MB se choti honi chahiye!");
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                uploadedFileBase64 = event.target.result;
+                document.getElementById("fileSelectedText").style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ==========================================
+        // 5. DATA OPERATIONS (CRUD)
+        // ==========================================
+        async function loadFiles() {
+            if (!currentUserPhone) return;
+            fileGrid.innerHTML = "<p style='grid-column: span 2; text-align: center;'>Loading...</p>";
+            
+            try {
+                const result = await db.execute({
+                    sql: "SELECT * FROM drive_items WHERE user_phone = ? ORDER BY created_at DESC",
+                    args: [currentUserPhone]
+                });
+                
+                fileGrid.innerHTML = "";
+                if (result.rows.length === 0) {
+                    fileGrid.innerHTML = "<p style='grid-column: span 2; text-align: center; color: #5f6368; margin-top: 20px;'>Abhi koi PDF nahi hai.<br>Neeche '+' button daba kar upload karein.</p>";
+                    return;
+                }
+
+                result.rows.forEach(row => {
+                    const card = document.createElement("div");
+                    card.className = "file-card";
+                    
+                    let downloadBtn = row.file_data ? `<a href="${row.file_data}" download="${row.name}.pdf" class="btn-download">Download</a>` : "";
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="pdf-icon">📑</div>
+                            <div class="file-name">${row.name}</div>
+                            <div class="file-note">${row.content || 'No notes'}</div>
+                        </div>
+                        <div class="file-actions">
+                            ${downloadBtn}
+                            <button class="btn-delete" onclick="deleteFile('${row.id}')">🗑️</button>
+                        </div>
+                    `;
+                    fileGrid.appendChild(card);
+                });
+            } catch (error) { console.error("Load Error:", error); }
+        }
+
+        // Save Button
+        document.getElementById("saveBtn").addEventListener("click", async () => {
+            const name = document.getElementById("fileName").value;
+            const content = document.getElementById("fileContent").value;
+            
+            if (!name) return alert("File ka naam likhein!");
+            if (!uploadedFileBase64) return alert("Pehle PDF file select karein!");
+
+            try {
+                const newId = crypto.randomUUID();
+                await db.execute({
+                    sql: "INSERT INTO drive_items (id, user_phone, name, content, file_data) VALUES (?, ?, ?, ?, ?)",
+                    args: [newId, currentUserPhone, name, content, uploadedFileBase64]
+                });
+                
+                alert("PDF save ho gayi!");
+                closeModal();
+                loadFiles();
+            } catch (error) {
+                console.error("Save Error:", error);
+                alert("Save nahi ho saka.");
+            }
+        });
+
+        window.deleteFile = async (id) => {
+            if (!confirm("Delete karna chahte hain?")) return;
+            await db.execute({ sql: "DELETE FROM drive_items WHERE id = ? AND user_phone = ?", args: [id, currentUserPhone] });
+            loadFiles();
+        };
+
+        // ==========================================
+        // 6. UI MODAL LOGIC (Bottom Sheet)
+        // ==========================================
+        document.getElementById("newFileBtn").addEventListener("click", () => {
+            if (!currentUserPhone) return alert("Pehle login karein!");
+            uploadedFileBase64 = null;
+            document.getElementById("fileName").value = "";
+            document.getElementById("fileContent").value = "";
+            document.getElementById("fileUpload").value = "";
+            document.getElementById("fileSelectedText").style.display = "none";
+            fileModal.style.display = "flex";
+            setTimeout(() => fileModal.classList.add("active"), 10); // Animation ke liye
+        });
+
+        function closeModal() {
+            fileModal.classList.remove("active");
+            setTimeout(() => fileModal.style.display = "none", 300); // Animation ke baad hide
+        }
+
+        document.getElementById("cancelBtn").addEventListener("click", closeModal);
+        
+        // Overlay par click karne se band ho jaye
+        fileModal.addEventListener("click", (e) => {
+            if (e.target === fileModal) closeModal();
+        });
+
+        // Search
+        document.getElementById("searchBar").addEventListener("input", (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll(".file-card").forEach(card => {
+                const name = card.querySelector(".file-name").innerText.toLowerCase();
+                card.style.display = name.includes(term) ? "flex" : "none";
+            });
+        });
+
+        // App Start
+        initDB().then(checkLogin);
+    </script>
+</body>
+</html>
