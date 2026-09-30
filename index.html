@@ -1,0 +1,1702 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cash Book Pro - Multi-Account Ledger</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{
+        --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;--card:#1e293b;--card2:#283548;
+        --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+        --green:#10b981;--green2:#059669;--greenbg:rgba(16,185,129,.12);
+        --red:#ef4444;--red2:#dc2626;--redbg:rgba(239,68,68,.12);
+        --blue:#3b82f6;--blue2:#2563eb;--bluebg:rgba(59,130,246,.12);
+        --yellow:#f59e0b;--purple:#8b5cf6;--border:#334155;
+        --radius:12px;--radius-sm:8px;--shadow:0 4px 24px rgba(0,0,0,.3);
+        }
+        body.theme-light{--bg:#f8fafc;--bg2:#ffffff;--bg3:#e2e8f0;--card:#ffffff;--card2:#f1f5f9;--text:#0f172a;--text2:#475569;--text3:#94a3b8;--border:#cbd5e1}
+        body.theme-blue{--bg:#0c1e3e;--bg2:#1e3a5f;--bg3:#2d5a87;--card:#1e3a5f;--card2:#2d5a87;--text:#e0f2fe;--text2:#7dd3fc;--text3:#38bdf8;--border:#1e40af}
+        body.theme-green{--bg:#052e16;--bg2:#14532d;--bg3:#166534;--card:#14532d;--card2:#166534;--text:#dcfce7;--text2:#86efac;--text3:#4ade80;--border:#15803d}
+        body.theme-purple{--bg:#1e1b4b;--bg2:#312e81;--bg3:#4338ca;--card:#312e81;--card2:#4338ca;--text:#e0e7ff;--text2:#a5b4fc;--text3:#818cf8;--border:#4f46e5}
+        body.theme-orange{--bg:#431407;--bg2:#7c2d12;--bg3:#9a3412;--card:#7c2d12;--card2:#9a3412;--text:#ffedd5;--text2:#fdba74;--text3:#fb923c;--border:#c2410c}
+        body.theme-pink{--bg:#4a0428;--bg2:#831843;--bg3:#9d174d;--card:#831843;--card2:#9d174d;--text:#fce7f3;--text2:#f9a8d4;--text3:#f472b6;--border:#be185d}
+
+        html,body{height:100%;overflow:hidden}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative;transition:background .3s,color .3s}
+
+        /* Login Overlay */
+        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;text-align:center}
+        .login-box{width:100%;max-width:320px;background:var(--card);padding:24px;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow)}
+        .login-box h2{font-size:20px;margin-bottom:8px;color:var(--blue)}
+        .login-box p{font-size:13px;color:var(--text2);margin-bottom:20px}
+        .login-box input{width:100%;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:16px;text-align:center;margin-bottom:16px;outline:none}
+        .login-box button{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer}
+
+        .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 12px;flex-shrink:0;z-index:10}
+        .header-top{display:flex;align-items:center;gap:8px}
+        .menu-btn{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--bg3);border:none;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .account-selector{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;cursor:pointer;min-width:0;transition:all .15s}
+        .account-selector:active{transform:scale(.97);border-color:var(--blue)}
+        .account-selector .icon{font-size:16px;flex-shrink:0}
+        .account-selector .name{flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .account-selector .badge{font-size:9px;background:var(--green);color:#fff;padding:1px 5px;border-radius:10px;flex-shrink:0}
+        .header-actions{display:flex;gap:6px;flex-shrink:0}
+        .header-actions button{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--bg3);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s}
+        .header-actions button:active{transform:scale(.92)}
+        .header-actions button.has-query{background:var(--blue);box-shadow:0 0 12px rgba(59,130,246,.5)}
+        .header-actions button.has-query::after{content:'';position:absolute;top:3px;right:3px;width:6px;height:6px;background:var(--yellow);border-radius:50%;box-shadow:0 0 4px var(--yellow)}
+
+        .balance-section{flex-shrink:0;padding:8px 12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+        .balance-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 6px;text-align:center}
+        .balance-card .label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+        .balance-card .value{font-size:14px;font-weight:700}
+        .balance-card.net .value{color:var(--blue)}
+        .balance-card.in .value{color:var(--green)}
+        .balance-card.out .value{color:var(--red)}
+
+        .statement-section{flex-shrink:0;padding:0 12px 4px}
+        .statement-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+        .statement-header h3{font-size:12px;color:var(--text2);font-weight:600}
+        .statement-header .count{font-size:10px;color:var(--text3)}
+
+        .entries-container{flex:1;overflow-y:auto;padding:0 12px 8px;-webkit-overflow-scrolling:touch}
+        .entries-list{display:flex;flex-direction:column;gap:2px}
+        .entry-item{display:flex;align-items:center;padding:6px 10px;border-radius:var(--radius-sm);background:var(--card);border-left:3px solid transparent;gap:8px;transition:all .15s;min-height:34px;position:relative}
+        .entry-item.in{border-left-color:var(--green);background:linear-gradient(90deg,rgba(16,185,129,.08),var(--card) 60%)}
+        .entry-item.out{border-left-color:var(--red);background:linear-gradient(90deg,rgba(239,68,68,.08),var(--card) 60%)}
+        .entry-item:active{transform:scale(.98)}
+
+        .entry-main{flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;cursor:pointer}
+        .entry-amount{font-size:14px;font-weight:800;flex-shrink:0;letter-spacing:.3px;text-shadow:0 0 8px currentColor}
+        .entry-item.in .entry-amount{color:var(--green);text-shadow:0 0 10px rgba(16,185,129,.6),0 0 4px rgba(16,185,129,.4)}
+        .entry-item.out .entry-amount{color:var(--red);text-shadow:0 0 10px rgba(239,68,68,.6),0 0 4px rgba(239,68,68,.4)}
+        .entry-name{flex:1;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 6px rgba(241,245,249,.3);min-width:0;text-align:right}
+        .entry-name.empty{color:var(--text3);font-style:italic;font-weight:400;font-size:11px;text-shadow:none}
+        .entry-meta{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex-shrink:0;margin-left:4px}
+        .entry-date{font-size:8px;color:var(--text3);white-space:nowrap;letter-spacing:.3px;opacity:.8}
+
+        .entry-menu-btn{width:28px;height:28px;border-radius:6px;border:none;font-size:18px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--bg3);color:var(--text2);transition:all .15s;flex-shrink:0;letter-spacing:1px}
+        .entry-menu-btn:active{transform:scale(.9);background:var(--blue);color:#fff}
+
+        .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--text3);text-align:center}
+        .empty-state .icon{font-size:40px;margin-bottom:12px;opacity:.5}
+        .empty-state p{font-size:13px;line-height:1.5}
+
+        .bottom-actions{flex-shrink:0;padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:8px}
+        .action-btn{flex:1;padding:12px;border-radius:var(--radius);border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+        .action-btn:active{transform:scale(.96)}
+        .action-btn.cash-in{background:var(--green);color:#fff}
+        .action-btn.cash-out{background:var(--red);color:#fff}
+
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+        .modal-overlay.active{display:flex}
+        .modal-overlay.center{align-items:center}
+        .modal{background:var(--bg2);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease}
+        .modal.center-modal{border-radius:16px;animation:popIn .2s ease;max-width:360px}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+        .modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1}
+        .modal-header h3{font-size:15px;font-weight:700}
+        .modal-close{width:30px;height:30px;border-radius:50%;background:var(--bg3);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .modal-body{padding:16px}
+
+        .form-group{margin-bottom:12px}
+        .form-group label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+        .form-group input,.form-group select{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;outline:none;transition:border-color .2s}
+        .form-group input:focus,.form-group select:focus{border-color:var(--blue)}
+        .form-group select{cursor:pointer}
+
+        .suggestions-container{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:90px;overflow-y:auto}
+        .suggestion-chip{padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;font-size:11px;color:var(--text2);cursor:pointer;transition:all .15s;user-select:none}
+        .suggestion-chip:active,.suggestion-chip:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+        .form-actions{display:flex;gap:8px;margin-top:16px}
+        .form-actions button{flex:1;padding:12px;border-radius:var(--radius);border:none;font-size:14px;font-weight:600;cursor:pointer}
+        .btn-cancel{background:var(--bg3);color:var(--text)}
+        .btn-save{background:var(--blue);color:#fff}
+        .btn-danger{background:var(--red);color:#fff}
+
+        .side-menu{position:fixed;top:0;left:-300px;width:280px;height:100%;background:var(--bg2);z-index:200;transition:left .3s ease;overflow-y:auto;border-right:1px solid var(--border);display:flex;flex-direction:column}
+        .side-menu.open{left:0}
+        .side-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:199;display:none}
+        .side-overlay.active{display:block}
+        .side-menu-header{padding:20px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:relative}
+        .side-menu-header .logo{font-size:28px}
+        .side-menu-header .info h3{font-size:15px;font-weight:700}
+        .side-menu-header .info p{font-size:10px;color:var(--text3)}
+        .side-menu-items{padding:8px;flex:1}
+        .side-menu-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;color:var(--text);font-size:14px}
+        .side-menu-item:hover{background:var(--bg3)}
+        .side-menu-item .icon{font-size:18px;width:24px;text-align:center}
+        .side-divider{height:1px;background:var(--border);margin:8px 16px}
+        .side-section-title{padding:8px 16px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+
+        .account-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+        .account-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
+        .account-item:active{transform:scale(.98)}
+        .account-item.active{border-color:var(--blue);background:var(--bluebg)}
+        .account-item .icon{font-size:20px}
+        .account-item .info{flex:1}
+        .account-item .info .name{font-size:13px;font-weight:600}
+        .account-item .info .balance{font-size:11px;color:var(--text3)}
+        .account-item .actions{display:flex;gap:4px}
+        .account-item .actions button{width:28px;height:28px;border-radius:6px;border:none;font-size:12px;cursor:pointer;background:var(--bg3);color:var(--text2)}
+
+        .filter-section{margin-bottom:16px}
+        .filter-section h4{font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600}
+        .filter-options{display:flex;flex-wrap:wrap;gap:6px}
+        .filter-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s}
+        .filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+        .date-inputs{display:flex;gap:8px}
+        .date-inputs input{flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px}
+
+        .search-input-wrap{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:16px;transition:border-color .2s}
+        .search-input-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+        .search-input-wrap .search-icon{font-size:16px;flex-shrink:0}
+        .search-input-wrap input{flex:1;background:none;border:none;color:var(--text);font-size:14px;outline:none}
+        .search-input-wrap input::placeholder{color:var(--text3)}
+        .search-input-wrap .clear-btn{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:2px 4px;display:none}
+        .search-input-wrap .clear-btn.visible{display:block}
+        .search-hint{font-size:10px;color:var(--text3);margin-top:-10px;margin-bottom:12px;padding-left:4px}
+
+        .trash-item{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px}
+        .trash-item .info{flex:1}
+        .trash-item .info .details{font-size:12px}
+        .trash-item .info .date{font-size:10px;color:var(--text3)}
+        .trash-item .actions{display:flex;gap:4px}
+        .trash-item .actions button{padding:4px 8px;border-radius:4px;border:none;font-size:11px;cursor:pointer}
+
+        .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg3);color:var(--text);padding:8px 16px;border-radius:20px;font-size:12px;z-index:400;opacity:0;transition:opacity .3s;pointer-events:none}
+        .toast.show{opacity:1}
+
+        .confirm-dialog{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;z-index:250;width:90%;max-width:340px;display:none;box-shadow:var(--shadow)}
+        .confirm-dialog.active{display:block}
+        .confirm-dialog h4{font-size:15px;margin-bottom:8px}
+        .confirm-dialog p{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.4}
+        .confirm-dialog .actions{display:flex;gap:8px}
+        .confirm-dialog .actions button{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-size:13px;font-weight:600;cursor:pointer}
+
+        .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+        .theme-option{padding:12px;border-radius:var(--radius-sm);border:2px solid var(--border);cursor:pointer;transition:all .2s;text-align:center;font-size:12px;font-weight:600}
+        .theme-option:hover{transform:scale(1.05)}
+        .theme-option.active{border-color:var(--blue);box-shadow:0 0 12px rgba(59,130,246,.3)}
+        .theme-option.dark{background:#0f172a;color:#f1f5f9}
+        .theme-option.light{background:#f8fafc;color:#0f172a}
+        .theme-option.blue{background:#0c1e3e;color:#e0f2fe}
+        .theme-option.green{background:#052e16;color:#dcfce7}
+        .theme-option.purple{background:#1e1b4b;color:#e0e7ff}
+        .theme-option.orange{background:#431407;color:#ffedd5}
+        .theme-option.pink{background:#4a0428;color:#fce7f3}
+
+        .entry-action-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 10px 40px rgba(0,0,0,.5);z-index:250;width:90%;max-width:320px;display:none;animation:popIn .2s ease;overflow:hidden}
+        .entry-action-modal.active{display:block}
+        .entry-action-header{padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+        .entry-action-header h4{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .entry-action-header .close-btn{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:none;color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .entry-action-header .close-btn:active{background:var(--red);color:#fff}
+        .entry-action-preview{padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px}
+        .entry-action-preview .preview-amount{font-weight:700;font-size:13px}
+        .entry-action-preview .preview-amount.in{color:var(--green)}
+        .entry-action-preview .preview-amount.out{color:var(--red)}
+        .entry-action-preview .preview-name{flex:1;text-align:right;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .entry-action-list{padding:6px}
+        .entry-action-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;font-size:14px;color:var(--text);border:none;background:transparent;width:100%;text-align:left}
+        .entry-action-item:hover{background:var(--bg3)}
+        .entry-action-item:active{transform:scale(.98)}
+        .entry-action-item .action-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .entry-action-item.edit .action-icon{background:var(--bluebg);color:var(--blue)}
+        .entry-action-item.move .action-icon{background:var(--greenbg);color:var(--green)}
+        .entry-action-item.delete .action-icon{background:var(--redbg);color:var(--red)}
+        .entry-action-item .action-text{flex:1;display:flex;flex-direction:column}
+        .entry-action-item .action-text .title{font-weight:600;font-size:13px}
+        .entry-action-item .action-text .desc{font-size:10px;color:var(--text3);margin-top:2px}
+        .entry-action-item.delete{color:var(--red)}
+
+        .statement-preview-box{background:#ffffff;color:#0f172a;padding:16px;border-radius:12px;font-family:sans-serif;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,0,0,.15);max-height:350px;overflow-y:auto}
+        .statement-preview-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #3b82f6;padding-bottom:8px;margin-bottom:12px}
+        .statement-preview-header h2{font-size:16px;color:#0f172a;display:flex;align-items:center;gap:6px}
+        .statement-preview-header .date{font-size:10px;color:#64748b}
+        .statement-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;text-align:center}
+        .statement-summary-box{padding:8px 4px;border-radius:6px;font-size:11px}
+        .statement-summary-box.in{background:#dcfce7;color:#166534}
+        .statement-summary-box.out{background:#fee2e2;color:#991b1b}
+        .statement-summary-box.net{background:#dbeafe;color:#1e40af}
+        .statement-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+        .statement-table th{background:#f1f5f9;color:#475569;padding:6px;text-align:left;font-size:10px;text-transform:uppercase}
+        .statement-table td{padding:6px;border-bottom:1px solid #e2e8f0;color:#1e293b}
+        .statement-table td.pos{color:#16a34a;font-weight:700}
+        .statement-table td.neg{color:#dc2626;font-weight:700}
+        .statement-footer{font-size:9px;color:#94a3b8;text-align:center;margin-top:8px;border-top:1px solid #f1f5f9;padding-top:6px}
+
+        @media print{
+        body *{visibility:hidden}
+        #printableStatementArea,#printableStatementArea *{visibility:visible}
+        #printableStatementArea{position:absolute;left:0;top:0;width:100%;background:#fff !important;color:#000 !important;padding:20px}
+        }
+
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+
+        @media(min-width:481px){
+        body{border-left:1px solid var(--border);border-right:1px solid var(--border)}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN OVERLAY -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>💳 Cash Book Pro</h2>
+            <p>Apna phone number daal kar login karein</p>
+            <input type="tel" id="loginPhone" placeholder="0300 1234567" inputmode="numeric">
+            <button onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-top">
+            <button class="menu-btn" onclick="toggleSideMenu()">☰</button>
+            <div class="account-selector" onclick="openAccountModal()">
+                <span class="icon" id="activeAccountIcon">💵</span>
+                <span class="name" id="activeAccountName">Select Account</span>
+                <span class="badge" id="autoSaveBadge">Auto</span>
+            </div>
+            <div class="header-actions">
+                <button id="searchFilterBtn" onclick="openFilterModal()" title="Search & Filters">🔍</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="balance-section">
+        <div class="balance-card net"><div class="label">Net Balance</div><div class="value" id="netBalance">Rs 0</div></div>
+        <div class="balance-card in"><div class="label">Cash In (+)</div><div class="value" id="totalIn">Rs 0</div></div>
+        <div class="balance-card out"><div class="label">Cash Out (-)</div><div class="value" id="totalOut">Rs 0</div></div>
+    </div>
+
+    <div class="statement-section">
+        <div class="statement-header">
+            <h3>📄 Statement</h3>
+            <span class="count" id="entryCount">0 entries</span>
+        </div>
+    </div>
+
+    <div class="entries-container" id="entriesContainer">
+        <div class="entries-list" id="entriesList"></div>
+        <div class="empty-state" id="emptyState">
+            <div class="icon">📭</div>
+            <p>No transactions found<br>Tap + CASH IN or - CASH OUT at the bottom to add your first transaction.</p>
+        </div>
+    </div>
+
+    <div class="bottom-actions">
+        <button class="action-btn cash-in" onclick="openEntryModal('in')">📈 + CASH IN</button>
+        <button class="action-btn cash-out" onclick="openEntryModal('out')">📉 - CASH OUT</button>
+    </div>
+
+    <div class="side-overlay" id="sideOverlay" onclick="toggleSideMenu()"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <span class="logo">💳</span>
+            <div class="info"><h3>Cash Book Pro</h3><p id="sideMenuPhone">Not logged in</p></div>
+        </div>
+        <div class="side-menu-items">
+            <div class="side-menu-item" onclick="openAnalytics()"><span class="icon">📊</span>Analytics</div>
+            <div class="side-menu-item" onclick="openSettings()"><span class="icon">⚙️</span>Settings</div>
+            <div class="side-menu-item" onclick="openTrash()"><span class="icon">🗑️</span>Trash</div>
+            <div class="side-divider"></div>
+            <div class="side-section-title">Data</div>
+            <div class="side-menu-item" onclick="exportData()"><span class="icon">📥</span>Export JSON</div>
+            <div class="side-menu-item" onclick="document.getElementById('importFile').click()"><span class="icon">📤</span>Import JSON</div>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            <div class="side-divider"></div>
+            <div class="side-section-title">Accounts & Statements</div>
+            <div class="side-menu-item" onclick="openAccountModal()"><span class="icon">💳</span>Manage Accounts</div>
+            <div class="side-menu-item" onclick="openStatementExportModal()"><span class="icon">📄</span>Export Statement (PDF/Picture)</div>
+            <div class="side-divider"></div>
+            <div class="side-menu-item" onclick="handleLogout()" style="color:var(--red)"><span class="icon">🚪</span>Logout</div>
+        </div>
+        <div style="padding:16px;text-align:center;font-size:10px;color:var(--text3);border-top:1px solid var(--border);margin-top:auto">
+            App Creator: Junaid Gillani<br>📞 03176407994
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="entryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="entryModalTitle">+ Cash IN</h3>
+                <button class="modal-close" onclick="closeEntryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Amount (Rs)</label>
+                    <input type="number" id="entryAmount" placeholder="Enter amount" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label>Name / Details (Optional)</label>
+                    <input type="text" id="entryDetails" placeholder="Enter description" list="detailsDatalist" oninput="showDetailsSuggestions()" onfocus="showDetailsSuggestions()" autocomplete="off">
+                    <datalist id="detailsDatalist"></datalist>
+                    <div class="suggestions-container" id="detailsSuggestionsContainer"></div>
+                </div>
+                <div class="form-group">
+                    <label>Date & Time</label>
+                    <input type="text" id="entryDateTime" readonly style="color:var(--text3);font-size:12px">
+                </div>
+                <div class="form-actions">
+                    <button class="btn-cancel" onclick="closeEntryModal()">Cancel</button>
+                    <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="accountModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>💳 Manage Accounts</h3>
+                <button class="modal-close" onclick="closeAccountModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="account-list" id="accountList"></div>
+                <div class="form-group">
+                    <label>Account Name</label>
+                    <input type="text" id="newAccountName" placeholder="e.g., Main Cash, Personal">
+                </div>
+                <div class="form-group">
+                    <label>Icon</label>
+                    <div class="filter-options" id="iconSelector">
+                        <span class="filter-chip active" data-icon="💵">💵</span>
+                        <span class="filter-chip" data-icon="👤">👤</span>
+                        <span class="filter-chip" data-icon="💼">💼</span>
+                        <span class="filter-chip" data-icon="🏦">🏦</span>
+                        <span class="filter-chip" data-icon="💰">💰</span>
+                        <span class="filter-chip" data-icon="🪙">🪙</span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-cancel" onclick="closeAccountModal()">Cancel</button>
+                    <button class="btn-save" onclick="addAccount()">+ Add Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="filterModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚙️ Search & Filters</h3>
+                <button class="modal-close" onclick="closeFilterModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="search-input-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="filterSearchInput" placeholder="Search by name or amount..." oninput="handleSearchFromModal()">
+                    <button class="clear-btn" id="filterClearBtn" onclick="clearSearchFromModal()">✕</button>
+                </div>
+                <div class="search-hint">Searches name/details and amount in real-time</div>
+                <div class="filter-section">
+                    <h4>Account Scope</h4>
+                    <div class="filter-options">
+                        <span class="filter-chip active" data-filter="scope" data-value="current">Current Account</span>
+                        <span class="filter-chip" data-filter="scope" data-value="all">All Accounts</span>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h4>Date Range</h4>
+                    <div class="date-inputs">
+                        <input type="date" id="filterDateFrom" placeholder="From">
+                        <input type="date" id="filterDateTo" placeholder="To">
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h4>Type</h4>
+                    <div class="filter-options">
+                        <span class="filter-chip active" data-filter="type" data-value="all">All</span>
+                        <span class="filter-chip" data-filter="type" data-value="in">+ In</span>
+                        <span class="filter-chip" data-filter="type" data-value="out">- Out</span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-cancel" onclick="resetFilters()">Clear All</button>
+                    <button class="btn-save" onclick="applyFilters()">Apply & Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="statementExportModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📄 Export Statement</h3>
+                <button class="modal-close" onclick="closeStatementExportModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Choose format to print or download your financial statement:</p>
+                <div class="statement-preview-box" id="printableStatementArea"></div>
+                <div class="form-actions" style="flex-direction:column;gap:8px">
+                    <button class="btn-save" onclick="exportStatementAsPDF()" style="background:var(--blue)">📄 Print / Save as PDF</button>
+                    <button class="btn-save" onclick="exportStatementAsImage()" style="background:var(--green)">🖼️ Download as Picture (PNG)</button>
+                    <button class="btn-cancel" onclick="openStatementExportHTML()" style="background:var(--bg3)">🌐 Export HTML File</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚙️ Settings</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-section">
+                    <h4>🎨 Color Theme</h4>
+                    <div class="theme-grid">
+                        <div class="theme-option dark" data-theme="dark" onclick="selectTheme('dark')">Dark</div>
+                        <div class="theme-option light" data-theme="light" onclick="selectTheme('light')">Light</div>
+                        <div class="theme-option blue" data-theme="blue" onclick="selectTheme('blue')">Blue</div>
+                        <div class="theme-option green" data-theme="green" onclick="selectTheme('green')">Green</div>
+                        <div class="theme-option purple" data-theme="purple" onclick="selectTheme('purple')">Purple</div>
+                        <div class="theme-option orange" data-theme="orange" onclick="selectTheme('orange')">Orange</div>
+                        <div class="theme-option pink" data-theme="pink" onclick="selectTheme('pink')">Pink</div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-save" onclick="closeSettingsModal()" style="flex:1">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="trashModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🗑️ Recycle Bin</h3>
+                <button class="modal-close" onclick="closeTrashModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="trashList"></div>
+                <div class="form-actions" style="margin-top:12px">
+                    <button class="btn-danger" onclick="emptyTrash()" style="flex:1">🗑️ Empty Trash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="analyticsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📊 Analytics</h3>
+                <button class="modal-close" onclick="closeAnalyticsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="analyticsChart" width="400" height="200" style="width:100%;margin-bottom:16px;border-radius:8px;background:var(--bg);padding:8px"></canvas>
+                <div class="balance-section" style="padding:0;margin-bottom:16px">
+                    <div class="balance-card in"><div class="label">Total In</div><div class="value" id="analyticsIn">Rs 0</div></div>
+                    <div class="balance-card out"><div class="label">Total Out</div><div class="value" id="analyticsOut">Rs 0</div></div>
+                    <div class="balance-card net"><div class="label">Net</div><div class="value" id="analyticsNet">Rs 0</div></div>
+                </div>
+                <div id="analyticsDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="moveEntryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📦 Move Entry to Account</h3>
+                <button class="modal-close" onclick="closeMoveEntryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="account-list" id="moveAccountList"></div>
+                <div class="form-actions">
+                    <button class="btn-cancel" onclick="closeMoveEntryModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay center" id="entryActionOverlay" onclick="closeEntryActionModal()">
+        <div class="entry-action-modal" id="entryActionModal" onclick="event.stopPropagation()">
+            <div class="entry-action-header">
+                <h4>⚙️ Entry Actions</h4>
+                <button class="close-btn" onclick="closeEntryActionModal()">✕</button>
+            </div>
+            <div class="entry-action-preview" id="entryActionPreview"></div>
+            <div class="entry-action-list">
+                <button class="entry-action-item edit" onclick="actionEditEntry()">
+                    <div class="action-icon">✏️</div>
+                    <div class="action-text">
+                        <div class="title">Edit Entry</div>
+                        <div class="desc">Change amount, name or details</div>
+                    </div>
+                </button>
+                <button class="entry-action-item move" onclick="actionMoveEntry()">
+                    <div class="action-icon">📦</div>
+                    <div class="action-text">
+                        <div class="title">Move to Other Account</div>
+                        <div class="desc">Transfer this entry to another account</div>
+                    </div>
+                </button>
+                <button class="entry-action-item delete" onclick="actionDeleteEntry()">
+                    <div class="action-icon">🗑️</div>
+                    <div class="action-text">
+                        <div class="title">Delete Entry</div>
+                        <div class="desc">Move to trash (can be restored)</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay center" id="confirmOverlay">
+        <div class="confirm-dialog" id="confirmDialog">
+            <h4 id="confirmTitle">Confirm</h4>
+            <p id="confirmMessage">Are you sure?</p>
+            <div id="confirmInput" style="display:none;margin-bottom:12px">
+                <input type="text" id="confirmInputField" placeholder="Type to confirm" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
+            </div>
+            <div class="actions">
+                <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+                <button class="btn-danger" id="confirmBtn" onclick="executeConfirm()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { createClient } from "https://esm.sh/@libsql/client/web";
+
+        // ==========================================
+        // 1. APNI TURSO KEYS YAHAN LAGAYEIN
+        // ==========================================
+        const TURSO_URL = "libsql://junaid-waleedgillani84-svg.aws-ap-south-1.turso.io";
+        const TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTA3MjQwNjYsImlkIjoiMDFhMGVmNzctOTIwMS03OTRmLThiZmUtNTc2ZmQxYWE2NmM4Iiwia2lkIjoiY2ZFdHp0VTl3SFFEcWI4WV9ZX2hzcGVITUsxbkxkQ0I5NjVBaXRwS0ZaVSIsInJpZCI6IjljYTE2ODA2LWM0NmQtNGM2YS1iNWY0LWI2N2Y3MWU4NjhiMSJ9.J-xUoZJR0DhhI6EStEGje_Wn2bZYR7luOAtNHcVIh_vi3UGC8qcWAMse7p01BQfXJ3iScFy2AQg_o1eJ1sqcDQ";
+
+        const db = createClient({ url: TURSO_URL, authToken: TURSO_TOKEN });
+
+        let currentUserPhone = localStorage.getItem('cashbookpro_phone') || null;
+
+        let state = {
+            accounts: [],
+            activeAccountId: null,
+            entries: [],
+            trash: [],
+            filters: { scope: 'current', type: 'all', dateFrom: '', dateTo: '' },
+            searchQuery: '',
+            editingEntryId: null,
+            entryType: 'in',
+            selectedIcon: '💵',
+            confirmAction: null,
+            theme: 'dark',
+            movingEntryId: null,
+            activeActionEntryId: null
+        };
+
+        // ==========================================
+        // 2. LOGIN & LOGOUT SYSTEM
+        // ==========================================
+        function handleLogin() {
+            const phone = document.getElementById('loginPhone').value.trim();
+            if (!phone) return alert("Phone number daalein!");
+            localStorage.setItem('cashbookpro_phone', phone);
+            currentUserPhone = phone;
+            document.getElementById('loginOverlay').style.display = 'none';
+            init();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('cashbookpro_phone');
+            currentUserPhone = null;
+            location.reload();
+        }
+
+        // ==========================================
+        // 3. DATABASE INIT & SYNC
+        // ==========================================
+        async function initDB() {
+            try {
+                await db.execute(`
+                    CREATE TABLE IF NOT EXISTS cash_book_data (
+                        user_phone TEXT PRIMARY KEY,
+                        data TEXT
+                    );
+                `);
+                console.log("Table ready!");
+            } catch (e) { 
+                console.error("DB Init Error:", e); 
+                alert("Database se connect nahi ho saka. Internet ya API keys check karein.");
+            }
+        }
+
+        async function loadStateFromDB() {
+            if (!currentUserPhone) return;
+            try {
+                const result = await db.execute({
+                    sql: "SELECT data FROM cash_book_data WHERE user_phone = ?",
+                    args: [currentUserPhone]
+                });
+                
+                if (result.rows.length > 0) {
+                    const parsed = JSON.parse(result.rows[0].data);
+                    Object.assign(state, parsed);
+                    console.log("Data loaded from Turso!");
+                } else {
+                    // Naya user hai, default account banao aur save karo
+                    createDefaultAccount();
+                    await saveStateToDB();
+                }
+            } catch (e) { 
+                console.error("DB Load Error:", e); 
+                // Agar database load fail ho jaye, tab bhi app chale, default account bana le
+                if (state.accounts.length === 0) createDefaultAccount();
+            }
+        }
+
+        async function saveStateToDB() {
+            if (!currentUserPhone) return;
+            const dataToSave = JSON.stringify({
+                accounts: state.accounts,
+                activeAccountId: state.activeAccountId,
+                entries: state.entries,
+                trash: state.trash,
+                filters: state.filters,
+                searchQuery: state.searchQuery,
+                theme: state.theme
+            });
+            
+            try {
+                await db.execute({
+                    sql: "INSERT OR REPLACE INTO cash_book_data (user_phone, data) VALUES (?, ?)",
+                    args: [currentUserPhone, dataToSave]
+                });
+                console.log("Data synced to Turso!");
+            } catch (e) { 
+                console.error("DB Save Error:", e); 
+            }
+        }
+
+        // ==========================================
+        // 4. APP INITIALIZATION
+        // ==========================================
+        async function init() {
+            if (!currentUserPhone) {
+                document.getElementById('loginOverlay').style.display = 'flex';
+                return;
+            }
+            
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('sideMenuPhone').textContent = '📞 ' + currentUserPhone;
+            
+            try {
+                await initDB();
+                await loadStateFromDB();
+                
+                applyTheme();
+                renderAll();
+                setupIconSelector();
+                setupFilterChips();
+                updateSearchButtonState();
+                registerServiceWorker();
+            } catch (e) {
+                console.error("App Init Error:", e);
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('cashbookpro_state', JSON.stringify({
+                    accounts: state.accounts,
+                    activeAccountId: state.activeAccountId,
+                    entries: state.entries,
+                    trash: state.trash,
+                    filters: state.filters,
+                    searchQuery: state.searchQuery,
+                    theme: state.theme
+                }));
+            } catch(e) { console.error('Local save error:', e); }
+            
+            // Auto sync to Turso
+            saveStateToDB();
+        }
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('ServiceWorker registered:', reg.scope))
+                    .catch(err => console.log('ServiceWorker registration failed:', err));
+                });
+            }
+        }
+
+        function createDefaultAccount() {
+            const acc = { id: generateId(), name: 'Main Cash', icon: '💵' };
+            state.accounts.push(acc);
+            state.activeAccountId = acc.id;
+            saveState();
+        }
+
+        function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+        function getActiveAccount() { return state.accounts.find(a => a.id === state.activeAccountId); }
+        function getAccountEntries(accountId) { return state.entries.filter(e => e.accountId === accountId); }
+
+        function getFilteredEntries() {
+            let entries = state.filters.scope === 'all' ? [...state.entries] : getAccountEntries(state.activeAccountId);
+            if (state.filters.type !== 'all') entries = entries.filter(e => e.type === state.filters.type);
+            if (state.filters.dateFrom) entries = entries.filter(e => e.date >= state.filters.dateFrom);
+            if (state.filters.dateTo) entries = entries.filter(e => e.date <= state.filters.dateTo + 'T23:59:59');
+            if (state.searchQuery) {
+                const q = state.searchQuery.toLowerCase();
+                entries = entries.filter(e => (e.details && e.details.toLowerCase().includes(q)) || (e.amount && e.amount.toString().includes(q)));
+            }
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            return entries;
+        }
+
+        function calculateBalance(entries) {
+            let totalIn = 0, totalOut = 0;
+            entries.forEach(e => { if (e.type === 'in') totalIn += parseFloat(e.amount) || 0; else totalOut += parseFloat(e.amount) || 0; });
+            return { totalIn, totalOut, net: totalIn - totalOut };
+        }
+
+        function formatBalanceNet(net) {
+            if (net > 0) return '+ Rs ' + formatNumber(net);
+            if (net < 0) return '- Rs ' + formatNumber(net);
+            return 'Rs 0';
+        }
+
+        function applyTheme() {
+            document.body.className = '';
+            if (state.theme && state.theme !== 'dark') document.body.classList.add('theme-' + state.theme);
+            updateThemeSelection();
+        }
+
+        function selectTheme(theme) {
+            state.theme = theme;
+            saveState();
+            applyTheme();
+            showToast('Theme changed to ' + theme);
+        }
+
+        function updateThemeSelection() {
+            document.querySelectorAll('.theme-option').forEach(opt => opt.classList.toggle('active', opt.dataset.theme === state.theme));
+        }
+
+        function renderAll() {
+            renderHeader();
+            renderBalance();
+            renderEntries();
+            updateSearchButtonState();
+        }
+
+        function renderHeader() {
+            const acc = getActiveAccount();
+            if (acc) {
+                document.getElementById('activeAccountIcon').textContent = acc.icon;
+                document.getElementById('activeAccountName').textContent = acc.name;
+            }
+        }
+
+        function renderBalance() {
+            const entries = state.filters.scope === 'all' ? state.entries : getAccountEntries(state.activeAccountId);
+            const { totalIn, totalOut, net } = calculateBalance(entries);
+            document.getElementById('netBalance').textContent = formatBalanceNet(net);
+            document.getElementById('totalIn').textContent = 'Rs ' + formatNumber(totalIn);
+            document.getElementById('totalOut').textContent = 'Rs ' + formatNumber(totalOut);
+        }
+
+        function renderEntries() {
+            const entries = getFilteredEntries();
+            const list = document.getElementById('entriesList');
+            const empty = document.getElementById('emptyState');
+            const countEl = document.getElementById('entryCount');
+            countEl.textContent = entries.length + ' entries';
+
+            if (entries.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'flex';
+                return;
+            }
+
+            empty.style.display = 'none';
+            list.innerHTML = entries.map(e => {
+                const d = new Date(e.date);
+                const dateStr = d.toLocaleDateString('en-PK', { day: '2-digit', month: 'short' });
+                const timeStr = d.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+                const prefix = e.type === 'in' ? '+' : '-';
+                const nameDisplay = e.details ? escapeHtml(e.details) : '--';
+                const nameClass = e.details ? 'entry-name' : 'entry-name empty';
+                return `<div class="entry-item ${e.type}">
+                    <div class="entry-main" onclick="editEntry('${e.id}')">
+                        <span class="entry-amount">${prefix} Rs ${formatNumber(e.amount)}</span>
+                        <span class="${nameClass}">${nameDisplay}</span>
+                    </div>
+                    <div class="entry-meta">
+                        <span class="entry-date">${dateStr} ${timeStr}</span>
+                    </div>
+                    <button class="entry-menu-btn" onclick="event.stopPropagation();openEntryActionModal('${e.id}')" title="Actions">⋮</button>
+                </div>`;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatNumber(n) {
+            return Math.abs(n).toLocaleString('en-PK', { maximumFractionDigits: 0 });
+        }
+
+        function updateSearchButtonState() {
+            const btn = document.getElementById('searchFilterBtn');
+            const hasQuery = state.searchQuery && state.searchQuery.length > 0;
+            btn.classList.toggle('has-query', hasQuery);
+        }
+
+        function showDetailsSuggestions() {
+            const input = document.getElementById('entryDetails');
+            const container = document.getElementById('detailsSuggestionsContainer');
+            const datalist = document.getElementById('detailsDatalist');
+            if (!input || !container) return;
+
+            const query = input.value.trim().toLowerCase();
+            const allDetails = [];
+            const seen = new Set();
+
+            const sorted = [...state.entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(e => {
+                if (e.details && e.details.trim()) {
+                    const trimmed = e.details.trim();
+                    const lower = trimmed.toLowerCase();
+                    if (!seen.has(lower)) {
+                        seen.add(lower);
+                        allDetails.push(trimmed);
+                    }
+                }
+            });
+
+            let matches = [];
+            if (query) {
+                matches = allDetails.filter(d => d.toLowerCase().includes(query));
+            } else {
+                matches = allDetails.slice(0, 5);
+            }
+
+            if (datalist) {
+                datalist.innerHTML = matches.map(d => `<option value="${escapeHtml(d)}"></option>`).join('');
+            }
+
+            if (matches.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = matches.slice(0, 5).map(d => 
+                `<span class="suggestion-chip" data-val="${escapeHtml(d)}" onclick="clickSuggestionChip(this)">${escapeHtml(d)}</span>`
+            ).join('');
+        }
+
+        function clickSuggestionChip(el) {
+            const val = el.getAttribute('data-val');
+            const input = document.getElementById('entryDetails');
+            if (input && val) {
+                input.value = val;
+            }
+            document.getElementById('detailsSuggestionsContainer').innerHTML = '';
+        }
+
+        function openEntryActionModal(entryId) {
+            const entry = state.entries.find(e => e.id === entryId);
+            if (!entry) return;
+            state.activeActionEntryId = entryId;
+
+            const preview = document.getElementById('entryActionPreview');
+            const prefix = entry.type === 'in' ? '+' : '-';
+            const nameDisplay = entry.details ? escapeHtml(entry.details) : 'No details';
+            preview.innerHTML = `<span class="preview-amount ${entry.type}">${prefix} Rs ${formatNumber(entry.amount)}</span><span class="preview-name">${nameDisplay}</span>`;
+
+            document.getElementById('entryActionOverlay').classList.add('active');
+            document.getElementById('entryActionModal').classList.add('active');
+        }
+
+        function closeEntryActionModal() {
+            document.getElementById('entryActionOverlay').classList.remove('active');
+            document.getElementById('entryActionModal').classList.remove('active');
+            state.activeActionEntryId = null;
+        }
+
+        function actionEditEntry() {
+            const id = state.activeActionEntryId;
+            closeEntryActionModal();
+            if (id) editEntry(id);
+        }
+
+        function actionMoveEntry() {
+            const id = state.activeActionEntryId;
+            closeEntryActionModal();
+            if (id) openMoveEntryModal(id);
+        }
+
+        function actionDeleteEntry() {
+            const id = state.activeActionEntryId;
+            closeEntryActionModal();
+            if (id) deleteEntry(id);
+        }
+
+        function toggleSideMenu() {
+            document.getElementById('sideMenu').classList.toggle('open');
+            document.getElementById('sideOverlay').classList.toggle('active');
+        }
+
+        function openEntryModal(type) {
+            state.entryType = type;
+            state.editingEntryId = null;
+            document.getElementById('entryModalTitle').textContent = type === 'in' ? '📈 + Cash IN' : '📉 - Cash OUT';
+            document.getElementById('entryAmount').value = '';
+            document.getElementById('entryDetails').value = '';
+            document.getElementById('entryDateTime').value = new Date().toLocaleString('en-PK');
+            document.getElementById('entryModal').classList.add('active');
+            showDetailsSuggestions();
+            setTimeout(() => document.getElementById('entryAmount').focus(), 200);
+        }
+
+        function closeEntryModal() {
+            document.getElementById('entryModal').classList.remove('active');
+            document.getElementById('detailsSuggestionsContainer').innerHTML = '';
+            state.editingEntryId = null;
+        }
+
+        function saveEntry() {
+            const amount = parseFloat(document.getElementById('entryAmount').value);
+            if (!amount || amount <= 0) { showToast('Please enter a valid amount'); return; }
+            const details = document.getElementById('entryDetails').value.trim();
+
+            if (state.editingEntryId) {
+                const entry = state.entries.find(e => e.id === state.editingEntryId);
+                if (entry) {
+                    entry.amount = amount;
+                    entry.details = details;
+                    entry.date = new Date().toISOString();
+                }
+                showToast('Entry updated');
+            } else {
+                state.entries.push({
+                    id: generateId(),
+                    accountId: state.activeAccountId,
+                    type: state.entryType,
+                    amount: amount,
+                    details: details,
+                    date: new Date().toISOString()
+                });
+                showToast(state.entryType === 'in' ? 'Cash In added' : 'Cash Out added');
+            }
+            saveState();
+            closeEntryModal();
+            renderAll();
+        }
+
+        function editEntry(id) {
+            const entry = state.entries.find(e => e.id === id);
+            if (!entry) return;
+            state.editingEntryId = id;
+            state.entryType = entry.type;
+            document.getElementById('entryModalTitle').textContent = entry.type === 'in' ? '✏️ Edit Cash IN' : '✏️ Edit Cash OUT';
+            document.getElementById('entryAmount').value = entry.amount;
+            document.getElementById('entryDetails').value = entry.details || '';
+            document.getElementById('entryDateTime').value = new Date(entry.date).toLocaleString('en-PK');
+            document.getElementById('entryModal').classList.add('active');
+            showDetailsSuggestions();
+        }
+
+        function deleteEntry(id) {
+            state.confirmAction = () => {
+                const idx = state.entries.findIndex(e => e.id === id);
+                if (idx > -1) {
+                    const [removed] = state.entries.splice(idx, 1);
+                    removed.deletedAt = new Date().toISOString();
+                    state.trash.push(removed);
+                    saveState();
+                    renderAll();
+                    showToast('Moved to trash');
+                }
+            };
+            showConfirm('Move to Trash?', 'This entry will be moved to the recycle bin.');
+        }
+
+        function openMoveEntryModal(entryId) {
+            state.movingEntryId = entryId;
+            renderMoveAccountList();
+            document.getElementById('moveEntryModal').classList.add('active');
+        }
+
+        function closeMoveEntryModal() {
+            document.getElementById('moveEntryModal').classList.remove('active');
+            state.movingEntryId = null;
+        }
+
+        function renderMoveAccountList() {
+            const list = document.getElementById('moveAccountList');
+            const entry = state.entries.find(e => e.id === state.movingEntryId);
+            if (!entry) return;
+
+            const otherAccounts = state.accounts.filter(a => a.id !== entry.accountId);
+            if (otherAccounts.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No other accounts available.<br>Create another account first.</p></div>';
+                return;
+            }
+
+            list.innerHTML = otherAccounts.map(a => {
+                const bal = calculateBalance(getAccountEntries(a.id));
+                return `<div class="account-item" onclick="moveEntryToAccount('${a.id}')">
+                    <span class="icon">${a.icon}</span>
+                    <div class="info">
+                        <div class="name">${a.name}</div>
+                        <div class="balance">Net: ${formatBalanceNet(bal.net)}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function moveEntryToAccount(accountId) {
+            const entry = state.entries.find(e => e.id === state.movingEntryId);
+            if (entry) {
+                entry.accountId = accountId;
+                saveState();
+                renderAll();
+                closeMoveEntryModal();
+                showToast('Entry moved successfully');
+            }
+        }
+
+        function openAccountModal() {
+            document.getElementById('sideMenu').classList.remove('open');
+            document.getElementById('sideOverlay').classList.remove('active');
+            renderAccountList();
+            document.getElementById('accountModal').classList.add('active');
+        }
+
+        function closeAccountModal() {
+            document.getElementById('accountModal').classList.remove('active');
+        }
+
+        function renderAccountList() {
+            const list = document.getElementById('accountList');
+            list.innerHTML = state.accounts.map(a => {
+                const bal = calculateBalance(getAccountEntries(a.id));
+                const isActive = a.id === state.activeAccountId;
+                return `<div class="account-item ${isActive ? 'active' : ''}" onclick="switchAccount('${a.id}')">
+                    <span class="icon">${a.icon}</span>
+                    <div class="info">
+                        <div class="name">${a.name}</div>
+                        <div class="balance">Net: ${formatBalanceNet(bal.net)}</div>
+                    </div>
+                    <div class="actions">
+                        <button onclick="event.stopPropagation();editAccount('${a.id}')" title="Edit">✏️</button>
+                        <button onclick="event.stopPropagation();deleteAccount('${a.id}')" title="Delete">🗑️</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function switchAccount(id) {
+            state.activeAccountId = id;
+            saveState();
+            renderAll();
+            closeAccountModal();
+            showToast('Account switched');
+        }
+
+        function addAccount() {
+            const name = document.getElementById('newAccountName').value.trim();
+            if (!name) { showToast('Please enter account name'); return; }
+            const acc = { id: generateId(), name, icon: state.selectedIcon };
+            state.accounts.push(acc);
+            state.activeAccountId = acc.id;
+            saveState();
+            renderAll();
+            renderAccountList();
+            document.getElementById('newAccountName').value = '';
+            showToast('Account created');
+        }
+
+        function editAccount(id) {
+            const acc = state.accounts.find(a => a.id === id);
+            if (!acc) return;
+            const newName = prompt('Account name:', acc.name);
+            if (newName && newName.trim()) {
+                acc.name = newName.trim();
+                saveState();
+                renderAll();
+                renderAccountList();
+            }
+        }
+
+        function deleteAccount(id) {
+            const acc = state.accounts.find(a => a.id === id);
+            if (!acc) return;
+            if (state.accounts.length <= 1) { showToast('Cannot delete last account'); return; }
+
+            state.confirmAction = () => {
+                const inputVal = document.getElementById('confirmInputField').value.trim();
+                if (inputVal !== acc.name) {
+                    showToast('Account name does not match');
+                    return;
+                }
+                state.accounts = state.accounts.filter(a => a.id !== id);
+                const removedEntries = state.entries.filter(e => e.accountId === id);
+                state.entries = state.entries.filter(e => e.accountId !== id);
+                const accCopy = { ...acc, deletedAt: new Date().toISOString(), type: 'account' };
+                state.trash.push(accCopy);
+                removedEntries.forEach(e => { e.deletedAt = new Date().toISOString(); state.trash.push(e); });
+                if (state.activeAccountId === id) state.activeAccountId = state.accounts[0].id;
+                saveState();
+                renderAll();
+                renderAccountList();
+                showToast('Account and entries moved to trash');
+            };
+            showConfirm('⚠️ Delete Account?', `To confirm deletion of "${acc.name}", please type the exact account name below:`, true, acc.name);
+        }
+
+        function setupIconSelector() {
+            document.querySelectorAll('#iconSelector .filter-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('#iconSelector .filter-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    state.selectedIcon = chip.dataset.icon;
+                });
+            });
+        }
+
+        function handleSearchFromModal() {
+            const val = document.getElementById('filterSearchInput').value;
+            state.searchQuery = val;
+            document.getElementById('filterClearBtn').classList.toggle('visible', val.length > 0);
+            renderEntries();
+            updateSearchButtonState();
+        }
+
+        function clearSearchFromModal() {
+            document.getElementById('filterSearchInput').value = '';
+            state.searchQuery = '';
+            document.getElementById('filterClearBtn').classList.remove('visible');
+            renderEntries();
+            updateSearchButtonState();
+        }
+
+        function openFilterModal() {
+            document.getElementById('filterModal').classList.add('active');
+            document.getElementById('filterDateFrom').value = state.filters.dateFrom || '';
+            document.getElementById('filterDateTo').value = state.filters.dateTo || '';
+            document.getElementById('filterSearchInput').value = state.searchQuery || '';
+            document.getElementById('filterClearBtn').classList.toggle('visible', (state.searchQuery || '').length > 0);
+            syncFilterChips();
+            setTimeout(() => document.getElementById('filterSearchInput').focus(), 200);
+        }
+
+        function closeFilterModal() {
+            document.getElementById('filterModal').classList.remove('active');
+            saveState();
+        }
+
+        function setupFilterChips() {
+            document.querySelectorAll('[data-filter]').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const group = chip.dataset.filter;
+                    document.querySelectorAll(`[data-filter="${group}"]`).forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                });
+            });
+        }
+
+        function syncFilterChips() {
+            document.querySelectorAll('[data-filter="scope"]').forEach(c => c.classList.toggle('active', c.dataset.value === state.filters.scope));
+            document.querySelectorAll('[data-filter="type"]').forEach(c => c.classList.toggle('active', c.dataset.value === state.filters.type));
+        }
+
+        function applyFilters() {
+            const scopeChip = document.querySelector('[data-filter="scope"].active');
+            const typeChip = document.querySelector('[data-filter="type"].active');
+            state.filters.scope = scopeChip ? scopeChip.dataset.value : 'current';
+            state.filters.type = typeChip ? typeChip.dataset.value : 'all';
+            state.filters.dateFrom = document.getElementById('filterDateFrom').value;
+            state.filters.dateTo = document.getElementById('filterDateTo').value;
+            saveState();
+            closeFilterModal();
+            renderAll();
+            showToast('Filters applied');
+        }
+
+        function resetFilters() {
+            state.filters = { scope: 'current', type: 'all', dateFrom: '', dateTo: '' };
+            state.searchQuery = '';
+            document.getElementById('filterSearchInput').value = '';
+            document.getElementById('filterClearBtn').classList.remove('visible');
+            saveState();
+            syncFilterChips();
+            renderAll();
+            showToast('All filters cleared');
+        }
+
+        function openSettings() {
+            toggleSideMenu();
+            updateThemeSelection();
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function openTrash() {
+            toggleSideMenu();
+            renderTrash();
+            document.getElementById('trashModal').classList.add('active');
+        }
+
+        function closeTrashModal() {
+            document.getElementById('trashModal').classList.remove('active');
+        }
+
+        function renderTrash() {
+            const list = document.getElementById('trashList');
+            if (state.trash.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">🗑️</div><p>Trash is empty</p></div>';
+                return;
+            }
+            list.innerHTML = state.trash.map((item, i) => {
+                if (item.type === 'account') {
+                    return `<div class="trash-item">
+                        <div class="info">
+                            <div class="details">💳 Account: ${item.name}</div>
+                            <div class="date">Deleted: ${new Date(item.deletedAt).toLocaleDateString('en-PK')}</div>
+                        </div>
+                        <div class="actions">
+                            <button onclick="restoreTrashItem(${i})" style="background:var(--green);color:#fff">↩️</button>
+                            <button onclick="permanentDeleteTrashItem(${i})" style="background:var(--red);color:#fff">✕</button>
+                        </div>
+                    </div>`;
+                } else {
+                    const prefix = item.type === 'in' ? '+' : '-';
+                    const d = new Date(item.deletedAt || item.date);
+                    return `<div class="trash-item">
+                        <div class="info">
+                            <div class="details">${prefix} Rs ${formatNumber(item.amount)} ${item.details ? '-- ' + item.details : ''}</div>
+                            <div class="date">${d.toLocaleDateString('en-PK')}</div>
+                        </div>
+                        <div class="actions">
+                            <button onclick="restoreTrashItem(${i})" style="background:var(--green);color:#fff">↩️</button>
+                            <button onclick="permanentDeleteTrashItem(${i})" style="background:var(--red);color:#fff">✕</button>
+                        </div>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        function restoreTrashItem(index) {
+            const item = state.trash.splice(index, 1)[0];
+            delete item.deletedAt;
+            if (item.type === 'account') {
+                delete item.type;
+                state.accounts.push(item);
+            } else {
+                state.entries.push(item);
+            }
+            saveState();
+            renderTrash();
+            renderAll();
+            showToast('Restored successfully');
+        }
+
+        function permanentDeleteTrashItem(index) {
+            state.trash.splice(index, 1);
+            saveState();
+            renderTrash();
+            showToast('Permanently deleted');
+        }
+
+        function emptyTrash() {
+            if (state.trash.length === 0) { showToast('Trash is already empty'); return; }
+            state.confirmAction = () => {
+                state.trash = [];
+                saveState();
+                renderTrash();
+                showToast('Trash emptied');
+            };
+            showConfirm('Empty Trash?', 'Permanently delete all trash entries? This cannot be undone.');
+        }
+
+        function openAnalytics() {
+            toggleSideMenu();
+            document.getElementById('analyticsModal').classList.add('active');
+            renderAnalytics();
+        }
+
+        function closeAnalyticsModal() {
+            document.getElementById('analyticsModal').classList.remove('active');
+        }
+
+        function renderAnalytics() {
+            const entries = state.filters.scope === 'all' ? state.entries : getAccountEntries(state.activeAccountId);
+            const { totalIn, totalOut, net } = calculateBalance(entries);
+            document.getElementById('analyticsIn').textContent = 'Rs ' + formatNumber(totalIn);
+            document.getElementById('analyticsOut').textContent = 'Rs ' + formatNumber(totalOut);
+            document.getElementById('analyticsNet').textContent = formatBalanceNet(net);
+
+            const canvas = document.getElementById('analyticsChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push({ date: d.toISOString().split('T')[0], label: d.toLocaleDateString('en-PK', { weekday: 'short' }), in: 0, out: 0 });
+            }
+            entries.forEach(e => {
+                const day = e.date.split('T')[0];
+                const d = days.find(dd => dd.date === day);
+                if (d) { if (e.type === 'in') d.in += parseFloat(e.amount) || 0; else d.out += parseFloat(e.amount) || 0; }
+            });
+            const maxVal = Math.max(...days.map(d => Math.max(d.in, d.out)), 1);
+            const barW = 20, gap = (w - 40) / 7;
+            days.forEach((d, i) => {
+                const x = 20 + i * gap + gap / 2;
+                const inH = (d.in / maxVal) * (h - 50);
+                const outH = (d.out / maxVal) * (h - 50);
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(x - barW, h - 30 - inH, barW / 2 - 1, inH);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(x + 1, h - 30 - outH, barW / 2 - 1, outH);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(d.label, x, h - 10);
+            });
+        }
+
+        function exportData() {
+            toggleSideMenu();
+            const data = JSON.stringify({ accounts: state.accounts, entries: state.entries, trash: state.trash }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cashbook_backup_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Data exported');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.accounts) state.accounts = data.accounts;
+                    if (data.entries) state.entries = data.entries;
+                    if (data.trash) state.trash = data.trash;
+                    if (state.accounts.length > 0 && !state.activeAccountId) state.activeAccountId = state.accounts[0].id;
+                    saveState();
+                    renderAll();
+                    showToast('Data imported successfully');
+                } catch(err) { showToast('Invalid file format'); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function openStatementExportModal() {
+            if (document.getElementById('sideMenu').classList.contains('open')) toggleSideMenu();
+            renderStatementPreview();
+            document.getElementById('statementExportModal').classList.add('active');
+        }
+
+        function closeStatementExportModal() {
+            document.getElementById('statementExportModal').classList.remove('active');
+        }
+
+        function renderStatementPreview() {
+            const entries = getFilteredEntries();
+            const { totalIn, totalOut, net } = calculateBalance(entries);
+            const acc = getActiveAccount();
+            const area = document.getElementById('printableStatementArea');
+
+            let rows = entries.map(e => {
+                const d = new Date(e.date);
+                const cls = e.type === 'in' ? 'pos' : 'neg';
+                const prefix = e.type === 'in' ? '+' : '-';
+                return `<tr>
+                    <td>${d.toLocaleDateString('en-PK')} ${d.toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</td>
+                    <td>${escapeHtml(e.details || '--')}</td>
+                    <td style="text-align:right" class="${cls}">${prefix} Rs ${formatNumber(e.amount)}</td>
+                </tr>`;
+            }).join('');
+
+            area.innerHTML = `
+                <div class="statement-preview-header">
+                    <h2><span>${acc ? acc.icon : '💳'}</span> ${acc ? escapeHtml(acc.name) : 'Cash Book'}</h2>
+                    <div class="date">Generated: ${new Date().toLocaleDateString('en-PK')}</div>
+                </div>
+                <div class="statement-summary-grid">
+                    <div class="statement-summary-box in"><strong>Cash In</strong><br>Rs ${formatNumber(totalIn)}</div>
+                    <div class="statement-summary-box out"><strong>Cash Out</strong><br>Rs ${formatNumber(totalOut)}</div>
+                    <div class="statement-summary-box net"><strong>Net Balance</strong><br>${formatBalanceNet(net)}</div>
+                </div>
+                <table class="statement-table">
+                    <thead><tr><th>Date & Time</th><th>Details</th><th style="text-align:right">Amount</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="3" style="text-align:center;color:#94a3b8">No entries found</td></tr>'}</tbody>
+                </table>
+                <div class="statement-footer">Cash Book Pro • Creator: Junaid Gillani (03176407994)</div>
+            `;
+        }
+
+        function exportStatementAsPDF() {
+            window.print();
+        }
+
+        function exportStatementAsImage() {
+            const area = document.getElementById('printableStatementArea');
+            if (window.html2canvas) {
+                showToast('Generating picture...');
+                html2canvas(area, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/png');
+                    a.download = 'statement_' + new Date().toISOString().split('T')[0] + '.png';
+                    a.click();
+                    showToast('Picture downloaded!');
+                }).catch(() => generateCanvasPictureFallback());
+            } else {
+                generateCanvasPictureFallback();
+            }
+        }
+
+        function generateCanvasPictureFallback() {
+            const entries = getFilteredEntries();
+            const { totalIn, totalOut, net } = calculateBalance(entries);
+            const acc = getActiveAccount();
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const width = 600;
+            const rowHeight = 30;
+            const height = 220 + (entries.length * rowHeight);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillText((acc ? acc.icon + ' ' + acc.name : 'Cash Book') + ' Statement', 20, 40);
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('Generated: ' + new Date().toLocaleString('en-PK'), 20, 60);
+
+            ctx.fillStyle = '#dcfce7'; ctx.fillRect(20, 80, 170, 50);
+            ctx.fillStyle = '#166534'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('Cash In', 30, 98);
+            ctx.fillText('Rs ' + formatNumber(totalIn), 30, 118);
+
+            ctx.fillStyle = '#fee2e2'; ctx.fillRect(210, 80, 170, 50);
+            ctx.fillStyle = '#991b1b'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('Cash Out', 220, 98);
+            ctx.fillText('Rs ' + formatNumber(totalOut), 220, 118);
+
+            ctx.fillStyle = '#dbeafe'; ctx.fillRect(400, 80, 180, 50);
+            ctx.fillStyle = '#1e40af'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('Net Balance', 410, 98);
+            ctx.fillText(formatBalanceNet(net), 410, 118);
+
+            ctx.fillStyle = '#f1f5f9'; ctx.fillRect(20, 150, 560, 25);
+            ctx.fillStyle = '#475569'; ctx.font = 'bold 11px sans-serif';
+            ctx.fillText('DATE & TIME', 30, 167);
+            ctx.fillText('DETAILS / NAME', 200, 167);
+            ctx.fillText('AMOUNT', 480, 167);
+
+            let y = 195;
+            entries.forEach((e, idx) => {
+                if (idx % 2 === 1) { ctx.fillStyle = '#f8fafc'; ctx.fillRect(20, y - 18, 560, rowHeight); }
+                const d = new Date(e.date);
+                ctx.fillStyle = '#1e293b'; ctx.font = '11px sans-serif';
+                ctx.fillText(d.toLocaleDateString('en-PK') + ' ' + d.toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'}), 30, y);
+                ctx.fillText((e.details || '--').substring(0, 30), 200, y);
+
+                const prefix = e.type === 'in' ? '+' : '-';
+                ctx.fillStyle = e.type === 'in' ? '#16a34a' : '#dc2626';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText(prefix + ' Rs ' + formatNumber(e.amount), 480, y);
+                y += rowHeight;
+            });
+
+            ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('Cash Book Pro • App Creator: Junaid Gillani (03176407994)', width / 2, height - 15);
+
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = 'statement_' + new Date().toISOString().split('T')[0] + '.png';
+            a.click();
+            showToast('Statement picture saved');
+        }
+
+        function openStatementExportHTML() {
+            closeStatementExportModal();
+            const entries = getFilteredEntries();
+            const { totalIn, totalOut, net } = calculateBalance(entries);
+            const acc = getActiveAccount();
+            let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Statement - ${acc ? acc.name : 'Cash Book'}</title>
+            <style>body{font-family:sans-serif;padding:20px;max-width:600px;margin:0 auto}
+            h1{color:#1e293b;border-bottom:2px solid #3b82f6;padding-bottom:8px}
+            .summary{display:flex;gap:16px;margin:16px 0}
+            .summary div{flex:1;padding:12px;border-radius:8px;text-align:center}
+            .in{background:#dcfce7;color:#166534}.out{background:#fee2e2;color:#991b1b}.net{background:#dbeafe;color:#1e40af}
+            table{width:100%;border-collapse:collapse;margin-top:16px}
+            th{background:#f1f5f9;padding:8px;text-align:left;font-size:12px}
+            td{padding:8px;border-bottom:1px solid #e2e8f0;font-size:13px}
+            .pos{color:#16a34a;font-weight:700}.neg{color:#dc2626;font-weight:700}
+            .footer{margin-top:24px;text-align:center;font-size:11px;color:#64748b}</style></head><body>
+            <h1>💳 ${acc ? acc.icon + ' ' + acc.name : 'Cash Book'} - Statement</h1>
+            <p style="color:#64748b;font-size:12px">Generated: ${new Date().toLocaleString('en-PK')}</p>
+            <div class="summary">
+            <div class="in"><strong>Total In</strong><br>Rs ${formatNumber(totalIn)}</div>
+            <div class="out"><strong>Total Out</strong><br>Rs ${formatNumber(totalOut)}</div>
+            <div class="net"><strong>Net Balance</strong><br>${formatBalanceNet(net)}</div>
+            </div>
+            <table><thead><tr><th>Date</th><th>Details</th><th style="text-align:right">Amount</th></tr></thead><tbody>`;
+            entries.forEach(e => {
+                const d = new Date(e.date);
+                const cls = e.type === 'in' ? 'pos' : 'neg';
+                const prefix = e.type === 'in' ? '+' : '-';
+                html += `<tr><td>${d.toLocaleDateString('en-PK')} ${d.toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})}</td><td>${e.details || '--'}</td><td style="text-align:right" class="${cls}">${prefix} Rs ${formatNumber(e.amount)}</td></tr>`;
+            });
+            html += `</tbody></table><div class="footer">Cash Book Pro • App Creator: Junaid Gillani • 03176407994</div></body></html>`;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'statement_' + (acc ? acc.name : 'cashbook') + '_' + new Date().toISOString().split('T')[0] + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Statement exported');
+        }
+
+        function showConfirm(title, message, requireInput, expectedValue) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmInput').style.display = requireInput ? 'block' : 'none';
+            document.getElementById('confirmInputField').value = '';
+            document.getElementById('confirmInputField').dataset.expected = expectedValue || '';
+            document.getElementById('confirmOverlay').classList.add('active');
+            document.getElementById('confirmDialog').classList.add('active');
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirmOverlay').classList.remove('active');
+            document.getElementById('confirmDialog').classList.remove('active');
+            state.confirmAction = null;
+        }
+
+        function executeConfirm() {
+            const expected = document.getElementById('confirmInputField').dataset.expected;
+            const inputVal = document.getElementById('confirmInputField').value.trim();
+            if (expected && inputVal !== expected) {
+                showToast('Input does not match. Please type exactly: ' + expected);
+                return;
+            }
+            if (state.confirmAction) state.confirmAction();
+            closeConfirm();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.getElementById('entryModal').classList.contains('active')) saveEntry();
+            if (e.key === 'Escape') {
+                closeEntryModal();
+                closeAccountModal();
+                closeFilterModal();
+                closeSettingsModal();
+                closeTrashModal();
+                closeAnalyticsModal();
+                closeMoveEntryModal();
+                closeEntryActionModal();
+                closeStatementExportModal();
+                closeConfirm();
+            }
+        });
+
+        // ==========================================
+        // 5. EXPOSE FUNCTIONS TO GLOBAL SCOPE (For HTML onclick)
+        // ==========================================
+        window.handleLogin = handleLogin;
+        window.toggleSideMenu = toggleSideMenu;
+        window.openAccountModal = openAccountModal;
+        window.openFilterModal = openFilterModal;
+        window.openEntryModal = openEntryModal;
+        window.openAnalytics = openAnalytics;
+        window.openSettings = openSettings;
+        window.openTrash = openTrash;
+        window.exportData = exportData;
+        window.importData = importData;
+        window.openStatementExportModal = openStatementExportModal;
+        window.handleLogout = handleLogout;
+        window.closeEntryModal = closeEntryModal;
+        window.closeAccountModal = closeAccountModal;
+        window.closeFilterModal = closeFilterModal;
+        window.closeStatementExportModal = closeStatementExportModal;
+        window.closeSettingsModal = closeSettingsModal;
+        window.closeTrashModal = closeTrashModal;
+        window.closeAnalyticsModal = closeAnalyticsModal;
+        window.closeMoveEntryModal = closeMoveEntryModal;
+        window.closeEntryActionModal = closeEntryActionModal;
+        window.closeConfirm = closeConfirm;
+        window.saveEntry = saveEntry;
+        window.showDetailsSuggestions = showDetailsSuggestions;
+        window.editEntry = editEntry;
+        window.openEntryActionModal = openEntryActionModal;
+        window.deleteEntry = deleteEntry;
+        window.actionEditEntry = actionEditEntry;
+        window.actionMoveEntry = actionMoveEntry;
+        window.actionDeleteEntry = actionDeleteEntry;
+        window.switchAccount = switchAccount;
+        window.editAccount = editAccount;
+        window.deleteAccount = deleteAccount;
+        window.addAccount = addAccount;
+        window.restoreTrashItem = restoreTrashItem;
+        window.permanentDeleteTrashItem = permanentDeleteTrashItem;
+        window.emptyTrash = emptyTrash;
+        window.selectTheme = selectTheme;
+        window.exportStatementAsPDF = exportStatementAsPDF;
+        window.exportStatementAsImage = exportStatementAsImage;
+        window.openStatementExportHTML = openStatementExportHTML;
+        window.executeConfirm = executeConfirm;
+        window.handleSearchFromModal = handleSearchFromModal;
+        window.clearSearchFromModal = clearSearchFromModal;
+        window.applyFilters = applyFilters;
+        window.resetFilters = resetFilters;
+        window.clickSuggestionChip = clickSuggestionChip;
+        window.moveEntryToAccount = moveEntryToAccount;
+
+        // App Start
+        init();
+    </script>
+</body>
+</html>
