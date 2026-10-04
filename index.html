@@ -1,0 +1,2616 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#080b12"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="WebBox"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="description" content="Save, publish and share HTML apps with per-user login and cloud sync."/>
+<title>WebBox -- HTML & Website Manager</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{--bg:#080b12;--line:rgba(255,255,255,.07);--txt:#eef2ff;--muted:#8b97b5;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;min-height:100%;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--txt);
+  background-color:#080b12;
+  background-image:radial-gradient(760px 420px at 10% -10%,rgba(79,125,255,.22),transparent 62%),
+  radial-gradient(760px 420px at 95% 2%,rgba(124,92,255,.18),transparent 62%);
+  background-attachment:fixed;background-repeat:no-repeat;
+  -webkit-font-smoothing:antialiased;overscroll-behavior-y:none;}
+body.lock{overflow:hidden;}
+.appbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;
+  padding:calc(12px + env(safe-area-inset-top)) 14px 12px;background:rgba(8,11,18,.78);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);}
+.brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0;}
+.logo{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#4f7dff,#7c5cff);
+  box-shadow:0 8px 22px rgba(79,125,255,.38),inset 0 1px 0 rgba(255,255,255,.28);
+  font-size:19px;font-weight:800;color:#fff;position:relative;}
+.logo .cloud-badge{position:absolute;bottom:-3px;right:-3px;font-size:11px;
+  background:#22c55e;border-radius:50%;width:16px;height:16px;
+  display:grid;place-items:center;border:2px solid #080b12;}
+.brand h1{margin:0;font-size:16.5px;font-weight:750;letter-spacing:-.3px;}
+.brand p{margin:1px 0 0;font-size:11px;color:var(--muted);font-weight:500;}
+.icon-btn{width:40px;height:40px;border-radius:13px;border:1px solid var(--line);
+  background:rgba(255,255,255,.055);color:#cfd8ee;font-size:17px;
+  display:grid;place-items:center;cursor:pointer;transition:.15s;position:relative;}
+.icon-btn:active{transform:scale(.9);background:rgba(255,255,255,.1);}
+.icon-btn .dot{position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;
+  background:#22c55e;border:2px solid #080b12;}
+.icon-btn.cloud-on{background:rgba(34,197,94,.15);color:#6ee7a0;border-color:rgba(34,197,94,.35);}
+.searchwrap{padding:12px 14px 0;display:none;}
+.searchwrap.show{display:block;}
+.searchwrap input{width:100%;padding:13px 15px;border-radius:15px;border:1px solid var(--line);
+  background:#101726;color:var(--txt);font-size:14px;outline:none;font-family:inherit;}
+.searchwrap input:focus{border-color:rgba(79,125,255,.65);box-shadow:0 0 0 3px rgba(79,125,255,.15);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:13px;
+  padding:16px 14px calc(120px + env(safe-area-inset-bottom));}
+@media (max-width:390px){.grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:11px;padding:14px 12px 120px;}}
+.card{position:relative;border-radius:18px;overflow:hidden;
+  background:linear-gradient(180deg,#161d2e,#111726);border:1px solid var(--line);
+  box-shadow:0 6px 18px rgba(0,0,0,.34);transition:transform .16s;cursor:pointer;
+  animation:pop .3s cubic-bezier(.2,.9,.3,1.15) backwards;}
+@keyframes pop{from{opacity:0;transform:scale(.88);}to{opacity:1;transform:scale(1);}}
+.card:active{transform:scale(.955);}
+.thumb{position:relative;aspect-ratio:1/1;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(135deg,#1b2438,#111827);}
+.thumb.link{background:linear-gradient(135deg,#1a2440,#0f1522);}
+.thumb.html{background:linear-gradient(135deg,var(--g1),var(--g2));}
+.thumb .glyph{font-size:30px;font-weight:800;color:rgba(255,255,255,.96);letter-spacing:-1.5px;
+  text-shadow:0 3px 12px rgba(0,0,0,.3);}
+.thumb .letter{position:absolute;font-size:52px;font-weight:800;color:rgba(255,255,255,.10);}
+.thumb img.favi{position:relative;width:52px;height:52px;border-radius:14px;object-fit:contain;
+  background:rgba(255,255,255,.07);padding:7px;box-shadow:0 6px 16px rgba(0,0,0,.35);}
+.thumb .custom-emoji{font-size:52px;line-height:1;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
+.thumb img.custom-icon{width:56px;height:56px;border-radius:14px;object-fit:cover;
+  background:rgba(255,255,255,.15);padding:2px;box-shadow:0 6px 16px rgba(0,0,0,.4);}
+.card-menu{position:absolute;top:7px;right:7px;width:28px;height:28px;border-radius:9px;z-index:2;
+  border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.45);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#e7ecfb;font-size:15px;line-height:1;display:grid;place-items:center;cursor:pointer;}
+.card-menu:active{transform:scale(.88);}
+.card-body{padding:9px 10px 11px;display:flex;flex-direction:column;gap:6px;}
+.card-name{font-size:12.5px;font-weight:650;line-height:1.3;color:#e8edfb;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;word-break:break-word;min-height:32px;}
+.badge{font-size:9px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+  padding:3.5px 7px;border-radius:7px;align-self:flex-start;}
+.badge.link{background:rgba(79,125,255,.18);color:#93b0ff;}
+.badge.html{background:rgba(34,197,94,.16);color:#6ee7a0;}
+.saved-dot{position:absolute;bottom:8px;left:8px;background:rgba(34,197,94,.92);
+  color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:7px;
+  letter-spacing:.3px;box-shadow:0 2px 8px rgba(34,197,94,.45);}
+.pub-dot{position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#4f7dff,#7c5cff);
+  color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:7px;
+  letter-spacing:.3px;box-shadow:0 2px 8px rgba(79,125,255,.55);}
+.icon-dot{position:absolute;bottom:8px;right:8px;background:rgba(124,92,255,.92);
+  color:#fff;font-size:10px;font-weight:700;padding:3px 6px;border-radius:7px;
+  box-shadow:0 2px 8px rgba(124,92,255,.5);}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:64px 30px 120px;color:var(--muted);}
+.empty[hidden]{display:none;}
+.empty .eic{width:84px;height:84px;border-radius:26px;display:grid;place-items:center;
+  font-size:36px;background:linear-gradient(135deg,rgba(79,125,255,.2),rgba(124,92,255,.12));
+  border:1px solid var(--line);margin-bottom:18px;}
+.empty h2{margin:0 0 8px;font-size:17px;color:#dfe6f7;font-weight:700;}
+.empty p{margin:0;font-size:13px;line-height:1.65;max-width:290px;}
+.fab{position:fixed;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;
+  width:62px;height:62px;border-radius:21px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#4f7dff,#7c5cff);color:#fff;font-size:30px;font-weight:300;
+  display:grid;place-items:center;box-shadow:0 14px 32px rgba(79,125,255,.45),
+  inset 0 1px 0 rgba(255,255,255,.32);transition:transform .18s;}
+.fab:active{transform:scale(.88) rotate(90deg);}
+.scrim{position:fixed;inset:0;z-index:70;background:rgba(3,5,10,.62);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .25s;}
+.scrim.show{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;
+  background:linear-gradient(180deg,#141b2b,#0d1320);border-radius:26px 26px 0 0;
+  border-top:1px solid rgba(255,255,255,.09);
+  padding:6px 16px calc(20px + env(safe-area-inset-bottom));
+  transform:translateY(103%);transition:transform .34s cubic-bezier(.2,.85,.25,1);
+  max-height:86vh;overflow-y:auto;box-shadow:0 -18px 50px rgba(0,0,0,.65);}
+.sheet.show{transform:translateY(0);}
+.handle{width:42px;height:4.5px;border-radius:3px;background:rgba(255,255,255,.18);margin:8px auto 16px;}
+.sheet h3{margin:0 0 15px;font-size:16px;font-weight:700;word-break:break-word;}
+.opt{display:flex;align-items:center;gap:13px;width:100%;padding:13px;border-radius:16px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);
+  color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;transition:.15s;font-family:inherit;}
+.opt:active{transform:scale(.98);background:rgba(255,255,255,.09);}
+.opt-ic{width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;
+  font-size:19px;background:linear-gradient(135deg,rgba(79,125,255,.25),rgba(124,92,255,.18));
+  border:1px solid rgba(255,255,255,.08);}
+.opt-t{font-size:14px;font-weight:650;}
+.opt-d{font-size:11.5px;color:var(--muted);margin-top:2px;word-break:break-all;}
+.fld{display:block;margin-bottom:13px;}
+.fld span{display:block;font-size:10.5px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.fld input,.fld textarea{width:100%;padding:13px 14px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.09);background:#0b1120;color:var(--txt);
+  font-size:14.5px;outline:none;font-family:inherit;resize:vertical;}
+.fld input:focus,.fld textarea:focus{border-color:rgba(79,125,255,.65);
+  box-shadow:0 0 0 3px rgba(79,125,255,.14);}
+.btnrow{display:flex;gap:10px;margin-top:8px;}
+.btn{flex:1;padding:14px;border-radius:15px;border:none;font-size:14.5px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.15s;
+  background:linear-gradient(135deg,#4f7dff,#7c5cff);color:#fff;
+  box-shadow:0 8px 22px rgba(79,125,255,.32);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn.ghost{background:rgba(255,255,255,.06);color:#c3cde6;box-shadow:none;border:1px solid var(--line);}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 8px 22px rgba(239,68,68,.3);}
+.btn.green{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 8px 22px rgba(34,197,94,.3);}
+.btn:active:not(:disabled){transform:scale(.97);}
+.infogrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.infocell{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:10px 11px;}
+.infocell .k{font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:4px;}
+.infocell .v{font-size:13px;font-weight:650;color:#dbe4f7;word-break:break-all;line-height:1.35;}
+.infocell.wide{grid-column:1/-1;}
+.infocell.ok .v{color:#6ee7a0;}
+.codebox{background:#080d18;border:1px solid var(--line);border-radius:14px;padding:12px 13px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.55;
+  color:#9fb0d1;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;margin-top:4px;}
+.viewer{position:fixed;inset:0;z-index:90;background:#05070c;display:flex;flex-direction:column;
+  opacity:0;transform:scale(.96);transition:opacity .22s,transform .22s;pointer-events:none;}
+.viewer[hidden]{display:none;}
+.viewer.open{opacity:1;transform:scale(1);pointer-events:auto;}
+.vbar{display:flex;align-items:center;gap:8px;
+  padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
+  background:rgba(10,14,22,.92);border-bottom:1px solid var(--line);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
+.vtitle{flex:1;font-size:13.5px;font-weight:650;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;padding:0 4px;min-width:0;}
+.vbtn{width:38px;height:38px;flex:0 0 38px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.06);color:#dbe3f7;font-size:16px;
+  display:grid;place-items:center;cursor:pointer;transition:.15s;}
+.vbtn:active{transform:scale(.9);background:rgba(255,255,255,.13);}
+.vbtn.save{background:rgba(34,197,94,.15);color:#6ee7a0;border-color:rgba(34,197,94,.3);}
+#vFrame{flex:1;width:100%;border:0;background:#fff;display:block;}
+.vnote{padding:9px 14px calc(9px + env(safe-area-inset-bottom));font-size:11.5px;
+  color:#93a0bd;background:#0b101c;border-top:1px solid var(--line);
+  display:flex;gap:8px;align-items:center;line-height:1.4;}
+.vnote[hidden]{display:none;}
+.vnote.ok{color:#6ee7a0;background:rgba(34,197,94,.08);}
+.viewer.immersive .vbar{display:none;}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));
+  transform:translate(-50%,20px);background:rgba(20,27,43,.97);
+  border:1px solid rgba(255,255,255,.1);color:var(--txt);
+  padding:11px 18px;border-radius:14px;font-size:13px;font-weight:600;z-index:120;
+  opacity:0;pointer-events:none;transition:.25s;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  max-width:88vw;text-align:center;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+.emoji-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:6px 0 14px;
+  max-height:240px;overflow-y:auto;padding:2px;}
+@media (max-width:390px){.emoji-grid{grid-template-columns:repeat(5,1fr);}}
+.emoji-btn{aspect-ratio:1/1;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);font-size:24px;cursor:pointer;
+  display:grid;place-items:center;transition:.15s;font-family:inherit;}
+.emoji-btn:active{transform:scale(.9);background:rgba(255,255,255,.12);}
+.emoji-btn.selected{background:linear-gradient(135deg,#4f7dff,#7c5cff);border-color:#7c5cff;
+  box-shadow:0 4px 14px rgba(79,125,255,.5);}
+.trash-row{display:flex;align-items:center;gap:11px;padding:11px;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);
+  border-radius:14px;margin-bottom:8px;}
+.trash-thumb{width:48px;height:48px;flex:0 0 48px;border-radius:12px;
+  display:grid;place-items:center;font-size:22px;overflow:hidden;
+  background:linear-gradient(135deg,#1b2438,#111827);filter:grayscale(.5);}
+.trash-thumb img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.trash-thumb .emoji{font-size:24px;}
+.trash-info{flex:1;min-width:0;}
+.trash-name{font-size:13px;font-weight:650;color:#dfe6f7;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;}
+.trash-days{font-size:10.5px;color:#f59e0b;font-weight:600;margin-top:3px;}
+.trash-actions{display:flex;gap:6px;margin-top:8px;}
+.mini-btn{padding:7px 11px;border-radius:10px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:#dbe3f7;font-size:11.5px;font-weight:650;
+  cursor:pointer;font-family:inherit;transition:.15s;}
+.mini-btn:active{transform:scale(.94);background:rgba(255,255,255,.12);}
+.mini-btn.green{background:rgba(34,197,94,.15);color:#6ee7a0;border-color:rgba(34,197,94,.3);}
+.mini-btn.red{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3);}
+.toggle{position:relative;display:inline-block;width:52px;height:30px;flex:0 0 52px;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle .sl{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.14);
+  border-radius:30px;transition:.25s;}
+.toggle .sl:before{position:absolute;content:"";height:22px;width:22px;left:4px;bottom:4px;
+  background:#fff;border-radius:50%;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.toggle input:checked + .sl{background:linear-gradient(135deg,#4f7dff,#7c5cff);}
+.toggle input:checked + .sl:before{transform:translateX(22px);}
+.syncrow{display:flex;align-items:center;gap:13px;padding:13px;border-radius:16px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);margin-bottom:12px;}
+.syncrow-info{flex:1;min-width:0;}
+.syncrow-t{font-size:14px;font-weight:650;}
+.syncrow-d{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.auth-overlay{position:fixed;inset:0;z-index:200;background:rgba(5,7,12,.97);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  transition:opacity .3s;overflow-y:auto;}
+.auth-overlay[hidden]{display:none;}
+.auth-box{width:100%;max-width:400px;background:linear-gradient(180deg,#141b2b,#0d1320);
+  border:1px solid rgba(255,255,255,.09);border-radius:26px;
+  padding:30px 24px calc(24px + env(safe-area-inset-bottom));
+  box-shadow:0 24px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);
+  margin:auto;}
+.auth-logo{width:72px;height:72px;margin:0 auto 18px;border-radius:22px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#4f7dff,#7c5cff);
+  box-shadow:0 14px 32px rgba(79,125,255,.5),inset 0 1px 0 rgba(255,255,255,.3);
+  font-size:32px;font-weight:800;color:#fff;}
+.auth-box h1{margin:0 0 6px;text-align:center;font-size:22px;font-weight:750;letter-spacing:-.4px;}
+.auth-sub{margin:0 0 24px;text-align:center;font-size:13px;color:var(--muted);line-height:1.5;}
+.auth-mode-tabs{display:flex;gap:6px;background:rgba(255,255,255,.04);
+  border-radius:14px;padding:4px;margin-bottom:20px;}
+.auth-mode-tabs button{flex:1;padding:11px;border-radius:10px;border:none;
+  background:transparent;color:var(--muted);font-size:13.5px;font-weight:650;
+  cursor:pointer;font-family:inherit;transition:.15s;}
+.auth-mode-tabs button.active{background:linear-gradient(135deg,#4f7dff,#7c5cff);
+  color:#fff;box-shadow:0 6px 16px rgba(79,125,255,.35);}
+.auth-msg{padding:11px 14px;border-radius:12px;font-size:12.5px;line-height:1.5;
+  margin-bottom:14px;display:none;}
+.auth-msg.show{display:block;}
+.auth-msg.error{background:rgba(239,68,68,.12);color:#fca5a5;
+  border:1px solid rgba(239,68,68,.3);}
+.auth-msg.ok{background:rgba(34,197,94,.12);color:#6ee7a0;
+  border:1px solid rgba(34,197,94,.3);}
+.auth-msg.info{background:rgba(79,125,255,.12);color:#93b0ff;
+  border:1px solid rgba(79,125,255,.3);}
+.link-btn{background:none;border:none;color:#93b0ff;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;padding:10px;width:100%;
+  text-decoration:underline;text-underline-offset:3px;}
+.link-btn:active{opacity:.7;}
+.skip-btn{background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;
+  cursor:pointer;font-family:inherit;padding:14px 10px 0;width:100%;
+  letter-spacing:.3px;}
+.skip-btn:active{opacity:.6;}
+
+#setupBanner{position:fixed;left:12px;right:12px;top:calc(78px + env(safe-area-inset-top));z-index:150;
+  background:linear-gradient(135deg,rgba(239,68,68,.95),rgba(220,38,38,.95));
+  color:#fff;padding:14px 16px;border-radius:16px;
+  box-shadow:0 12px 32px rgba(239,68,68,.45);
+  display:none;font-size:13px;line-height:1.55;}
+#setupBanner.show{display:block;animation:pop .3s;}
+#setupBanner b{display:block;font-size:14px;margin-bottom:4px;}
+#setupBanner button{margin-top:10px;background:rgba(255,255,255,.2);color:#fff;
+  border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:8px 14px;
+  font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+#setupBanner button:active{transform:scale(.96);}
+
+#pubRoot{position:fixed;inset:0;z-index:180;background:#080b12;display:flex;flex-direction:column;color:#eef2ff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+#pubRoot .pubbar{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:rgba(10,14,22,.92);border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+#pubRoot .pubtitle{flex:1;font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;}
+#pubRoot .pubbtn{width:38px;height:38px;flex:0 0 38px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.06);color:#dbe3f7;font-size:16px;display:grid;place-items:center;cursor:pointer;}
+#pubRoot .pubbtn:active{transform:scale(.9);}
+#pubFrame{flex:1;width:100%;border:0;background:#fff;display:block;}
+#pubStatus{padding:9px 14px calc(9px + env(safe-area-inset-bottom));font-size:11.5px;color:#93a0bd;background:#0b101c;border-top:1px solid rgba(255,255,255,.07);text-align:center;}
+#pubLogin{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+#pubLoginBox{width:100%;max-width:400px;background:linear-gradient(180deg,#141b2b,#0d1320);border:1px solid rgba(255,255,255,.09);border-radius:26px;padding:30px 24px;}
+#pubLoginBox .plogo{width:72px;height:72px;margin:0 auto 18px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#4f7dff,#7c5cff);box-shadow:0 14px 32px rgba(79,125,255,.5);font-size:32px;font-weight:800;color:#fff;}
+#pubLoginBox h1{margin:0 0 6px;text-align:center;font-size:22px;font-weight:750;letter-spacing:-.4px;}
+#pubLoginBox .sub{margin:0 0 24px;text-align:center;font-size:13px;color:#8b97b5;line-height:1.5;}
+#pubLoginBox .msg{padding:11px 14px;border-radius:12px;font-size:12.5px;line-height:1.5;margin-bottom:14px;display:none;font-weight:600;}
+#pubLoginBox .msg.show{display:block;}
+#pubLoginBox .msg.error{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
+#pubLoginBox .msg.ok{background:rgba(34,197,94,.12);color:#6ee7a0;border:1px solid rgba(34,197,94,.3);}
+#pubMenu{position:fixed;inset:0;z-index:200;background:rgba(3,5,10,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;}
+#pubMenu .sheetbox{width:100%;max-width:500px;background:linear-gradient(180deg,#141b2b,#0d1320);border-radius:26px 26px 0 0;border-top:1px solid rgba(255,255,255,.09);padding:6px 16px calc(20px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;}
+#pubMenu .handle{width:42px;height:4.5px;border-radius:3px;background:rgba(255,255,255,.18);margin:8px auto 16px;}
+.admin-row{display:flex;align-items:center;gap:11px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;margin-bottom:8px;}
+.admin-row .ic{width:44px;height:44px;flex:0 0 44px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(135deg,rgba(79,125,255,.25),rgba(124,92,255,.18));border:1px solid rgba(255,255,255,.08);}
+.admin-row .info{flex:1;min-width:0;}
+.admin-row .nm{font-size:13.5px;font-weight:650;color:#e8edfb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.admin-row .meta{font-size:11px;color:#8b97b5;margin-top:2px;}
+
+/* hidden file inputs -- mobile safe */
+.file-hidden{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div id="setupBanner">
+  <b>⚠️ Database Setup Required</b>
+  <span id="setupBannerMsg">Supabase me schema run nahi hua.</span>
+  <br>
+  <button onclick="document.getElementById('setupBanner').classList.remove('show')">Dismiss</button>
+</div>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">◈</div>
+    <h1>WebBox</h1>
+    <p class="auth-sub" id="authSub">Sign in to sync your HTML files across devices</p>
+    <div class="auth-mode-tabs" id="authTabs">
+      <button type="button" data-mode="login" class="active">Login</button>
+      <button type="button" data-mode="signup">Sign Up</button>
+    </div>
+    <div class="auth-msg" id="authMsg"></div>
+    <label class="fld"><span>Email</span>
+      <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" autocapitalize="off" spellcheck="false"/>
+    </label>
+    <label class="fld"><span>Password</span>
+      <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    </label>
+    <div class="btnrow">
+      <button class="btn" id="authSubmitBtn">Login</button>
+    </div>
+    <button class="link-btn" id="authForgotBtn" type="button">Forgot password?</button>
+    <button class="skip-btn" id="authSkipBtn" type="button">Continue offline (no cloud sync) →</button>
+  </div>
+</div>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="logo">◈<span class="cloud-badge" id="cloudBadge" style="display:none">☁</span></div>
+    <div><h1>WebBox</h1><p id="countEl">0 items</p></div>
+  </div>
+  <button class="icon-btn" id="cloudBtn" title="Cloud Sync">☁️</button>
+  <button class="icon-btn" id="trashBtn" title="Trash">🗑️<span class="dot" id="trashDot" style="display:none"></span></button>
+  <button class="icon-btn" id="searchBtn">🔍</button>
+  <button class="icon-btn" id="menuBtn">⋮</button>
+</header>
+
+<div class="searchwrap" id="searchWrap">
+  <input id="search" type="search" placeholder="Search..." autocomplete="off"/>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="empty" id="empty">
+  <div class="eic">🗂️</div>
+  <h2>Kuch bhi add nahi hai</h2>
+  <p>Neeche <b>+</b> button dabayein aur HTML file ya website link add karein.</p>
+</div>
+
+<button class="fab" id="fab">+</button>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div id="sheetBody"></div></div>
+
+<div class="viewer" id="viewer" hidden>
+  <div class="vbar">
+    <button class="vbtn" id="vClose">←</button>
+    <div class="vtitle" id="vTitle">Untitled</div>
+    <button class="vbtn save" id="vSave" title="Save Entries">💾</button>
+    <button class="vbtn" id="vReload">⟳</button>
+    <button class="vbtn" id="vFs">⛶</button>
+    <button class="vbtn" id="vOpen">↗</button>
+  </div>
+  <iframe id="vFrame" allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media"
+          allowfullscreen referrerpolicy="no-referrer"></iframe>
+  <div class="vnote" id="vNote" hidden><span>⚠️</span><span>Website embed block kar sakti hai. <b>↗</b> se browser me kholein.</span></div>
+  <div class="vnote ok" id="vLive" hidden><span>💾</span><span id="vLiveText">Entries auto-capture ho rahi hain...</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- File pickers -- mobile safe (hidden attribute works differently on some mobile browsers) -->
+<input type="file" id="filePicker" class="file-hidden" accept=".html,.htm,text/html" multiple/>
+<input type="file" id="jsonPicker" class="file-hidden" accept=".json,application/json"/>
+<input type="file" id="iconPicker" class="file-hidden" accept="image/*"/>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   SUPABASE CONFIG
+   ========================================================= */
+const SUPABASE_URL      = 'https://xcwcuhjycpshgycnvmyu.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_JhjDWCc8VrbjXOPFCKMO4g_w1HhgP_4';
+
+/* ADMIN (private) */
+const ADMIN_MOBILE = '03176407904';
+const ADMIN_PIN    = '0786';
+
+const PRISTINE_HTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+const EXPORT_ID_STORAGE = 'webbox_last_export_id_v2';
+const SYNC_ENABLED_KEY  = 'webbox_sync_enabled';
+const SYNC_LAST_KEY     = 'webbox_sync_last';
+const OFFLINE_MODE_KEY  = 'webbox_offline_mode';
+
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const fmtBytes = n => {n=Number(n)||0;if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(2)+' MB';};
+const fmtDate = ts => {if(!ts)return '--';const d=new Date(ts);return d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});};
+const daysLeft = ts => {const remain = 30*24*60*60*1000 - (Date.now() - ts);return Math.max(0, Math.ceil(remain / (24*60*60*1000)));};
+const TRASH_MS = 30 * 24 * 60 * 60 * 1000;
+const GRADS=[['#4f7dff','#7c5cff'],['#22c55e','#0ea5e9'],['#f59e0b','#ef4444'],['#ec4899','#8b5cf6'],['#06b6d4','#3b82f6'],['#f43f5e','#f97316'],['#14b8a6','#6366f1'],['#a855f7','#ec4899']];
+function gradFor(id){let h=0;for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return GRADS[h%GRADS.length];}
+function faviconURL(url){try{return 'https://www.google.com/s2/favicons?domain='+encodeURIComponent(new URL(url).hostname)+'&sz=128';}catch(e){return '';}}
+function ddgURL(url){try{return 'https://icons.duckduckgo.com/ip3/'+new URL(url).hostname+'.ico';}catch(e){return '';}}
+function isImageIcon(icon){ return typeof icon === 'string' && icon.indexOf('data:image/') === 0; }
+function safeLsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function safeLsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function safeLsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+function genSlug(){ return Math.random().toString(36).slice(2,8) + Date.now().toString(36).slice(-4); }
+
+const DB_NAME='webbox_db',DB_VER=1,STORE='items',LS_KEY='webbox_items_v2';
+let _db=null,useFallback=false;
+function openDB(){return new Promise((res,rej)=>{
+  if(!('indexedDB' in window))return rej(new Error('no-idb'));
+  const r=indexedDB.open(DB_NAME,DB_VER);
+  r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id'});};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);
+});}
+function lsAll(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return [];}}
+function lsSave(a){try{localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}}
+const Store={
+  async all(){if(useFallback)return lsAll();try{const db=_db||(_db=await openDB());
+    return await new Promise((res,rej)=>{const t=db.transaction(STORE,'readonly');
+      const q=t.objectStore(STORE).getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);});
+    }catch(e){useFallback=true;return lsAll();}},
+  async put(item){
+    if(useFallback){const a=lsAll();const i=a.findIndex(x=>x.id===item.id);
+      if(i>=0)a[i]=item;else a.push(item);lsSave(a);return;}
+    try{const db=_db||(_db=await openDB());await new Promise((res,rej)=>{
+      const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).put(item);
+      t.oncomplete=res;t.onerror=()=>rej(t.error);});
+    }catch(e){useFallback=true;await Store.put(item);}},
+  async del(id){
+    if(useFallback){lsSave(lsAll().filter(x=>x.id!==id));return;}
+    try{const db=_db||(_db=await openDB());await new Promise((res,rej)=>{
+      const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).delete(id);
+      t.oncomplete=res;t.onerror=()=>rej(t.error);});
+    }catch(e){useFallback=true;await Store.del(id);}},
+  async clear(){
+    if(useFallback){lsSave([]);return;}
+    try{const db=_db||(_db=await openDB());await new Promise((res,rej)=>{
+      const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).clear();
+      t.oncomplete=res;t.onerror=()=>rej(t.error);});
+    }catch(e){useFallback=true;await Store.clear();}}
+};
+
+let sb = null, sbReady = false, schemaOK = false, schemaChecked = false;
+(function initSupabase(){
+  try{
+    if(typeof window.supabase === 'undefined' || !window.supabase.createClient){
+      console.warn('[WebBox] Supabase SDK not loaded.'); return;
+    }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sbReady = true;
+    console.log('[WebBox] ✅ Supabase ready ->', SUPABASE_URL);
+  }catch(e){ console.error('[WebBox] Supabase init failed:', e); }
+})();
+
+async function checkSchemaHealth(){
+  if(!sbReady){ schemaChecked = true; return false; }
+  try{
+    const { error } = await sb.from('webbox_sync').select('sync_key').limit(1);
+    if(error && /could not find the table/i.test(error.message || '')){
+      schemaOK = false;
+      showSetupBanner('Table "webbox_sync" nahi mila. Supabase me SQL run karein.');
+      return false;
+    }
+    const { error: e2 } = await sb.from('published_apps').select('id').limit(1);
+    if(e2 && /could not find the table/i.test(e2.message || '')){
+      schemaOK = false;
+      showSetupBanner('Table "published_apps" nahi mila. Supabase me SQL run karein.');
+      return false;
+    }
+    schemaOK = true;
+    console.log('[WebBox] ✅ Schema OK');
+    return true;
+  }catch(e){
+    console.warn('[WebBox] Schema check error:', e);
+    return false;
+  }finally{
+    schemaChecked = true;
+  }
+}
+function showSetupBanner(msg){
+  const b = document.getElementById('setupBanner');
+  const m = document.getElementById('setupBannerMsg');
+  if(!b) return;
+  if(m) m.textContent = msg;
+  b.classList.add('show');
+  setTimeout(()=>b.classList.remove('show'), 15000);
+}
+
+let currentUser = null;
+let offlineMode = safeLsGet(OFFLINE_MODE_KEY) === '1';
+
+const Cloud = {
+  enabled: safeLsGet(SYNC_ENABLED_KEY) !== '0',
+  lastSync: parseInt(safeLsGet(SYNC_LAST_KEY) || '0', 10) || 0,
+  status: 'idle',
+  autoTimer: null,
+  deviceName: (function(){
+    try{
+      const ua = navigator.userAgent;
+      if(/iPhone/i.test(ua)) return 'iPhone';
+      if(/iPad/i.test(ua)) return 'iPad';
+      if(/Android/i.test(ua)) return 'Android';
+      if(/Mac/i.test(ua)) return 'Mac';
+      if(/Windows/i.test(ua)) return 'Windows';
+      return 'Device';
+    }catch(e){ return 'Device'; }
+  })()
+};
+
+function cloudReady(){ return sbReady && currentUser && Cloud.enabled && schemaOK; }
+function userSyncKey(){ return currentUser ? ('user-' + currentUser.id) : ''; }
+function updateCloudIndicator(){
+  const btn = $('#cloudBtn'), badge = $('#cloudBadge');
+  if(!btn) return;
+  btn.classList.remove('cloud-on');
+  if(Cloud.enabled && currentUser && schemaOK){
+    btn.classList.add('cloud-on');
+    btn.title = 'Cloud sync ON';
+    badge.style.display = 'grid';
+    badge.textContent = Cloud.status === 'syncing' ? '⏳' : (Cloud.status === 'error' ? '⚠' : '☁');
+    badge.style.background = Cloud.status === 'error' ? '#ef4444' : (Cloud.status === 'syncing' ? '#f59e0b' : '#22c55e');
+  } else if(currentUser && !schemaOK){
+    btn.title = 'Setup required -- Supabase me SQL run karein';
+    badge.style.display = 'none';
+  } else {
+    btn.title = currentUser ? 'Cloud sync OFF' : 'Login to enable cloud';
+    badge.style.display = 'none';
+  }
+}
+
+async function cloudBackup(silent){
+  if(!sbReady){ if(!silent) toast('⚠️ Supabase ready nahi'); return false; }
+  if(!currentUser){ if(!silent) toast('⚠️ Login karein'); return false; }
+  if(!schemaOK){
+    const ok = await checkSchemaHealth();
+    if(!ok){ if(!silent) toast('❌ SQL run karein -- webbox_sync table missing'); return false; }
+  }
+  if(!silent && !confirm('Cloud pe saara data upload karein?')) return false;
+  Cloud.status = 'syncing'; updateCloudIndicator();
+  try{
+    if(currentItem && currentItem.type === 'html' && !viewer.hidden){
+      try{ vFrame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){}
+      await new Promise(r=>setTimeout(r, 400));
+      const idx = items.findIndex(x=>x.id === currentItem.id);
+      if(idx >= 0 && currentItem.liveState) items[idx].liveState = currentItem.liveState;
+    }
+    const payload = items.map(serializeItem);
+    const { error } = await sb.from('webbox_sync').upsert({
+      sync_key: userSyncKey(), items: payload, user_id: currentUser.id,
+      device_name: Cloud.deviceName, updated_at: new Date().toISOString()
+    }, { onConflict: 'sync_key' });
+    if(error){
+      if(/could not find the table/i.test(error.message || '')){
+        schemaOK = false; showSetupBanner('Table "webbox_sync" nahi mila. Supabase me SQL run karein.');
+      }
+      throw error;
+    }
+    Cloud.status = 'ok'; Cloud.lastSync = Date.now();
+    safeLsSet(SYNC_LAST_KEY, String(Cloud.lastSync)); updateCloudIndicator();
+    if(!silent){
+      const size = new Blob([JSON.stringify(payload)]).size;
+      toast('☁️ Backup done -- ' + payload.length + ' items (' + fmtBytes(size) + ')');
+    }
+    return true;
+  }catch(e){
+    console.error('[WebBox] Cloud backup failed:', e);
+    Cloud.status = 'error'; updateCloudIndicator();
+    if(!silent){
+      const msg = e.message || String(e);
+      if(/could not find the table/i.test(msg)) toast('❌ Setup missing -- SQL run karein');
+      else toast('❌ Backup fail: ' + msg);
+    }
+    return false;
+  }
+}
+
+async function cloudRestore(silent){
+  if(!sbReady){ if(!silent) toast('⚠️ Supabase ready nahi'); return false; }
+  if(!currentUser){ if(!silent) toast('⚠️ Login karein'); return false; }
+  if(!schemaOK){
+    const ok = await checkSchemaHealth();
+    if(!ok){ if(!silent) toast('❌ SQL run karein -- webbox_sync table missing'); return false; }
+  }
+  Cloud.status = 'syncing'; updateCloudIndicator();
+  try{
+    const { data, error } = await sb.from('webbox_sync')
+      .select('items, updated_at, device_name')
+      .eq('sync_key', userSyncKey()).maybeSingle();
+    if(error){
+      if(/could not find the table/i.test(error.message || '')){
+        schemaOK = false; showSetupBanner('Table "webbox_sync" nahi mila. Supabase me SQL run karein.');
+      }
+      throw error;
+    }
+    // ✅ FIX: empty cloud pe local items NAHI clear karein
+    if(!data || !Array.isArray(data.items) || data.items.length === 0){
+      Cloud.status = 'ok'; updateCloudIndicator();
+      if(!silent) toast('⚠️ Cloud pe data nahi mila');
+      console.log('[WebBox] Cloud empty -- local items NOT cleared');
+      return false;
+    }
+    const cloudItems = data.items;
+    if(!silent){
+      const when = data.updated_at ? fmtDate(new Date(data.updated_at).getTime()) : 'unknown';
+      const ok = confirm('Cloud se ' + cloudItems.length + ' items restore karein?\n\nLast: ' + when +
+        '\nFrom: ' + (data.device_name || 'unknown') + '\n\n⚠️ Local data REPLACE ho jayega.');
+      if(!ok){ Cloud.status = 'idle'; updateCloudIndicator(); return false; }
+    }
+    await Store.clear(); items = [];
+    let nE = 0;
+    for(const raw of cloudItems){
+      if(!raw || typeof raw !== 'object') continue;
+      const content = raw.content || '';
+      const liveState = raw.liveState || null;
+      const it = {
+        id: raw.id || uid(),
+        type: raw.type === 'link' ? 'link' : 'html',
+        name: raw.name || 'Untitled',
+        url: raw.url || '',
+        content, fileName: raw.fileName || (raw.name ? raw.name + '.html' : ''),
+        mimeType: raw.mimeType || 'text/html',
+        fileSize: raw.fileSize || raw.size || content.length,
+        charCount: raw.charCount || content.length,
+        lineCount: raw.lineCount || (content ? content.split(/\r?\n/).length : 0),
+        lastModified: raw.lastModified || raw.createdAt || Date.now(),
+        createdAt: raw.createdAt || Date.now(),
+        liveState, icon: raw.icon || null, deletedAt: raw.deletedAt || null,
+        publishedSlug: raw.publishedSlug || null
+      };
+      if(it.type === 'link' && !it.url) continue;
+      if(it.liveState){
+        nE += Object.keys(it.liveState.localStorage||{}).length +
+              Object.keys(it.liveState.sessionStorage||{}).length +
+              Object.keys(it.liveState.formValues||{}).length;
+      }
+      items.push(it); await Store.put(it);
+    }
+    Cloud.status = 'ok'; Cloud.lastSync = Date.now();
+    safeLsSet(SYNC_LAST_KEY, String(Cloud.lastSync));
+    updateCloudIndicator(); render();
+    if(!silent) toast('☁️ Restored -- ' + items.length + ' items, ' + nE + ' entries');
+    return true;
+  }catch(e){
+    console.error('[WebBox] Cloud restore failed:', e);
+    Cloud.status = 'error'; updateCloudIndicator();
+    if(!silent){
+      const msg = e.message || String(e);
+      if(/could not find the table/i.test(msg)) toast('❌ Setup missing -- SQL run karein');
+      else toast('❌ Restore fail: ' + msg);
+    }
+    return false;
+  }
+}
+
+function scheduleCloudSync(){
+  if(!cloudReady()) return;
+  if(Cloud.autoTimer) clearTimeout(Cloud.autoTimer);
+  Cloud.autoTimer = setTimeout(()=>{
+    Cloud.autoTimer = null;
+    cloudBackup(true).then(ok=>{ if(ok) console.log('[WebBox] Auto-sync done'); });
+  }, 3000);
+}
+
+/* =============== AUTH =============== */
+let authMode = 'login';
+function showAuthOverlay(){ const o = $('#authOverlay'); if(o) o.hidden = false; document.body.classList.add('lock'); }
+function hideAuthOverlay(){ const o = $('#authOverlay'); if(o) o.hidden = true; document.body.classList.remove('lock'); }
+function showAuthMsg(text, type){
+  const m = $('#authMsg'); if(!m) return;
+  m.textContent = text; m.className = 'auth-msg show ' + (type || 'info');
+  if(type !== 'error') setTimeout(()=>{ m.classList.remove('show'); }, 5000);
+}
+function clearAuthMsg(){ const m = $('#authMsg'); if(m) m.className = 'auth-msg'; }
+function setAuthMode(mode){
+  authMode = mode;
+  $$('#authTabs button').forEach(b=>{ b.classList.toggle('active', b.dataset.mode === mode); });
+  const b = $('#authSubmitBtn'); if(b) b.textContent = mode === 'signup' ? 'Create Account' : 'Login';
+  const sub = $('#authSub');
+  if(sub) sub.textContent = mode === 'signup'
+    ? 'Create an account to sync your HTML files'
+    : 'Sign in to sync your HTML files across devices';
+  clearAuthMsg();
+}
+async function handleAuthSubmit(){
+  if(!sbReady){ showAuthMsg('Supabase ready nahi hai', 'error'); return; }
+  const email = ($('#authEmail')||{}).value?.trim() || '';
+  const password = ($('#authPassword')||{}).value || '';
+  if(!email){ showAuthMsg('Email daalein', 'error'); return; }
+  if(!password){ showAuthMsg('Password daalein', 'error'); return; }
+  if(password.length < 6){ showAuthMsg('Password kam se kam 6 characters', 'error'); return; }
+  const btn = $('#authSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Please wait...';
+  try{
+    if(authMode === 'signup'){
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if(error) throw error;
+      if(data.user && !data.session){
+        showAuthMsg('✅ Account ban gaya! Email confirm karein, phir login.', 'ok');
+        setAuthMode('login');
+      } else if(data.session){ showAuthMsg('✅ Account ban gaya!', 'ok'); }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      showAuthMsg('✅ Login ho gaya', 'ok');
+    }
+  }catch(e){
+    console.error('[WebBox] Auth error:', e);
+    showAuthMsg('❌ ' + (e.message || 'Auth failed'), 'error');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = authMode === 'signup' ? 'Create Account' : 'Login';
+  }
+}
+async function handleForgotPassword(){
+  const email = ($('#authEmail')||{}).value?.trim() || '';
+  if(!email){ showAuthMsg('Pehle email daalein', 'error'); return; }
+  try{
+    const { error } = await sb.auth.resetPasswordForEmail(email);
+    if(error) throw error;
+    showAuthMsg('✅ Password reset email bhej diya', 'ok');
+  }catch(e){ showAuthMsg('❌ ' + (e.message || 'Failed'), 'error'); }
+}
+async function handleLogout(){
+  if(!sbReady) return;
+  try{
+    await sb.auth.signOut();
+    offlineMode = false; safeLsDel(OFFLINE_MODE_KEY);
+    toast('👋 Logout ho gaya'); closeSheet();
+  }catch(e){ toast('❌ Logout fail'); }
+}
+
+/* ✅ FIX: onUserLoggedIn -- local items hone pe auto-restore nahi */
+async function onUserLoggedIn(user){
+  currentUser = user;
+  Cloud.enabled = true; safeLsSet(SYNC_ENABLED_KEY, '1');
+  hideAuthOverlay(); updateCloudIndicator(); render();
+  if(!schemaChecked) await checkSchemaHealth();
+
+  setTimeout(async ()=>{
+    if(!schemaOK) return;
+
+    const localCount = activeItems().length;
+    if(localCount > 0){
+      console.log('[WebBox] Local items present (' + localCount + ') -- backup only, no restore');
+      await cloudBackup(true);
+      return;
+    }
+
+    console.log('[WebBox] Local empty -- trying cloud restore');
+    const found = await cloudRestore(true);
+    if(!found){
+      console.log('[WebBox] Cloud empty -- nothing to restore');
+    }
+  }, 800);
+}
+function onUserLoggedOut(){
+  currentUser = null; updateCloudIndicator();
+  showAuthOverlay();
+}
+function attachAuthListeners(){
+  $('#authTabs').addEventListener('click', (e)=>{
+    const b = e.target.closest('button[data-mode]'); if(b) setAuthMode(b.dataset.mode);
+  });
+  $('#authSubmitBtn').addEventListener('click', handleAuthSubmit);
+  $('#authForgotBtn').addEventListener('click', handleForgotPassword);
+  $('#authSkipBtn').addEventListener('click', ()=>{
+    offlineMode = true; safeLsSet(OFFLINE_MODE_KEY, '1');
+    hideAuthOverlay(); toast('📴 Offline mode'); updateCloudIndicator();
+  });
+  ['authEmail','authPassword'].forEach(id=>{
+    const el = $('#'+id);
+    if(el) el.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') handleAuthSubmit(); });
+  });
+  if(sbReady){
+    sb.auth.onAuthStateChange((event, session)=>{
+      if(event === 'SIGNED_OUT') onUserLoggedOut();
+      else if(session && session.user) onUserLoggedIn(session.user);
+    });
+    sb.auth.getSession().then(({data})=>{
+      if(data && data.session && data.session.user) onUserLoggedIn(data.session.user);
+      else { if(offlineMode) hideAuthOverlay(); else showAuthOverlay(); }
+    }).catch(()=>{ if(offlineMode) hideAuthOverlay(); else showAuthOverlay(); });
+  } else {
+    showAuthOverlay();
+    showAuthMsg('⚠️ Supabase load nahi hua. Offline mode use karein.', 'error');
+  }
+}
+
+/* =============== IFRAME BRIDGE =============== */
+const BRIDGE_SCRIPT = [
+'(function(){',
+'  if(window.__webbox_bridge) return;',
+'  window.__webbox_bridge = true;',
+'  var TAG = "webbox-state";',
+'  function getSel(el){',
+'    try{',
+'      if(el.id && /^[A-Za-z_][\\w\\-:.]*$/.test(el.id)){',
+'        if(document.querySelectorAll("#"+CSS.escape(el.id)).length===1) return "#"+CSS.escape(el.id);',
+'      }',
+'      if(el.name){',
+'        var q = \'[name="\'+CSS.escape(el.name)+\'"]\';',
+'        if(document.querySelectorAll(q).length===1) return q;',
+'      }',
+'      var parts=[], cur=el;',
+'      while(cur && cur!==document.body && cur.nodeType===1){',
+'        var tag=cur.tagName.toLowerCase();',
+'        var p=cur.parentNode;',
+'        if(p){',
+'          var sib=[];',
+'          for(var i=0;i<p.children.length;i++){',
+'            if(p.children[i].tagName===cur.tagName) sib.push(p.children[i]);',
+'          }',
+'          if(sib.length>1) tag+=":nth-of-type("+(sib.indexOf(cur)+1)+")";',
+'        }',
+'        parts.unshift(tag);',
+'        cur=p;',
+'        if(parts.length>10) break;',
+'      }',
+'      return parts.length ? "body > "+parts.join(" > ") : null;',
+'    }catch(e){ return null; }',
+'  }',
+'  function collect(){',
+'    var fv={};',
+'    try{',
+'      var els=document.querySelectorAll("input, textarea, select");',
+'      for(var i=0;i<els.length;i++){',
+'        var el=els[i];',
+'        if(el.type==="file"||el.type==="password") continue;',
+'        var s=getSel(el); if(!s) continue;',
+'        if(el.type==="checkbox"||el.type==="radio"){',
+'          fv[s]={t:"c",c:!!el.checked,v:el.value};',
+'        }else if(el.tagName==="SELECT"&&el.multiple){',
+'          var vs=[];',
+'          for(var j=0;j<el.options.length;j++) if(el.options[j].selected) vs.push(el.options[j].value);',
+'          fv[s]={t:"m",v:vs};',
+'        }else{',
+'          fv[s]={t:"v",v:el.value};',
+'        }',
+'      }',
+'    }catch(e){}',
+'    var ls={},ss={};',
+'    try{ for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);ls[k]=localStorage.getItem(k);} }catch(e){}',
+'    try{ for(var i=0;i<sessionStorage.length;i++){var k=sessionStorage.key(i);ss[k]=sessionStorage.getItem(k);} }catch(e){}',
+'    return {formValues:fv,localStorage:ls,sessionStorage:ss,capturedAt:Date.now()};',
+'  }',
+'  function apply(st){',
+'    if(!st) return;',
+'    try{ if(st.localStorage) for(var k in st.localStorage){ try{localStorage.setItem(k,st.localStorage[k]);}catch(e){} } }catch(e){}',
+'    try{ if(st.sessionStorage) for(var k in st.sessionStorage){ try{sessionStorage.setItem(k,st.sessionStorage[k]);}catch(e){} } }catch(e){}',
+'    function ff(){',
+'      try{',
+'        if(!st.formValues) return;',
+'        for(var s in st.formValues){',
+'          try{',
+'            var el=document.querySelector(s); if(!el) continue;',
+'            var v=st.formValues[s];',
+'            if(v.t==="c") el.checked=!!v.c;',
+'            else if(v.t==="m"){',
+'              for(var i=0;i<el.options.length;i++) el.options[i].selected=v.v.indexOf(el.options[i].value)>=0;',
+'            }else{',
+'              el.value=v.v;',
+'              try{el.dispatchEvent(new Event("input",{bubbles:true}));}catch(e){}',
+'              try{el.dispatchEvent(new Event("change",{bubbles:true}));}catch(e){}',
+'            }',
+'          }catch(e){}',
+'        }',
+'      }catch(e){}',
+'    }',
+'    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",ff); else ff();',
+'    setTimeout(ff,150); setTimeout(ff,700); setTimeout(ff,1800);',
+'  }',
+'  var last="";',
+'  function send(){',
+'    try{',
+'      var st=collect();',
+'      var s=JSON.stringify(st);',
+'      if(s===last) return;',
+'      last=s;',
+'      parent.postMessage({__webbox:TAG,state:st},"*");',
+'    }catch(e){}',
+'  }',
+'  var tt=null;',
+'  function sched(){ if(tt) return; tt=setTimeout(function(){tt=null;send();},200); }',
+'  ["input","change","keyup","paste","blur"].forEach(function(ev){',
+'    document.addEventListener(ev,function(e){',
+'      var t=e.target;',
+'      if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT")) sched();',
+'    },true);',
+'  });',
+'  setInterval(send,1500);',
+'  window.addEventListener("message",function(e){',
+'    var d=e.data; if(!d) return;',
+'    if(d.__webbox==="apply"&&d.state) apply(d.state);',
+'    else if(d.__webbox==="request") send();',
+'  });',
+'  window.addEventListener("beforeunload",send);',
+'  setTimeout(send,300);',
+'  setTimeout(send,1200);',
+'  if(window.__WEBBOX_INIT__){ apply(window.__WEBBOX_INIT__); }',
+'})();'
+].join('\n');
+
+function buildHTMLWithBridge(it){
+  let html = it.content || '';
+  const state = it.liveState || null;
+  const stateJSON = state ? JSON.stringify(state)
+    .replace(/</g,'\\u003c').replace(/>/g,'\\u003e')
+    .replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029') : 'null';
+  const cs = '<' + '/script>';
+  const os = '<' + 'script>';
+  const injection =
+    os + 'window.__WEBBOX_INIT__=' + stateJSON + ';' + cs +
+    os + BRIDGE_SCRIPT + cs;
+  if(/<head[^>]*>/i.test(html)) html = html.replace(/<head[^>]*>/i, m => m + injection);
+  else if(/<html[^>]*>/i.test(html)) html = html.replace(/<html[^>]*>/i, m => m + '<head>' + injection + '</head>');
+  else if(/<body[^>]*>/i.test(html)) html = html.replace(/<body[^>]*>/i, m => injection + m);
+  else html = injection + html;
+  return html;
+}
+
+/* =============== MAIN APP =============== */
+let items=[];
+let currentItem=null;
+let blobUrl=null;
+let noteTimer=null;
+let persistTimer=null;
+let iconTargetId=null;
+
+const grid=$('#grid'),emptyEl=$('#empty'),countEl=$('#countEl');
+const searchInp=$('#search'),searchWrap=$('#searchWrap');
+const scrim=$('#scrim'),sheet=$('#sheet'),sheetBody=$('#sheetBody');
+const viewer=$('#viewer'),vFrame=$('#vFrame'),vTitle=$('#vTitle');
+const vNote=$('#vNote'),vLive=$('#vLive'),vLiveText=$('#vLiveText');
+const toastEl=$('#toast'),filePicker=$('#filePicker'),jsonPicker=$('#jsonPicker');
+const iconPicker=$('#iconPicker'),trashDot=$('#trashDot');
+
+let toastTimer=null;
+function toast(msg){
+  if(!toastEl) return;
+  toastEl.textContent=msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastEl.classList.remove('show'),2800);
+}
+
+window.addEventListener('message',(e)=>{
+  const d = e.data; if(!d || d.__webbox !== 'webbox-state' || !d.state) return;
+  if(!currentItem || currentItem.type !== 'html') return;
+  currentItem.liveState = d.state;
+  const idx = items.findIndex(x=>x.id === currentItem.id);
+  if(idx >= 0) items[idx].liveState = d.state;
+  const n = Object.keys(d.state.formValues||{}).length +
+            Object.keys(d.state.localStorage||{}).length +
+            Object.keys(d.state.sessionStorage||{}).length;
+  if(vLive && !vLive.hidden){
+    vLiveText.textContent = '💾 ' + n + ' entr' + (n===1?'y':'ies') + ' auto-captured';
+  }
+  schedulePersist(); scheduleCloudSync();
+});
+function schedulePersist(){
+  if(persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(async ()=>{
+    if(currentItem && currentItem.type === 'html' && currentItem.liveState){
+      const idx = items.findIndex(x=>x.id === currentItem.id);
+      if(idx >= 0){ items[idx].liveState = currentItem.liveState; try{ await Store.put(items[idx]); }catch(e){} }
+    }
+  }, 800);
+}
+
+function activeItems(){ return items.filter(i => !i.deletedAt); }
+function trashedItems(){ return items.filter(i => i.deletedAt); }
+function hasSavedEntries(it){
+  const ls = it.liveState; if(!ls) return false;
+  return (Object.keys(ls.localStorage||{}).length + Object.keys(ls.sessionStorage||{}).length + Object.keys(ls.formValues||{}).length) > 0;
+}
+function countEntries(it){
+  const ls = it.liveState || {};
+  return Object.keys(ls.localStorage||{}).length + Object.keys(ls.sessionStorage||{}).length + Object.keys(ls.formValues||{}).length;
+}
+function countStateEntries(s){
+  if(!s) return 0;
+  return Object.keys(s.formValues||{}).length + Object.keys(s.localStorage||{}).length + Object.keys(s.sessionStorage||{}).length;
+}
+
+function render(){
+  if(!grid) return;
+  const q = searchInp.value.trim().toLowerCase();
+  let list = activeItems();
+  if(q) list = list.filter(i =>
+    (i.name||'').toLowerCase().includes(q) ||
+    (i.url||'').toLowerCase().includes(q) ||
+    (i.fileName||'').toLowerCase().includes(q));
+  list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  grid.innerHTML = list.map((it,idx)=>cardHTML(it,idx)).join('');
+  emptyEl.hidden = list.length > 0;
+  countEl.textContent = activeItems().length + (activeItems().length===1 ? ' item' : ' items');
+  const n = trashedItems().length;
+  trashDot.style.display = n > 0 ? 'block' : 'none';
+  updateCloudIndicator();
+}
+
+function iconHTML(it){
+  const icon = it.icon;
+  if(icon){
+    if(isImageIcon(icon)) return '<img class="custom-icon" src="'+esc(icon)+'" alt=""/>';
+    return '<span class="custom-emoji">'+esc(icon)+'</span>';
+  }
+  if(it.type === 'link'){
+    let letter='?';
+    try{ letter = (new URL(it.url).hostname.replace(/^www\./,'')[0]||'?').toUpperCase(); }catch(e){}
+    const fav=faviconURL(it.url), fb=ddgURL(it.url);
+    return '<span class="letter">'+esc(letter)+'</span>' +
+      (fav ? '<img class="favi" src="'+esc(fav)+'" alt="" loading="lazy" data-fb="'+esc(fb)+'" ' +
+        'onerror="if(!this.dataset.t){this.dataset.t=1;this.src=this.dataset.fb||\'\';}else{this.remove();}">' : '');
+  }
+  return '<span class="glyph">&lt;/&gt;</span>';
+}
+
+function cardHTML(it,idx){
+  const isLink = it.type === 'link';
+  const delay = Math.min(idx*22,380);
+  const saved = !isLink && hasSavedEntries(it);
+  const hasIcon = !!it.icon;
+  const thumbClass = isLink ? 'link' : 'html';
+  const style = !isLink && !it.icon ? 'style="--g1:'+gradFor(it.id)[0]+';--g2:'+gradFor(it.id)[1]+'"' : '';
+  const dotBadge = saved ? '<span class="saved-dot">💾 '+countEntries(it)+'</span>' : '';
+  const pubBadge = it.publishedSlug ? '<span class="pub-dot">🌐 Live</span>' : '';
+  const iconBadge = hasIcon ? '<span class="icon-dot">🎨</span>' : '';
+  return '<article class="card" data-id="'+esc(it.id)+'" style="animation-delay:'+delay+'ms">' +
+    '<div class="thumb '+thumbClass+'" '+style+'>' +
+    iconHTML(it) + dotBadge + pubBadge + iconBadge +
+    '<button class="card-menu" data-menu="'+esc(it.id)+'">⋮</button>' +
+    '</div>' +
+    '<div class="card-body">' +
+    '<div class="card-name">'+esc(it.name)+'</div>' +
+    '<span class="badge '+(isLink?'link':'html')+'">'+(isLink?'Website':'HTML')+'</span>' +
+    '</div></article>';
+}
+
+function openSheet(html){
+  sheetBody.innerHTML = html;
+  scrim.classList.add('show'); sheet.classList.add('show');
+  document.body.classList.add('lock'); sheet.scrollTop = 0;
+}
+function closeSheet(){
+  scrim.classList.remove('show'); sheet.classList.remove('show');
+  if(viewer.hidden) document.body.classList.remove('lock');
+}
+scrim.addEventListener('click', closeSheet);
+
+function addSheet(){
+  openSheet('<div class="handle"></div><h3>Add to WebBox</h3>' +
+    '<button class="opt" data-act="pick-file"><div class="opt-ic">📄</div>' +
+    '<div><div class="opt-t">HTML File</div><div class="opt-d">File manager se .html select karein</div></div></button>' +
+    '<button class="opt" data-act="pick-link"><div class="opt-ic">🌐</div>' +
+    '<div><div class="opt-t">Website Link</div><div class="opt-d">URL daalein -- logo auto</div></div></button>');
+}
+function addLinkSheet(){
+  openSheet('<div class="handle"></div><h3>Add Website</h3>' +
+    '<label class="fld"><span>Website URL</span><input id="inUrl" type="url" inputmode="url" placeholder="https://example.com"/></label>' +
+    '<label class="fld"><span>Name (optional)</span><input id="inName" type="text" placeholder="Auto detect"/></label>' +
+    '<div class="btnrow"><button class="btn ghost" data-act="close">Cancel</button>' +
+    '<button class="btn" data-act="save-link">Add</button></div>');
+  setTimeout(()=>{const el=$('#inUrl');if(el)el.focus();},320);
+}
+function cloudSheet(){
+  const loggedIn = !!currentUser;
+  const email = loggedIn ? currentUser.email : 'Not logged in';
+  let statusText, statusColor;
+  if(!sbReady){ statusText = '⚠️ Supabase ready nahi'; statusColor = '#f59e0b'; }
+  else if(!loggedIn){ statusText = '🔒 Login zaroori'; statusColor = '#fca5a5'; }
+  else if(!schemaOK){ statusText = '❌ Setup missing -- SQL run karein'; statusColor = '#fca5a5'; }
+  else if(Cloud.status === 'syncing'){ statusText = '⏳ Syncing...'; statusColor = '#93b0ff'; }
+  else if(Cloud.status === 'error'){ statusText = '⚠️ Last sync failed'; statusColor = '#fca5a5'; }
+  else if(Cloud.lastSync){ statusText = '✅ Last: ' + fmtDate(Cloud.lastSync); statusColor = '#6ee7a0'; }
+  else { statusText = '✅ Ready'; statusColor = '#6ee7a0'; }
+
+  let bodyHtml = '<div class="handle"></div><h3>☁️ Cloud Sync</h3>' +
+    '<div class="infogrid">' +
+    '<div class="infocell wide"><div class="k">Account</div><div class="v" style="font-size:12px">'+esc(email)+'</div></div>' +
+    '<div class="infocell wide"><div class="k">Status</div><div class="v" style="color:'+statusColor+'">'+statusText+'</div></div>' +
+    '<div class="infocell"><div class="k">Device</div><div class="v">'+esc(Cloud.deviceName)+'</div></div>' +
+    '<div class="infocell"><div class="k">Items</div><div class="v">'+items.length+'</div></div>' +
+    '</div>';
+
+  if(loggedIn && !schemaOK){
+    bodyHtml +=
+      '<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:13px;margin-bottom:12px;font-size:12.5px;line-height:1.6;color:#fca5a5">' +
+      '<b>⚠️ Database Setup Missing</b><br>' +
+      'Supabase me <code>webbox-schema.sql</code> run nahi hua. SQL Editor kholein aur SQL paste karke Run karein.' +
+      '</div>' +
+      '<button class="opt" data-act="recheck-schema">' +
+      '<div class="opt-ic">🔄</div>' +
+      '<div><div class="opt-t">Re-check Setup</div>' +
+      '<div class="opt-d">SQL run karne ke baad yahan tap karein</div></div></button>';
+  }
+
+  if(loggedIn){
+    bodyHtml +=
+      '<div class="syncrow">' +
+      '<div class="syncrow-info">' +
+      '<div class="syncrow-t">Auto-Sync</div>' +
+      '<div class="syncrow-d">Har change 3 sec baad cloud pe upload</div>' +
+      '</div>' +
+      '<label class="toggle"><input type="checkbox" id="syncToggle" '+(Cloud.enabled?'checked':'')+'/><span class="sl"></span></label>' +
+      '</div>' +
+      '<button class="opt" data-act="cloud-backup">' +
+      '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(34,197,94,.3),rgba(16,163,74,.2))">☁️</div>' +
+      '<div><div class="opt-t">Backup to Cloud</div>' +
+      '<div class="opt-d">Local data cloud pe upload karein</div></div></button>' +
+      '<button class="opt" data-act="cloud-restore">' +
+      '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(79,125,255,.3),rgba(124,92,255,.2))">⬇️</div>' +
+      '<div><div class="opt-t">Restore from Cloud</div>' +
+      '<div class="opt-d">Cloud data se local replace karein</div></div></button>' +
+      '<button class="opt" data-act="logout" style="margin-top:14px;border-color:rgba(239,68,68,.2)">' +
+      '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(239,68,68,.25),rgba(220,38,38,.18))">🚪</div>' +
+      '<div><div class="opt-t">Logout</div>' +
+      '<div class="opt-d">'+esc(currentUser.email)+'</div></div></button>';
+  } else {
+    bodyHtml +=
+      '<button class="opt" data-act="open-login"><div class="opt-ic">🔑</div>' +
+      '<div><div class="opt-t">Login / Sign Up</div>' +
+      '<div class="opt-d">Cloud sync enable karne ke liye</div></div></button>';
+  }
+
+  bodyHtml += '<div class="btnrow" style="margin-top:10px">' +
+    '<button class="btn ghost" data-act="close">Close</button>' +
+    '</div>';
+
+  openSheet(bodyHtml);
+}
+
+function menuSheet(){
+  const h = activeItems().filter(i=>i.type==='html').length;
+  const l = activeItems().filter(i=>i.type==='link').length;
+  const withSaved = activeItems().filter(i=>i.type==='html' && hasSavedEntries(i)).length;
+  const trashed = trashedItems().length;
+  let totalEntries = 0;
+  activeItems().forEach(i=>{ if(i.type==='html') totalEntries += countEntries(i); });
+  openSheet('<div class="handle"></div><h3>Menu</h3>' +
+    '<div class="infogrid">' +
+    '<div class="infocell"><div class="k">HTML Files</div><div class="v">'+h+'</div></div>' +
+    '<div class="infocell"><div class="k">Websites</div><div class="v">'+l+'</div></div>' +
+    '<div class="infocell ok"><div class="k">Files w/ Entries</div><div class="v">'+withSaved+'</div></div>' +
+    '<div class="infocell ok"><div class="k">Total Entries</div><div class="v">'+totalEntries+'</div></div>' +
+    (trashed ? '<div class="infocell wide" style="border-color:rgba(239,68,68,.3)"><div class="k" style="color:#fca5a5">In Trash</div><div class="v" style="color:#fca5a5">'+trashed+' item'+(trashed>1?'s':'')+'</div></div>' : '') +
+    '</div>' +
+    '<button class="opt" data-act="cloud-open"><div class="opt-ic">☁️</div>' +
+    '<div><div class="opt-t">Cloud Sync '+(currentUser?'(Login OK)':'')+'</div>' +
+    '<div class="opt-d">Supabase me backup / restore</div></div></button>' +
+    '<button class="opt" data-act="admin-panel"><div class="opt-ic">👑</div>' +
+    '<div><div class="opt-t">Admin Panel</div>' +
+    '<div class="opt-d">Sab published apps + sab users ki entries dekhein</div></div></button>' +
+    '<button class="opt" data-act="backup"><div class="opt-ic">💾</div>' +
+    '<div><div class="opt-t">Backup JSON (Local)</div><div class="opt-d">File me download karein</div></div></button>' +
+    '<button class="opt" data-act="export-portable"><div class="opt-ic">🌐</div>' +
+    '<div><div class="opt-t">Export as Portable HTML</div>' +
+    '<div class="opt-d">Poora app + saara data ek HTML file me</div></div></button>' +
+    '<button class="opt" data-act="restore"><div class="opt-ic">📥</div>' +
+    '<div><div class="opt-t">Restore JSON (Local)</div><div class="opt-d">File se wapas laayein</div></div></button>' +
+    '<button class="opt" data-act="open-trash"><div class="opt-ic">🗑️</div>' +
+    '<div><div class="opt-t">Trash</div><div class="opt-d">'+(trashed?trashed+' deleted item'+(trashed>1?'s':''):'Khaali hai')+'</div></div></button>' +
+    '<button class="opt" data-act="close"><div class="opt-ic">✖️</div>' +
+    '<div><div class="opt-t">Close</div><div class="opt-d">Band karein</div></div></button>');
+}
+
+const EMOJI_SET = ['📄','📝','📋','📊','📈','📉','🎯','🎨','🎮','🎵','🎬','📷','📸','🗺️','💼','📚','📖','🔧','🔨','⚙️','🚀','⭐','🌟','💡','🔔','📱','💻','🖥️','⌨️','🖱️','🌐','🏠','🏢','🛒','🛍️','📦','🎁','✏️','🖊️','🔖','📌','📍','🧩','🔮','💎','🔥','⚡','🌈','☀️','🌙','☁️','🌊','🍀','🌸','🌺','🎪','🎭','🎼','🎤','🎧','🎲','🧠','👑','🛡️','⚔️','🗡️','🏆','🥇','🎖️','🚗','✈️','🚁','⛵','🚂','🍕','🍔','🍎','☕','🍰','🧁'];
+
+function iconPickerSheet(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  iconTargetId = id;
+  const cur = it.icon || '';
+  const emojiBtns = EMOJI_SET.map(e =>
+    '<button class="emoji-btn '+(cur===e?'selected':'')+'" data-emoji="'+esc(e)+'">'+esc(e)+'</button>'
+  ).join('');
+  openSheet('<div class="handle"></div><h3>Choose Icon</h3>' +
+    '<p style="color:#8b97b5;font-size:12px;margin:-6px 0 12px;line-height:1.6">' +
+    'Emoji chunein ya apni image upload karein.</p>' +
+    '<div style="display:flex;gap:10px;margin-bottom:12px">' +
+    '<button class="btn ghost" data-act="upload-icon" style="padding:11px">🖼️ Upload Image</button>' +
+    '<button class="btn ghost" data-act="remove-icon" style="padding:11px">🚫 Remove</button>' +
+    '</div>' +
+    '<div class="emoji-grid" id="emojiGrid">' + emojiBtns + '</div>' +
+    '<div class="btnrow"><button class="btn ghost" data-act="close">Done</button></div>');
+}
+
+function deleteSheet(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  const expected = it.name || 'Untitled';
+  openSheet('<div class="handle"></div><h3>Delete "'+esc(expected)+'"?</h3>' +
+    '<p style="color:#8b97b5;font-size:12.5px;margin:-6px 0 14px;line-height:1.6">' +
+    'Item <b style="color:#fbbf24">Trash</b> me jayega (30 din tak). Confirm ke liye exact naam likhein:</p>' +
+    '<label class="fld"><span>Type: '+esc(expected)+'</span>' +
+    '<input id="delConfirm" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="'+esc(expected)+'"/></label>' +
+    '<div class="btnrow"><button class="btn ghost" data-act="close">Cancel</button>' +
+    '<button class="btn danger" id="delBtn" data-act="delete-confirm" data-id="'+esc(it.id)+'" disabled>Move to Trash</button></div>');
+  setTimeout(()=>{
+    const inp = $('#delConfirm'); const btn = $('#delBtn'); if(!inp || !btn) return;
+    inp.focus();
+    const check = () => { btn.disabled = inp.value.trim() !== expected; };
+    inp.addEventListener('input', check);
+    inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !btn.disabled) btn.click(); });
+    check();
+  }, 320);
+}
+
+function trashSheet(){
+  const list = trashedItems().sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0));
+  let body = '<div class="handle"></div><h3>🗑️ Trash</h3>' +
+    '<p style="color:#8b97b5;font-size:12px;margin:-6px 0 14px;line-height:1.6">' +
+    'Items 30 din tak yahan rehte hain, phir auto-delete.</p>';
+  if(!list.length){
+    body += '<div style="text-align:center;padding:30px 10px;color:#8b97b5">' +
+      '<div style="font-size:42px;margin-bottom:10px">✨</div>' +
+      '<div style="font-size:14px">Trash khaali hai</div></div>';
+  } else {
+    list.forEach(it=>{
+      const dLeft = daysLeft(it.deletedAt);
+      const icon = it.icon; let thumb;
+      if(icon){ if(isImageIcon(icon)) thumb = '<img src="'+esc(icon)+'" alt=""/>';
+        else thumb = '<span class="emoji">'+esc(icon)+'</span>'; }
+      else thumb = it.type === 'link' ? '🌐' : '📄';
+      body += '<div class="trash-row">' +
+        '<div class="trash-thumb">'+thumb+'</div>' +
+        '<div class="trash-info">' +
+        '<div class="trash-name">'+esc(it.name||'Untitled')+'</div>' +
+        '<div class="trash-days">⏳ '+dLeft+' din baaki • '+esc(it.type==='link'?'Website':'HTML')+'</div>' +
+        '<div class="trash-actions">' +
+        '<button class="mini-btn green" data-act="restore-item" data-id="'+esc(it.id)+'">♻️ Restore</button>' +
+        '<button class="mini-btn red" data-act="purge-item" data-id="'+esc(it.id)+'">🗑️ Delete Forever</button>' +
+        '</div></div></div>';
+    });
+    body += '<div class="btnrow" style="margin-top:14px">' +
+      '<button class="btn ghost" data-act="close">Close</button>' +
+      '<button class="btn danger" data-act="empty-trash">Empty Trash</button></div>';
+  }
+  openSheet(body);
+}
+
+function itemSheet(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  const isLink = it.type === 'link';
+  const saved = !isLink && hasSavedEntries(it);
+  const hasIcon = !!it.icon;
+  let html = '<div class="handle"></div><h3>'+esc(it.name)+'</h3>' +
+    '<button class="opt" data-act="open" data-id="'+esc(it.id)+'">' +
+    '<div class="opt-ic">▶️</div><div><div class="opt-t">Open</div>' +
+    '<div class="opt-d">Fullscreen viewer</div></div></button>';
+  if(!isLink){
+    if(it.publishedSlug){
+      html += '<button class="opt" data-act="share-link" data-id="'+esc(it.id)+'">' +
+        '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(79,125,255,.35),rgba(124,92,255,.25))">🔗</div>' +
+        '<div><div class="opt-t">Copy Share Link</div>' +
+        '<div class="opt-d">'+esc(getPublishURL(it.publishedSlug))+'</div></div></button>' +
+      '<button class="opt" data-act="unpublish" data-id="'+esc(it.id)+'">' +
+        '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(239,68,68,.25),rgba(220,38,38,.18))">🚫</div>' +
+        '<div><div class="opt-t">Unpublish</div>' +
+        '<div class="opt-d">Public link disable karein</div></div></button>';
+    } else {
+      html += '<button class="opt" data-act="publish" data-id="'+esc(it.id)+'">' +
+        '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(34,197,94,.3),rgba(16,163,74,.2))">🌐</div>' +
+        '<div><div class="opt-t">Publish & Share</div>' +
+        '<div class="opt-d">Public link banayein (mobile + PIN login)</div></div></button>';
+    }
+  }
+  html += '<button class="opt" data-act="icon" data-id="'+esc(it.id)+'">' +
+    '<div class="opt-ic">🎨</div><div><div class="opt-t">'+(hasIcon?'Change Icon':'Add Icon')+'</div>' +
+    '<div class="opt-d">Emoji ya image lagayein</div></div></button>' +
+    '<button class="opt" data-act="info" data-id="'+esc(it.id)+'">' +
+    '<div class="opt-ic">ℹ️</div><div><div class="opt-t">Details</div>' +
+    '<div class="opt-d">'+(isLink?'URL aur info':'Content + saved entries')+'</div></div></button>';
+  if(isLink){
+    html += '<button class="opt" data-act="external" data-id="'+esc(it.id)+'">' +
+      '<div class="opt-ic">🌐</div><div><div class="opt-t">Browser me kholein</div>' +
+      '<div class="opt-d">'+esc(it.url)+'</div></div></button>';
+  } else {
+    html += '<button class="opt" data-act="capture" data-id="'+esc(it.id)+'">' +
+      '<div class="opt-ic">💾</div><div><div class="opt-t">Save Entries Now</div>' +
+      '<div class="opt-d">'+(saved?countEntries(it)+' entries saved -- update karein':'Latest state capture karein')+'</div></div></button>';
+    if(saved){
+      html += '<button class="opt" data-act="clear-entries" data-id="'+esc(it.id)+'">' +
+        '<div class="opt-ic">🧽</div><div><div class="opt-t">Clear Saved Entries</div>' +
+        '<div class="opt-d">Sirf entries hataayein</div></div></button>';
+    }
+    html += '<button class="opt" data-act="download" data-id="'+esc(it.id)+'">' +
+      '<div class="opt-ic">⬇️</div><div><div class="opt-t">Download HTML</div>' +
+      '<div class="opt-d">Entries embedded ke saath</div></div></button>' +
+      '<button class="opt" data-act="export-one" data-id="'+esc(it.id)+'">' +
+      '<div class="opt-ic">📤</div><div><div class="opt-t">Export as JSON</div>' +
+      '<div class="opt-d">Sirf is item ka backup</div></div></button>';
+  }
+  html += '<button class="opt" data-act="rename" data-id="'+esc(it.id)+'">' +
+    '<div class="opt-ic">✏️</div><div><div class="opt-t">Rename</div>' +
+    '<div class="opt-d">Naam badlein</div></div></button>' +
+    '<button class="opt" data-act="delete" data-id="'+esc(it.id)+'">' +
+    '<div class="opt-ic">🗑️</div><div><div class="opt-t">Delete</div>' +
+    '<div class="opt-d">Trash me bhejein (30 din)</div></div></button>';
+  openSheet(html);
+}
+
+function renameSheet(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  openSheet('<div class="handle"></div><h3>Rename</h3>' +
+    '<label class="fld"><span>Name</span><input id="rnInput" type="text" value="'+esc(it.name)+'"/></label>' +
+    '<div class="btnrow"><button class="btn ghost" data-act="close">Cancel</button>' +
+    '<button class="btn" data-act="rename-save" data-id="'+esc(it.id)+'">Save</button></div>');
+  setTimeout(()=>{const el=$('#rnInput');if(el){el.focus();el.select();}},320);
+}
+
+function itemInfoSheet(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  const isLink = it.type === 'link';
+  if(isLink){
+    openSheet('<div class="handle"></div><h3>'+esc(it.name)+'</h3>' +
+      '<div class="infogrid">' +
+      '<div class="infocell wide"><div class="k">URL</div><div class="v">'+esc(it.url)+'</div></div>' +
+      '<div class="infocell"><div class="k">Type</div><div class="v">Website</div></div>' +
+      '<div class="infocell"><div class="k">Added</div><div class="v">'+esc(fmtDate(it.createdAt))+'</div></div>' +
+      '</div>' +
+      '<div class="btnrow"><button class="btn ghost" data-act="close">Close</button>' +
+      '<button class="btn" data-act="open" data-id="'+esc(it.id)+'">Open</button></div>');
+    return;
+  }
+  const content = it.content || '';
+  const chars = it.charCount || content.length;
+  const lines = it.lineCount || (content ? content.split(/\r?\n/).length : 0);
+  const bytes = it.fileSize || new Blob([content]).size;
+  const ls = it.liveState || {};
+  const nLs = Object.keys(ls.localStorage||{}).length;
+  const nSs = Object.keys(ls.sessionStorage||{}).length;
+  const nF  = Object.keys(ls.formValues||{}).length;
+  const total = nLs + nSs + nF;
+  const preview = content.length > 2500 ? content.slice(0,2500)+'\n\n... (+'+(content.length-2500).toLocaleString()+' chars)' : content;
+  const entriesPreview = total ? esc(JSON.stringify({
+    formValues: ls.formValues || {}, localStorage: ls.localStorage || {}, sessionStorage: ls.sessionStorage || {}
+  }, null, 2).slice(0, 2500)) : 'Koi entries save nahi hain.';
+  const pubInfo = it.publishedSlug ? '<div class="infocell wide" style="border-color:rgba(34,197,94,.3)"><div class="k" style="color:#6ee7a0">Published Slug</div><div class="v" style="color:#6ee7a0">'+esc(it.publishedSlug)+'</div></div>' : '';
+  openSheet('<div class="handle"></div><h3>'+esc(it.name)+'</h3>' +
+    '<div class="infogrid">' +
+    '<div class="infocell"><div class="k">Size</div><div class="v">'+fmtBytes(bytes)+'</div></div>' +
+    '<div class="infocell"><div class="k">Lines</div><div class="v">'+lines.toLocaleString()+'</div></div>' +
+    '<div class="infocell '+(total?'ok':'')+'"><div class="k">Saved Entries</div><div class="v">'+total+'</div></div>' +
+    '<div class="infocell"><div class="k">Chars</div><div class="v">'+chars.toLocaleString()+'</div></div>' +
+    '<div class="infocell wide"><div class="k">File</div><div class="v">'+esc(it.fileName||(it.name+'.html'))+'</div></div>' +
+    '<div class="infocell wide"><div class="k">Captured</div><div class="v">'+esc(ls.capturedAt?fmtDate(ls.capturedAt):'--')+'</div></div>' +
+    pubInfo +
+    '</div>' +
+    '<div style="font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#8b97b5;margin:10px 0 6px">Saved Entries</div>' +
+    '<div class="codebox">'+entriesPreview+'</div>' +
+    '<div style="font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#8b97b5;margin:14px 0 6px">HTML Preview</div>' +
+    '<div class="codebox">'+esc(preview)+'</div>' +
+    '<div class="btnrow" style="margin-top:14px"><button class="btn ghost" data-act="close">Close</button>' +
+    '<button class="btn" data-act="export-one" data-id="'+esc(it.id)+'">Export JSON</button></div>');
+}
+
+/* =============== PUBLISH =============== */
+function getPublishURL(slug){
+  const base = location.href.split('#')[0];
+  return base + '#/p/' + slug;
+}
+function showShareSheet(url, slug){
+  openSheet('<div class="handle"></div><h3>🌐 Published!</h3>' +
+    '<p style="color:#8b97b5;font-size:12.5px;margin:-6px 0 14px;line-height:1.6">' +
+    'Ye link share karein. Recipient <b style="color:#93b0ff">mobile number</b> + <b style="color:#93b0ff">4-digit PIN</b> se login karega, aur uski entries sirf usi ko dikhengi.</p>' +
+    '<label class="fld"><span>Share Link</span>' +
+    '<input id="shareUrl" type="text" value="'+esc(url)+'" readonly/></label>' +
+    '<div class="btnrow">' +
+    '<button class="btn ghost" data-act="copy-link">📋 Copy</button>' +
+    '<button class="btn" data-act="open-share-link" data-slug="'+esc(slug)+'">🔗 Open</button>' +
+    '</div>');
+}
+async function publishItem(id){
+  const it = items.find(x=>x.id===id); if(!it || it.type !== 'html') return;
+  if(!sbReady){ toast('⚠️ Supabase ready nahi'); return; }
+  if(!schemaOK){
+    const ok = await checkSchemaHealth();
+    if(!ok){ toast('❌ SQL run karein -- published_apps table missing'); return; }
+  }
+  const slug = it.publishedSlug || genSlug();
+  toast('⏳ Publishing...');
+  try{
+    const { error } = await sb.from('published_apps').upsert({
+      slug,
+      owner_id: currentUser ? currentUser.id : null,
+      owner_email: currentUser ? currentUser.email : null,
+      name: it.name,
+      content: it.content,
+      icon: it.icon || null,
+      active: true,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'slug' });
+    if(error) throw error;
+    it.publishedSlug = slug;
+    await Store.put(it);
+    render();
+    toast('✅ Published!');
+    showShareSheet(getPublishURL(slug), slug);
+  }catch(e){
+    console.error(e);
+    toast('❌ Publish fail: ' + (e.message||e));
+  }
+}
+async function unpublishItem(id){
+  const it = items.find(x=>x.id===id); if(!it || !it.publishedSlug) return;
+  if(!confirm('Ye app unpublish karein? Public link kaam nahi karega.')) return;
+  try{
+    const { error } = await sb.from('published_apps').update({ active: false })
+      .eq('slug', it.publishedSlug);
+    if(error) throw error;
+    delete it.publishedSlug;
+    await Store.put(it);
+    render(); closeSheet();
+    toast('🚫 Unpublished');
+  }catch(e){
+    toast('❌ ' + (e.message||e));
+  }
+}
+
+/* =============== ADMIN =============== */
+function adminLoginSheet(){
+  openSheet('<div class="handle"></div><h3>👑 Admin Login</h3>' +
+    '<p style="color:#8b97b5;font-size:12.5px;margin:-6px 0 14px;line-height:1.6">' +
+    'Admin mobile aur 4-digit PIN daalein.</p>' +
+    '<label class="fld"><span>Mobile</span><input id="admMobile" type="tel" inputmode="numeric" placeholder="03XXXXXXXXX"/></label>' +
+    '<label class="fld"><span>4-digit PIN</span><input id="admPin" type="tel" inputmode="numeric" maxlength="4" placeholder="••••"/></label>' +
+    '<div class="btnrow"><button class="btn ghost" data-act="close">Cancel</button>' +
+    '<button class="btn" id="admBtn" data-act="admin-login-go">Login</button></div>');
+  setTimeout(()=>{
+    const p = $('#admPin');
+    if(p) p.addEventListener('input', (e)=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,4); });
+  }, 320);
+}
+async function adminLoginGo(){
+  const mobile = ($('#admMobile')||{}).value?.trim() || '';
+  const pin = ($('#admPin')||{}).value?.trim() || '';
+  if(!mobile || pin.length !== 4){ toast('Mobile aur 4-digit PIN daalein'); return; }
+  if(mobile !== ADMIN_MOBILE || pin !== ADMIN_PIN){ toast('❌ Galat admin credentials'); return; }
+  try{
+    const { data, error } = await sb.rpc('app_login', { p_mobile: mobile, p_pin: pin });
+    if(error) throw error;
+    if(!data || !data.ok){ toast('❌ ' + ((data && data.error) || 'Login fail')); return; }
+    safeLsSet('webbox_admin_session', JSON.stringify({ id: data.user_id, mobile: data.mobile }));
+    adminPanelSheet();
+  }catch(e){ toast('❌ ' + (e.message||e)); }
+}
+async function adminPanelSheet(){
+  openSheet('<div class="handle"></div><h3>👑 Admin Panel</h3>' +
+    '<p style="color:#8b97b5;font-size:12.5px;margin:-6px 0 14px;line-height:1.6">Loading...</p>');
+  try{
+    const { data: apps, error } = await sb.from('published_apps')
+      .select('id,slug,name,owner_email,created_at,updated_at,active')
+      .order('created_at', { ascending: false });
+    if(error) throw error;
+    if(!apps || !apps.length){
+      openSheet('<div class="handle"></div><h3>👑 Admin Panel</h3>' +
+        '<div style="text-align:center;padding:30px 10px;color:#8b97b5">' +
+        '<div style="font-size:42px;margin-bottom:10px">📭</div>' +
+        '<div style="font-size:14px">Koi published app nahi hai</div></div>' +
+        '<div class="btnrow"><button class="btn ghost" data-act="close">Close</button></div>');
+      return;
+    }
+    const counts = {};
+    try{
+      const { data: entries } = await sb.from('app_entries').select('app_id,user_id');
+      (entries||[]).forEach(e => { counts[e.app_id] = (counts[e.app_id]||0) + 1; });
+    }catch(e){}
+    const rows = apps.map(a => {
+      const n = counts[a.id] || 0;
+      return '<div class="admin-row" data-act="admin-view-app" data-id="'+esc(a.id)+'">' +
+        '<div class="ic">🌐</div>' +
+        '<div class="info">' +
+        '<div class="nm">'+esc(a.name||'Untitled')+'</div>' +
+        '<div class="meta">slug: '+esc(a.slug)+' • '+n+' user'+(n===1?'':'s')+(a.active===false?' • ⛔ inactive':'')+'</div>' +
+        '</div>' +
+        '<div style="color:#8b97b5;font-size:18px">›</div>' +
+      '</div>';
+    }).join('');
+    openSheet('<div class="handle"></div><h3>👑 Admin Panel</h3>' +
+      '<p style="color:#8b97b5;font-size:12.5px;margin:-6px 0 14px;line-height:1.6">' +
+      'Saari published apps. Kisi par click karein taake us users ki entries dekh sakein.</p>' +
+      rows +
+      '<div class="btnrow" style="margin-top:10px"><button class="btn ghost" data-act="close">Close</button></div>');
+  }catch(e){
+    console.error(e);
+    const msg = (e.message || String(e));
+    openSheet('<div class="handle"></div><h3>👑 Admin Panel</h3>' +
+      '<p style="color:#fca5a5;font-size:12.5px">Error: '+esc(msg)+'</p>' +
+      '<div class="btnrow"><button class="btn ghost" data-act="close">Close</button></div>');
+  }
+}
+async function adminViewAppSheet(appId){
+  openSheet('<div class="handle"></div><h3>Loading...</h3>');
+  try{
+    const { data: app } = await sb.from('published_apps').select('*').eq('id', appId).maybeSingle();
+    const { data: entries } = await sb.from('app_entries').select('*').eq('app_id', appId)
+      .order('updated_at', { ascending: false });
+    const userIds = (entries||[]).map(e=>e.user_id);
+    let usersMap = {};
+    if(userIds.length){
+      const { data: users } = await sb.from('app_users').select('id,mobile,created_at,last_login').in('id', userIds);
+      (users||[]).forEach(u => { usersMap[u.id] = u; });
+    }
+    let rows = '';
+    (entries||[]).forEach(e => {
+      const u = usersMap[e.user_id] || { mobile: 'unknown' };
+      const n = countStateEntries(e.state);
+      const when = e.updated_at ? fmtDate(new Date(e.updated_at).getTime()) : '--';
+      rows += '<div class="admin-row" data-act="admin-view-entry" data-id="'+esc(e.id)+'">' +
+        '<div class="ic">📱</div>' +
+        '<div class="info">' +
+        '<div class="nm">'+esc(u.mobile)+'</div>' +
+        '<div class="meta">'+n+' entries • Last: '+esc(when)+'</div>' +
+        '</div>' +
+        '<div style="color:#8b97b5;font-size:18px">›</div>' +
+      '</div>';
+    });
+    if(!rows) rows = '<div style="text-align:center;padding:30px 10px;color:#8b97b5"><div style="font-size:42px;margin-bottom:10px">🗒️</div><div style="font-size:14px">Kisi ne abhi kuch entries nahi ki</div></div>';
+    const shareURL = getPublishURL(app.slug);
+    openSheet('<div class="handle"></div><h3>'+esc(app.name||'Untitled')+'</h3>' +
+      '<div class="infogrid">' +
+      '<div class="infocell wide"><div class="k">Share Link</div><div class="v" style="font-size:11px">'+esc(shareURL)+'</div></div>' +
+      '<div class="infocell"><div class="k">Slug</div><div class="v" style="font-size:11px">'+esc(app.slug)+'</div></div>' +
+      '<div class="infocell"><div class="k">Users</div><div class="v">'+(entries||[]).length+'</div></div>' +
+      '<div class="infocell wide"><div class="k">Owner</div><div class="v" style="font-size:11px">'+esc(app.owner_email||'--')+'</div></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-bottom:12px">' +
+      '<button class="btn ghost" data-act="copy-link" data-url="'+esc(shareURL)+'" style="padding:11px">📋 Copy Link</button>' +
+      '</div>' +
+      '<div style="font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#8b97b5;margin:8px 0 8px">Users & Entries</div>' +
+      rows +
+      '<div class="btnrow" style="margin-top:10px"><button class="btn ghost" data-act="admin-back">← Back</button>' +
+      '<button class="btn ghost" data-act="close">Close</button></div>');
+  }catch(e){ toast('❌ ' + (e.message||e)); }
+}
+async function adminViewEntrySheet(entryId){
+  openSheet('<div class="handle"></div><h3>Loading...</h3>');
+  try{
+    const { data: e } = await sb.from('app_entries').select('*').eq('id', entryId).maybeSingle();
+    if(!e){ toast('Not found'); return; }
+    const { data: u } = await sb.from('app_users').select('mobile,created_at,last_login').eq('id', e.user_id).maybeSingle();
+    const state = e.state || {};
+    const jsonStr = JSON.stringify(state, null, 2);
+    openSheet('<div class="handle"></div><h3>📱 '+esc(u ? u.mobile : 'unknown')+'</h3>' +
+      '<div class="infogrid">' +
+      '<div class="infocell"><div class="k">Mobile</div><div class="v">'+esc(u ? u.mobile : '--')+'</div></div>' +
+      '<div class="infocell"><div class="k">Entries</div><div class="v">'+countStateEntries(state)+'</div></div>' +
+      '<div class="infocell wide"><div class="k">Last Updated</div><div class="v">'+esc(fmtDate(new Date(e.updated_at).getTime()))+'</div></div>' +
+      '</div>' +
+      '<div style="font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#8b97b5;margin:6px 0">Entries JSON</div>' +
+      '<div class="codebox" style="max-height:340px">'+esc(jsonStr.slice(0, 4000))+'</div>' +
+      '<div class="btnrow" style="margin-top:10px"><button class="btn ghost" data-act="admin-back-app" data-id="'+esc(e.app_id)+'">← Back</button>' +
+      '<button class="btn ghost" data-act="close">Close</button></div>');
+  }catch(e){ toast('❌ ' + (e.message||e)); }
+}
+
+/* =============== SHEET ACTIONS =============== */
+sheetBody.addEventListener('click', async (e)=>{
+  const eb = e.target.closest('[data-emoji]');
+  if(eb){
+    const emoji = eb.dataset.emoji;
+    const it = items.find(x=>x.id === iconTargetId);
+    if(it){
+      it.icon = emoji;
+      await Store.put(it); render();
+      $$('.emoji-btn').forEach(b => b.classList.toggle('selected', b.dataset.emoji === emoji));
+      toast('🎨 Icon set'); scheduleCloudSync();
+    }
+    return;
+  }
+  const btn = e.target.closest('[data-act]'); if(!btn) return;
+  const act = btn.dataset.act, id = btn.dataset.id;
+  switch(act){
+    case 'close': closeSheet(); break;
+    case 'pick-file': closeSheet(); setTimeout(()=>filePicker.click(),220); break;
+    case 'pick-link': addLinkSheet(); break;
+    case 'save-link': {
+      const u = ($('#inUrl')||{}).value || '';
+      const n = ($('#inName')||{}).value || '';
+      if(!u.trim()){ toast('URL daalein'); return; }
+      await addLink(u, n); break;
+    }
+    case 'open': closeSheet(); setTimeout(()=>openViewer(id),200); break;
+    case 'info': itemInfoSheet(id); break;
+    case 'icon': iconPickerSheet(id); break;
+    case 'upload-icon': setTimeout(()=>iconPicker.click(), 80); break;
+    case 'remove-icon': {
+      const it = items.find(x=>x.id === iconTargetId);
+      if(it){ delete it.icon; await Store.put(it); render(); toast('🚫 Icon removed'); scheduleCloudSync(); }
+      closeSheet(); break;
+    }
+    case 'external': {
+      const it = items.find(x=>x.id===id);
+      if(it) window.open(it.url,'_blank','noopener'); break;
+    }
+    case 'capture': {
+      const it = items.find(x=>x.id===id); if(!it) return;
+      closeSheet();
+      if(viewer.hidden){ setTimeout(()=>openViewer(id),200); }
+      else{ try{ vFrame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){} toast('💾 Entries refresh'); }
+      break;
+    }
+    case 'clear-entries': {
+      const it = items.find(x=>x.id===id); if(!it) return;
+      delete it.liveState; await Store.put(it); render(); closeSheet();
+      toast('🧽 Entries clear ho gayin'); scheduleCloudSync(); break;
+    }
+    case 'download': downloadHTML(id); break;
+    case 'export-one': exportSingleItem(id); break;
+    case 'rename': renameSheet(id); break;
+    case 'rename-save': {
+      const v = ($('#rnInput')||{}).value || '';
+      const it = items.find(x=>x.id===id);
+      if(it && v.trim()){ it.name = v.trim(); await Store.put(it); render(); toast('✏️ Renamed'); scheduleCloudSync(); }
+      closeSheet(); break;
+    }
+    case 'delete': deleteSheet(id); break;
+    case 'delete-confirm': {
+      const it = items.find(x=>x.id===id); if(!it) return;
+      it.deletedAt = Date.now();
+      await Store.put(it); render(); closeSheet();
+      toast('🗑️ Trash me bhej diya'); scheduleCloudSync();
+      break;
+    }
+    case 'restore-item': {
+      const it = items.find(x=>x.id===id); if(!it) return;
+      delete it.deletedAt;
+      await Store.put(it); render(); trashSheet();
+      toast('♻️ Restore ho gaya'); scheduleCloudSync();
+      break;
+    }
+    case 'purge-item': {
+      await Store.del(id);
+      items = items.filter(x=>x.id!==id);
+      render(); trashSheet();
+      toast('💥 Permanently deleted'); scheduleCloudSync();
+      break;
+    }
+    case 'empty-trash': {
+      const trashed = trashedItems();
+      for(const t of trashed){ await Store.del(t.id); }
+      items = items.filter(x => !x.deletedAt);
+      render(); trashSheet();
+      toast('💥 Trash empty'); scheduleCloudSync();
+      break;
+    }
+    case 'open-trash': trashSheet(); break;
+    case 'backup': backupSheet(); break;
+    case 'backup-now': await exportJSON(); closeSheet(); break;
+    case 'export-portable': closeSheet(); setTimeout(()=>exportPortableHTML(), 220); break;
+    case 'restore': closeSheet(); setTimeout(()=>jsonPicker.click(),220); break;
+
+    case 'cloud-open': cloudSheet(); break;
+    case 'cloud-backup': closeSheet(); setTimeout(()=>cloudBackup(false), 200); break;
+    case 'cloud-restore': closeSheet(); setTimeout(()=>cloudRestore(false), 200); break;
+    case 'open-login': closeSheet(); setTimeout(()=>showAuthOverlay(), 250); break;
+    case 'logout': await handleLogout(); break;
+
+    case 'recheck-schema': {
+      const ok = await checkSchemaHealth();
+      if(ok){ toast('✅ Setup OK'); cloudSheet(); }
+      else { toast('❌ Abhi bhi missing -- SQL run karein'); }
+      break;
+    }
+
+    case 'publish': await publishItem(id); break;
+    case 'unpublish': await unpublishItem(id); break;
+    case 'share-link': {
+      const it = items.find(x=>x.id===id);
+      if(it && it.publishedSlug) showShareSheet(getPublishURL(it.publishedSlug), it.publishedSlug);
+      break;
+    }
+    case 'copy-link': {
+      const url = btn.dataset.url || (($('#shareUrl')||{}).value) || '';
+      if(url){
+        try{ await navigator.clipboard.writeText(url); toast('📋 Link copy ho gaya'); }
+        catch(e){ toast('Copy fail - manually copy karein'); }
+      }
+      break;
+    }
+    case 'open-share-link': {
+      const slug = btn.dataset.slug;
+      if(slug) window.open(getPublishURL(slug), '_blank', 'noopener');
+      break;
+    }
+
+    case 'admin-panel': closeSheet(); setTimeout(adminLoginSheet, 220); break;
+    case 'admin-login-go': await adminLoginGo(); break;
+    case 'admin-view-app': await adminViewAppSheet(id); break;
+    case 'admin-view-entry': await adminViewEntrySheet(id); break;
+    case 'admin-back': await adminPanelSheet(); break;
+    case 'admin-back-app': await adminViewAppSheet(id); break;
+  }
+});
+
+sheetBody.addEventListener('change', (e)=>{
+  const t = e.target;
+  if(t && t.id === 'syncToggle'){
+    Cloud.enabled = !!t.checked;
+    safeLsSet(SYNC_ENABLED_KEY, Cloud.enabled ? '1' : '0');
+    updateCloudIndicator();
+    toast(Cloud.enabled ? '☁️ Auto-sync ON' : '⛔ Auto-sync OFF');
+    if(Cloud.enabled && currentUser) scheduleCloudSync();
+  }
+});
+
+/* =============== ADD / FILES =============== */
+async function addLink(url, name){
+  url = String(url).trim();
+  if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  let host = '';
+  try{ host = new URL(url).hostname.replace(/^www\./,''); }
+  catch(e){ toast('❌ Invalid URL'); return; }
+  const it = {id: uid(), type:'link', url, name:(name&&name.trim())?name.trim():host, createdAt: Date.now(), icon:null, deletedAt:null};
+  await Store.put(it); items.push(it); render(); closeSheet();
+  toast('✅ Website added'); searchInp.value = '';
+  scheduleCloudSync();
+}
+async function handleFiles(fileList){
+  const files = [...fileList].filter(f =>
+    /\.html?$/i.test(f.name) || f.type === 'text/html' || f.type === '');
+  if(!files.length){ toast('❌ Koi HTML file nahi mili'); return; }
+  toast('⏳ Adding ' + files.length + ' file(s)...');
+  for(const f of files){
+    let text = '';
+    try{ text = await f.text(); }catch(e){ continue; }
+    const lines = text ? text.split(/\r?\n/).length : 0;
+    const it = {
+      id: uid(), type: 'html',
+      name: f.name.replace(/\.html?$/i,'') || 'Untitled',
+      content: text, fileName: f.name,
+      mimeType: f.type || 'text/html',
+      fileSize: f.size || text.length,
+      charCount: text.length, lineCount: lines,
+      lastModified: f.lastModified || Date.now(),
+      createdAt: Date.now(),
+      liveState: null, icon: null, deletedAt: null
+    };
+    await Store.put(it); items.push(it);
+  }
+  render();
+  toast('✅ ' + files.length + ' file(s) added');
+  filePicker.value = '';
+  scheduleCloudSync();
+}
+async function handleIconFile(file){
+  if(!file) return;
+  if(file.size > 200 * 1024){ toast('❌ Image 200KB se chhoti honi chahiye'); return; }
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const it = items.find(x=>x.id === iconTargetId);
+    if(it){
+      it.icon = reader.result;
+      await Store.put(it); render();
+      toast('🖼️ Image icon set'); scheduleCloudSync();
+    }
+  };
+  reader.readAsDataURL(file);
+  iconPicker.value = '';
+}
+
+/* =============== DOWNLOAD / BACKUP =============== */
+function downloadHTML(id){
+  const it = items.find(x=>x.id===id);
+  if(!it || it.type !== 'html') return;
+  const html = buildHTMLWithBridge(it);
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = it.fileName || (it.name + '.html');
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('⬇️ Downloaded (entries embedded)');
+}
+function serializeItem(i){
+  if(i.type === 'html'){
+    return {
+      id: i.id, type:'html', name: i.name,
+      fileName: i.fileName || (i.name + '.html'),
+      mimeType: i.mimeType || 'text/html',
+      content: i.content || '',
+      fileSize: i.fileSize || (i.content ? i.content.length : 0),
+      charCount: i.charCount || (i.content ? i.content.length : 0),
+      lineCount: i.lineCount || (i.content ? i.content.split(/\r?\n/).length : 0),
+      lastModified: i.lastModified || i.createdAt,
+      createdAt: i.createdAt,
+      liveState: i.liveState || null,
+      icon: i.icon || null,
+      deletedAt: i.deletedAt || null,
+      publishedSlug: i.publishedSlug || null
+    };
+  }
+  return {
+    id: i.id, type:'link', name: i.name,
+    url: i.url, createdAt: i.createdAt,
+    icon: i.icon || null, deletedAt: i.deletedAt || null
+  };
+}
+function exportSingleItem(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  const data = {app:'WebBox', version:12, exportedAt:new Date().toISOString(), single:true, count:1, items:[serializeItem(it)]};
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'webbox-' + (it.name||'item').replace(/[^a-z0-9\-_]+/gi,'_') + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('📤 Item exported');
+}
+async function exportJSON(){
+  if(currentItem && currentItem.type === 'html' && !viewer.hidden){
+    try{ vFrame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){}
+    await new Promise(r=>setTimeout(r, 400));
+    const idx = items.findIndex(x=>x.id === currentItem.id);
+    if(idx >= 0 && currentItem.liveState) items[idx].liveState = currentItem.liveState;
+  }
+  const fullItems = items.map(serializeItem);
+  const htmlItems = fullItems.filter(i=>i.type==='html');
+  const linkItems = fullItems.filter(i=>i.type==='link');
+  const totalChars = htmlItems.reduce((a,b)=>a+b.charCount,0);
+  const totalLines = htmlItems.reduce((a,b)=>a+b.lineCount,0);
+  let totalEntries = 0;
+  htmlItems.forEach(i=>{ if(i.liveState){
+    totalEntries += Object.keys(i.liveState.localStorage||{}).length +
+      Object.keys(i.liveState.sessionStorage||{}).length +
+      Object.keys(i.liveState.formValues||{}).length; } });
+  const data = {
+    app:'WebBox', version:12, exportedAt:new Date().toISOString(),
+    count: fullItems.length,
+    stats: { htmlCount: htmlItems.length, linkCount: linkItems.length,
+      totalHtmlChars: totalChars, totalHtmlLines: totalLines,
+      totalSavedEntries: totalEntries, trashedCount: trashedItems().length },
+    items: fullItems
+  };
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'webbox-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  toast('💾 Backup ready -- ' + fmtBytes(blob.size) + ' | ' + totalEntries + ' entries');
+}
+function exportPortableHTML(){
+  const doExport = () => {
+    const portable = items.map(serializeItem);
+    let totalEntries = 0;
+    portable.forEach(it => { if(it.liveState){
+      totalEntries += Object.keys(it.liveState.formValues||{}).length +
+                      Object.keys(it.liveState.localStorage||{}).length +
+                      Object.keys(it.liveState.sessionStorage||{}).length; } });
+    const exportId = 'exp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    let jsonStr;
+    try {
+      jsonStr = JSON.stringify(portable)
+        .replace(/</g, '\\u003c').replace(/>/g, '\\u003e')
+        .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    } catch(e) { toast('❌ Export failed: ' + e.message); return; }
+    let html = PRISTINE_HTML;
+    html = html.replace(/<script[^>]*id=["']__webbox_portable_data__["'][^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '');
+    const SO = '<' + 'script id="__webbox_portable_data__">';
+    const SC = '<' + '/' + 'script>';
+    const injection = SO +
+      'window.__WEBBOX_PORTABLE_DATA__=' + jsonStr + ';' +
+      'window.__WEBBOX_PORTABLE_ID__="' + exportId + '";' +
+      SC;
+    if(/<body[^>]*>/i.test(html)) html = html.replace(/<body[^>]*>/i, m => m + injection);
+    else if(/<html[^>]*>/i.test(html)) html = html.replace(/<html[^>]*>/i, m => m + '<body>' + injection);
+    else html = injection + html;
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'webbox-portable-' + new Date().toISOString().slice(0,10) + '.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 8000);
+    toast('🌐 Exported: ' + portable.length + ' items, ' + totalEntries + ' entries');
+  };
+  if(currentItem && currentItem.type === 'html' && !viewer.hidden){
+    try{ vFrame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){}
+    setTimeout(()=>{
+      const idx = items.findIndex(x=>x.id === currentItem.id);
+      if(idx >= 0 && currentItem.liveState) items[idx].liveState = currentItem.liveState;
+      doExport();
+    }, 500);
+  } else { setTimeout(doExport, 100); }
+}
+function backupSheet(){
+  const htmlItems = activeItems().filter(i=>i.type==='html');
+  const linkItems = activeItems().filter(i=>i.type==='link');
+  let totalChars=0,totalLines=0,totalEntries=0;
+  htmlItems.forEach(i=>{
+    totalChars += i.charCount || (i.content||'').length;
+    totalLines += i.lineCount || 0;
+    totalEntries += countEntries(i);
+  });
+  const trashed = trashedItems().length;
+  const approxBytes = new Blob([JSON.stringify({items})]).size;
+  openSheet('<div class="handle"></div><h3>Backup Summary</h3>' +
+    '<p style="color:#8b97b5;font-size:12.5px;margin:-6px 0 14px;line-height:1.6">' +
+    'Har HTML ka <b style="color:#6ee7a0">poora content</b> + <b style="color:#6ee7a0">saari saved entries</b> backup me jayengi.</p>' +
+    '<div class="infogrid">' +
+    '<div class="infocell"><div class="k">HTML Files</div><div class="v">'+htmlItems.length+'</div></div>' +
+    '<div class="infocell"><div class="k">Websites</div><div class="v">'+linkItems.length+'</div></div>' +
+    '<div class="infocell ok"><div class="k">Total Entries</div><div class="v">'+totalEntries+'</div></div>' +
+    '<div class="infocell"><div class="k">Characters</div><div class="v">'+totalChars.toLocaleString()+'</div></div>' +
+    (trashed ? '<div class="infocell wide" style="border-color:rgba(239,68,68,.3)"><div class="k" style="color:#fca5a5">In Trash</div><div class="v" style="color:#fca5a5">'+trashed+'</div></div>' : '') +
+    '<div class="infocell wide"><div class="k">Estimated Size</div><div class="v">'+fmtBytes(approxBytes)+'</div></div>' +
+    '</div>' +
+    '<div class="btnrow"><button class="btn ghost" data-act="close">Cancel</button>' +
+    '<button class="btn" data-act="backup-now">Download JSON</button></div>');
+}
+async function importJSON(file){
+  try{
+    const txt = await file.text();
+    const data = JSON.parse(txt);
+    const list = Array.isArray(data) ? data : (data && data.items);
+    if(!Array.isArray(list)) throw new Error('bad format');
+    let n = 0, nE = 0, nT = 0;
+    for(const raw of list){
+      if(!raw || typeof raw !== 'object') continue;
+      const content = raw.content || '';
+      const liveState = raw.liveState || null;
+      const it = {
+        id: raw.id || uid(),
+        type: raw.type === 'link' ? 'link' : 'html',
+        name: raw.name || 'Untitled',
+        url: raw.url || '',
+        content, fileName: raw.fileName || (raw.name ? raw.name + '.html' : ''),
+        mimeType: raw.mimeType || 'text/html',
+        fileSize: raw.fileSize || raw.size || content.length,
+        charCount: raw.charCount || content.length,
+        lineCount: raw.lineCount || (content ? content.split(/\r?\n/).length : 0),
+        lastModified: raw.lastModified || raw.createdAt || Date.now(),
+        createdAt: raw.createdAt || Date.now(),
+        liveState, icon: raw.icon || null, deletedAt: raw.deletedAt || null,
+        publishedSlug: raw.publishedSlug || null
+      };
+      if(it.type === 'link' && !it.url) continue;
+      if(it.liveState){
+        nE += Object.keys(it.liveState.localStorage||{}).length +
+              Object.keys(it.liveState.sessionStorage||{}).length +
+              Object.keys(it.liveState.formValues||{}).length;
+      }
+      if(it.deletedAt) nT++;
+      const idx = items.findIndex(x=>x.id === it.id);
+      if(idx >= 0) items[idx] = it; else items.push(it);
+      await Store.put(it);
+      n++;
+    }
+    render();
+    toast('✅ ' + n + ' items restored' + (nE ? ' | ' + nE + ' entries' : '') + (nT ? ' | ' + nT + ' in trash' : ''));
+    scheduleCloudSync();
+  }catch(e){
+    console.error(e); toast('❌ Invalid backup file');
+  }finally{ jsonPicker.value = ''; }
+}
+
+/* =============== VIEWER =============== */
+function openViewer(id){
+  const it = items.find(x=>x.id===id); if(!it) return;
+  currentItem = it;
+  vTitle.textContent = it.name;
+  if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
+  if(it.type === 'html'){
+    const html = buildHTMLWithBridge(it);
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    blobUrl = URL.createObjectURL(blob);
+    vFrame.setAttribute('sandbox',
+      'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
+    vFrame.src = blobUrl;
+    vNote.hidden = true; vLive.hidden = false;
+    vLiveText.textContent = '💾 Entries auto-capture ho rahi hain...';
+  }else{
+    vFrame.removeAttribute('sandbox');
+    vFrame.src = it.url;
+    vNote.hidden = false; vLive.hidden = true;
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(()=>{ vNote.hidden = true; }, 7000);
+  }
+  viewer.hidden = false;
+  document.body.classList.add('lock');
+  requestAnimationFrame(()=> viewer.classList.add('open'));
+  try{ history.pushState({viewer:true}, ''); }catch(e){}
+}
+async function closeViewer(){
+  if(currentItem && currentItem.type === 'html' && !viewer.hidden){
+    try{ vFrame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){}
+    await new Promise(r=>setTimeout(r, 320));
+    if(currentItem.liveState){
+      const idx = items.findIndex(x=>x.id === currentItem.id);
+      if(idx >= 0){
+        items[idx].liveState = currentItem.liveState;
+        try{ await Store.put(items[idx]); }catch(e){}
+      }
+    }
+  }
+  viewer.classList.remove('open'); viewer.classList.remove('immersive');
+  document.body.classList.remove('lock');
+  clearTimeout(noteTimer); vLive.hidden = true;
+  setTimeout(()=>{
+    viewer.hidden = true;
+    vFrame.src = 'about:blank';
+    if(blobUrl){ URL.revokeObjectURL(blobUrl); blobUrl = null; }
+    currentItem = null; render(); scheduleCloudSync();
+  }, 230);
+  if(document.fullscreenElement || document.webkitFullscreenElement){
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  }
+}
+function toggleFullscreen(){
+  const el = viewer;
+  const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+  if(isFs){ (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if(req){ try{ const p = req.call(el); if(p && p.catch) p.catch(()=> el.classList.toggle('immersive')); }catch(e){ el.classList.toggle('immersive'); } }
+  else{ el.classList.toggle('immersive'); }
+}
+
+/* =============== EVENT WIRING =============== */
+$('#fab').addEventListener('click', addSheet);
+$('#menuBtn').addEventListener('click', menuSheet);
+$('#trashBtn').addEventListener('click', trashSheet);
+$('#cloudBtn').addEventListener('click', ()=>{ cloudSheet(); });
+$('#searchBtn').addEventListener('click', ()=>{
+  searchWrap.classList.toggle('show');
+  if(searchWrap.classList.contains('show')) searchInp.focus();
+  else { searchInp.value=''; render(); }
+});
+searchInp.addEventListener('input', render);
+grid.addEventListener('click', (e)=>{
+  const mb = e.target.closest('.card-menu');
+  if(mb){ e.stopPropagation(); itemSheet(mb.dataset.menu); return; }
+  const card = e.target.closest('.card');
+  if(card) openViewer(card.dataset.id);
+});
+$('#vClose').addEventListener('click', closeViewer);
+$('#vSave').addEventListener('click', ()=>{
+  if(!currentItem) return;
+  try{ vFrame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){}
+  setTimeout(async ()=>{
+    if(currentItem && currentItem.liveState){
+      const idx = items.findIndex(x=>x.id === currentItem.id);
+      if(idx >= 0){
+        items[idx].liveState = currentItem.liveState;
+        await Store.put(items[idx]);
+        toast('💾 ' + countEntries(currentItem) + ' entries saved');
+        scheduleCloudSync();
+      }
+    }else{ toast('⚠️ Koi entry nahi mili'); }
+  }, 400);
+});
+$('#vReload').addEventListener('click', ()=>{
+  if(!currentItem) return;
+  if(currentItem.type === 'html' && blobUrl){
+    vFrame.src = 'about:blank';
+    setTimeout(()=>{ vFrame.src = blobUrl; }, 60);
+  }else{ vFrame.src = vFrame.src; }
+});
+$('#vFs').addEventListener('click', toggleFullscreen);
+$('#vOpen').addEventListener('click', ()=>{
+  if(!currentItem) return;
+  if(currentItem.type === 'link') window.open(currentItem.url, '_blank', 'noopener');
+  else if(blobUrl) window.open(blobUrl, '_blank', 'noopener');
+});
+filePicker.addEventListener('change', (e)=>{
+  if(e.target.files && e.target.files.length) handleFiles(e.target.files);
+});
+jsonPicker.addEventListener('change', (e)=>{
+  if(e.target.files && e.target.files[0]) importJSON(e.target.files[0]);
+});
+iconPicker.addEventListener('change', (e)=>{
+  if(e.target.files && e.target.files[0]) handleIconFile(e.target.files[0]);
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    if(!viewer.hidden) closeViewer();
+    else if(sheet.classList.contains('show')) closeSheet();
+  }
+});
+window.addEventListener('popstate', ()=>{ if(!viewer.hidden) closeViewer(); });
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>{
+  document.addEventListener(ev, ()=>{
+    const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    $('#vFs').textContent = on ? '⤡' : '⛶';
+  });
+});
+
+/* =============== TRASH PURGE =============== */
+async function purgeTrash(){
+  const now = Date.now();
+  const expired = items.filter(i => i.deletedAt && (now - i.deletedAt) > TRASH_MS);
+  if(!expired.length) return;
+  for(const it of expired){ await Store.del(it.id); }
+  items = items.filter(i => !expired.includes(i));
+  console.log('[WebBox] Auto-purged ' + expired.length + ' items from trash');
+}
+
+/* =========================================================
+   PUBLIC VIEWER (#/p/{slug})
+   ========================================================= */
+let pubState = { app: null, user: null, isAdmin: false, liveState: null, syncTimer: null, autoSync: true, blobUrl: null };
+
+function hideShellForPublic(){
+  ['.appbar','.searchwrap','#grid','#empty','.fab','.auth-overlay','.viewer','.sheet','.scrim','#setupBanner'].forEach(sel=>{
+    const el = document.querySelector(sel); if(el) el.style.display = 'none';
+  });
+  document.body.classList.remove('lock');
+}
+
+async function bootPublicViewer(slug){
+  hideShellForPublic();
+  const root = document.createElement('div');
+  root.id = 'pubRoot';
+  document.body.appendChild(root);
+
+  if(!sbReady || !slug){
+    root.innerHTML = '<div style="flex:1;display:grid;place-items:center;padding:40px 20px;text-align:center;color:#8b97b5">' +
+      '<div><div style="font-size:60px;margin-bottom:16px">❌</div>' +
+      '<h2 style="color:#dfe6f7;margin:0 0 10px;font-size:18px">Invalid link</h2>' +
+      '<p style="font-size:13px">Ye link sahi nahi hai.</p></div></div>';
+    return;
+  }
+
+  let app = null;
+  try{
+    const { data, error } = await sb.from('published_apps').select('*').eq('slug', slug).eq('active', true).maybeSingle();
+    if(error) throw error;
+    app = data;
+  }catch(e){ console.error(e); }
+  if(!app){
+    root.innerHTML = '<div style="flex:1;display:grid;place-items:center;padding:40px 20px;text-align:center;color:#8b97b5">' +
+      '<div><div style="font-size:60px;margin-bottom:16px">🔍</div>' +
+      '<h2 style="color:#dfe6f7;margin:0 0 10px;font-size:18px">App not found</h2>' +
+      '<p style="font-size:13px">Ye app exist nahi karti ya unpublish ho chuki hai.</p></div></div>';
+    return;
+  }
+  pubState.app = app;
+
+  const sessKey = 'webbox_pub_user_' + slug;
+  const saved = safeLsGet(sessKey);
+  if(saved){
+    try{
+      const u = JSON.parse(saved);
+      if(u && u.id && u.mobile){ pubState.user = u; pubState.isAdmin = (u.mobile === ADMIN_MOBILE); }
+    }catch(e){}
+  }
+
+  if(!pubState.user) renderPubLogin(root, slug);
+  else await renderPubApp(root);
+}
+
+function renderPubLogin(root, slug){
+  root.innerHTML = '<div id="pubLogin">' +
+    '<div id="pubLoginBox">' +
+    '<div class="plogo">◈</div>' +
+    '<h1>'+esc(pubState.app.name||'WebBox')+'</h1>' +
+    '<p class="sub">Apna mobile number aur 4-digit PIN daalein. Aapki entries sirf aapko dikhengi.</p>' +
+    '<div class="msg" id="pubMsg"></div>' +
+    '<label class="fld"><span>Mobile Number</span>' +
+    '<input id="pubMobile" type="tel" inputmode="numeric" placeholder="03XXXXXXXXX" maxlength="15" autocomplete="tel"/></label>' +
+    '<label class="fld"><span>4-digit PIN</span>' +
+    '<input id="pubPin" type="tel" inputmode="numeric" placeholder="••••" maxlength="4" autocomplete="off" style="font-size:22px;letter-spacing:10px;text-align:center"/></label>' +
+    '<div class="btnrow">' +
+    '<button class="btn ghost" id="pubSignupBtn">Sign Up</button>' +
+    '<button class="btn" id="pubLoginBtn">Login</button>' +
+    '</div>' +
+    '<p style="color:#8b97b5;font-size:11px;text-align:center;margin:14px 0 0;line-height:1.6">' +
+    'Pehli baar? <b style="color:#93b0ff">Sign Up</b> se apna mobile + PIN register karein.</p>' +
+    '</div></div>';
+
+  const showMsg = (text, type) => {
+    const m = document.getElementById('pubMsg');
+    m.textContent = text;
+    m.className = 'msg show ' + (type || 'error');
+    if(type !== 'error') setTimeout(()=>{ m.className='msg'; }, 5000);
+  };
+
+  document.getElementById('pubPin').addEventListener('input', (e)=>{
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4);
+  });
+
+  const doAuth = async (mode) => {
+    const mobile = (document.getElementById('pubMobile').value || '').trim();
+    const pin = (document.getElementById('pubPin').value || '').trim();
+    if(!mobile || mobile.length < 6){ showMsg('Sahi mobile number daalein'); return; }
+    if(pin.length !== 4){ showMsg('4-digit PIN daalein'); return; }
+    const btnL = document.getElementById('pubLoginBtn');
+    const btnS = document.getElementById('pubSignupBtn');
+    btnL.disabled = true; btnS.disabled = true;
+    try{
+      const { data, error } = await sb.rpc(mode === 'signup' ? 'app_signup' : 'app_login', {
+        p_mobile: mobile, p_pin: pin
+      });
+      if(error) throw error;
+      if(!data || !data.ok){ showMsg((data && data.error) || 'Failed'); return; }
+      pubState.user = { id: data.user_id, mobile: data.mobile };
+      pubState.isAdmin = (data.mobile === ADMIN_MOBILE);
+      safeLsSet('webbox_pub_user_' + slug, JSON.stringify(pubState.user));
+      await renderPubApp(root);
+    }catch(e){
+      console.error(e); showMsg('Error: ' + (e.message || e));
+    }finally{
+      btnL.disabled = false; btnS.disabled = false;
+    }
+  };
+  document.getElementById('pubLoginBtn').onclick = () => doAuth('login');
+  document.getElementById('pubSignupBtn').onclick = () => doAuth('signup');
+
+  document.getElementById('pubPin').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') doAuth('login');
+  });
+  document.getElementById('pubMobile').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ document.getElementById('pubPin').focus(); }
+  });
+}
+
+async function renderPubApp(root){
+  let initialState = null;
+  try{
+    const { data, error } = await sb.from('app_entries')
+      .select('state').eq('app_id', pubState.app.id).eq('user_id', pubState.user.id).maybeSingle();
+    if(!error && data && data.state) initialState = data.state;
+  }catch(e){ console.error(e); }
+  pubState.liveState = initialState;
+
+  root.innerHTML =
+    '<div class="pubbar">' +
+      '<button class="pubbtn" id="pubMenuBtn" title="Menu">☰</button>' +
+      '<div class="pubtitle">'+esc(pubState.app.name||'Untitled')+'</div>' +
+      '<button class="pubbtn" id="pubReloadBtn" title="Reload">⟳</button>' +
+      '<button class="pubbtn" id="pubSaveBtn" title="Sync now">💾</button>' +
+    '</div>' +
+    '<iframe id="pubFrame" allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media" allowfullscreen></iframe>' +
+    '<div id="pubStatus">' +
+      (initialState
+        ? '✅ ' + countStateEntries(initialState) + ' entries loaded from cloud'
+        : '💾 Auto-sync ON -- entries cloud me save hongi') +
+    '</div>';
+
+  const fakeItem = {
+    id: 'pub-' + pubState.app.id,
+    type: 'html',
+    content: pubState.app.content,
+    liveState: initialState
+  };
+  const html = buildHTMLWithBridge(fakeItem);
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  if(pubState.blobUrl){ URL.revokeObjectURL(pubState.blobUrl); }
+  pubState.blobUrl = URL.createObjectURL(blob);
+
+  const frame = document.getElementById('pubFrame');
+  frame.setAttribute('sandbox',
+    'allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation');
+  frame.src = pubState.blobUrl;
+
+  window.addEventListener('message', (e)=>{
+    const d = e.data;
+    if(!d || d.__webbox !== 'webbox-state' || !d.state) return;
+    if(!pubState.app || !pubState.user) return;
+    pubState.liveState = d.state;
+    schedulePubSave();
+  });
+
+  document.getElementById('pubReloadBtn').onclick = () => {
+    const f = document.getElementById('pubFrame');
+    f.src = 'about:blank';
+    setTimeout(()=>{ f.src = pubState.blobUrl; }, 60);
+  };
+  document.getElementById('pubSaveBtn').onclick = () => {
+    try{ frame.contentWindow.postMessage({__webbox:'request'},'*'); }catch(e){}
+    setTimeout(()=>pubBackupNow(), 400);
+  };
+  document.getElementById('pubMenuBtn').onclick = () => showPubMenu(root);
+}
+
+function schedulePubSave(){
+  if(pubState.autoSync === false) return;
+  if(pubState.syncTimer) clearTimeout(pubState.syncTimer);
+  pubState.syncTimer = setTimeout(()=>pubSaveNow(true), 1200);
+}
+
+async function pubSaveNow(silent){
+  if(!pubState.app || !pubState.user || !pubState.liveState) return false;
+  try{
+    const { error } = await sb.from('app_entries').upsert({
+      app_id: pubState.app.id,
+      user_id: pubState.user.id,
+      state: pubState.liveState,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'app_id,user_id' });
+    if(error) throw error;
+    const n = countStateEntries(pubState.liveState);
+    const st = document.getElementById('pubStatus');
+    if(st) st.textContent = '✅ ' + n + ' entries synced • ' + new Date().toLocaleTimeString();
+    if(!silent) toast('☁️ Entries saved to cloud');
+    return true;
+  }catch(e){
+    console.error('pubSave', e);
+    const st = document.getElementById('pubStatus');
+    if(st) st.textContent = '❌ Sync fail: ' + (e.message||e);
+    if(!silent) toast('❌ Sync fail');
+    return false;
+  }
+}
+
+async function pubBackupNow(){
+  toast('⏳ Syncing...');
+  await pubSaveNow(false);
+}
+
+async function pubRestoreNow(){
+  try{
+    const { data, error } = await sb.from('app_entries')
+      .select('state').eq('app_id', pubState.app.id).eq('user_id', pubState.user.id).maybeSingle();
+    if(error) throw error;
+    const state = (data && data.state) || null;
+    const fakeItem = {
+      id: 'pub-' + pubState.app.id,
+      type: 'html',
+      content: pubState.app.content,
+      liveState: state
+    };
+    const html = buildHTMLWithBridge(fakeItem);
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    if(pubState.blobUrl) URL.revokeObjectURL(pubState.blobUrl);
+    pubState.blobUrl = URL.createObjectURL(blob);
+    const f = document.getElementById('pubFrame');
+    f.src = 'about:blank';
+    setTimeout(()=>{ f.src = pubState.blobUrl; }, 60);
+    pubState.liveState = state;
+    toast('⬇️ Restored from cloud');
+    const st = document.getElementById('pubStatus');
+    if(st) st.textContent = '✅ ' + countStateEntries(state) + ' entries restored';
+  }catch(e){ toast('❌ Restore fail: ' + (e.message||e)); }
+}
+
+function showPubMenu(root){
+  const old = document.getElementById('pubMenu'); if(old) old.remove();
+  const menu = document.createElement('div');
+  menu.id = 'pubMenu';
+  const autoOn = pubState.autoSync !== false;
+  menu.innerHTML =
+    '<div class="sheetbox">' +
+      '<div class="handle"></div>' +
+      '<h3 style="margin:0 0 6px;font-size:16px;color:#eef2ff">📱 '+esc(pubState.user.mobile)+'</h3>' +
+      '<p style="color:#8b97b5;font-size:11.5px;margin:0 0 16px">'+esc(pubState.app.name||'')+(pubState.isAdmin?' • 👑 Admin':'')+'</p>' +
+
+      '<button class="opt" id="pubMenuBackup">' +
+        '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(34,197,94,.3),rgba(16,163,74,.2))">☁️</div>' +
+        '<div><div class="opt-t">Backup to Cloud</div>' +
+        '<div class="opt-d">Abhi ki entries cloud me save karein</div></div>' +
+      '</button>' +
+
+      '<button class="opt" id="pubMenuRestore">' +
+        '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(79,125,255,.3),rgba(124,92,255,.2))">⬇️</div>' +
+        '<div><div class="opt-t">Restore from Cloud</div>' +
+        '<div class="opt-d">Cloud ki entries wapas load karein</div></div>' +
+      '</button>' +
+
+      '<div class="syncrow">' +
+        '<div class="syncrow-info">' +
+          '<div class="syncrow-t">Auto-Sync</div>' +
+          '<div class="syncrow-d">Har change cloud pe auto save</div>' +
+        '</div>' +
+        '<label class="toggle"><input type="checkbox" id="pubAutoToggle" '+(autoOn?'checked':'')+'/><span class="sl"></span></label>' +
+      '</div>' +
+
+      (pubState.isAdmin ?
+        '<button class="opt" id="pubMenuAdmin">' +
+          '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(124,92,255,.2))">👑</div>' +
+          '<div><div class="opt-t">Admin Panel</div>' +
+          '<div class="opt-d">Sab users ki entries dekhein</div></div>' +
+        '</button>' : '') +
+
+      '<button class="opt" id="pubMenuLogout" style="border-color:rgba(239,68,68,.2)">' +
+        '<div class="opt-ic" style="background:linear-gradient(135deg,rgba(239,68,68,.25),rgba(220,38,38,.18))">🚪</div>' +
+        '<div><div class="opt-t">Logout</div>' +
+        '<div class="opt-d">'+esc(pubState.user.mobile)+'</div></div>' +
+      '</button>' +
+
+      '<div class="btnrow" style="margin-top:10px">' +
+        '<button class="btn ghost" id="pubMenuClose">Close</button>' +
+      '</div>' +
+    '</div>';
+
+  root.appendChild(menu);
+
+  menu.addEventListener('click', (e)=>{
+    if(e.target === menu) menu.remove();
+  });
+  document.getElementById('pubMenuClose').onclick = () => menu.remove();
+  document.getElementById('pubMenuBackup').onclick = () => { menu.remove(); pubBackupNow(); };
+  document.getElementById('pubMenuRestore').onclick = () => { menu.remove(); pubRestoreNow(); };
+  document.getElementById('pubMenuLogout').onclick = () => {
+    safeLsDel('webbox_pub_user_' + pubState.app.slug);
+    pubState.user = null; pubState.liveState = null;
+    menu.remove();
+    document.getElementById('pubRoot').remove();
+    location.hash = '#/p/' + pubState.app.slug;
+    location.reload();
+  };
+  const at = document.getElementById('pubAutoToggle');
+  if(at){
+    at.addEventListener('change', ()=>{
+      pubState.autoSync = !!at.checked;
+      const st = document.getElementById('pubStatus');
+      if(st) st.textContent = pubState.autoSync ? '💾 Auto-sync ON' : '⛔ Auto-sync OFF';
+      toast(pubState.autoSync ? '☁️ Auto-sync ON' : '⛔ Auto-sync OFF');
+      if(pubState.autoSync) schedulePubSave();
+    });
+  }
+  const adm = document.getElementById('pubMenuAdmin');
+  if(adm) adm.onclick = () => { menu.remove(); showPubAdmin(); };
+}
+
+async function showPubAdmin(){
+  const root = document.getElementById('pubRoot'); if(!root) return;
+  const old = document.getElementById('pubAdminOverlay'); if(old) old.remove();
+  const ov = document.createElement('div');
+  ov.id = 'pubAdminOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:250;background:rgba(3,5,10,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));overflow-y:auto;';
+  ov.innerHTML = '<div style="max-width:600px;width:100%;margin:0 auto">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
+      '<h2 style="margin:0;font-size:18px;color:#eef2ff">👑 Admin Panel</h2>' +
+      '<button id="pubAdminClose" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#dbe3f7;border-radius:10px;padding:8px 14px;cursor:pointer;font-family:inherit">Close</button>' +
+    '</div>' +
+    '<div id="pubAdminBody" style="color:#8b97b5;font-size:13px">Loading...</div>' +
+  '</div>';
+  root.appendChild(ov);
+  document.getElementById('pubAdminClose').onclick = () => ov.remove();
+
+  try{
+    const { data: apps } = await sb.from('published_apps')
+      .select('id,slug,name,created_at,active').order('created_at', { ascending: false });
+    let entriesCount = {};
+    try{
+      const { data: es } = await sb.from('app_entries').select('app_id,user_id');
+      (es||[]).forEach(e => { entriesCount[e.app_id] = (entriesCount[e.app_id]||0) + 1; });
+    }catch(e){}
+    const rows = (apps||[]).map(a =>
+      '<div class="admin-row" data-app="'+esc(a.id)+'" data-slug="'+esc(a.slug)+'" data-name="'+esc(a.name||'')+'" style="cursor:pointer">' +
+        '<div class="ic">🌐</div>' +
+        '<div class="info">' +
+          '<div class="nm">'+esc(a.name||'Untitled')+'</div>' +
+          '<div class="meta">'+(entriesCount[a.id]||0)+' users • slug '+esc(a.slug)+(a.active===false?' • ⛔':'')+'</div>' +
+        '</div>' +
+        '<div style="color:#8b97b5;font-size:18px">›</div>' +
+      '</div>').join('');
+    document.getElementById('pubAdminBody').innerHTML = rows || '<div style="text-align:center;padding:30px;color:#8b97b5">Koi app nahi</div>';
+    document.getElementById('pubAdminBody').onclick = (e)=>{
+      const row = e.target.closest('[data-app]'); if(!row) return;
+      pubAdminShowApp(row.dataset.app, row.dataset.name);
+    };
+  }catch(e){
+    document.getElementById('pubAdminBody').innerHTML = '<div style="color:#fca5a5">Error: '+esc(e.message||e)+'</div>';
+  }
+}
+
+async function pubAdminShowApp(appId, appName){
+  const body = document.getElementById('pubAdminBody'); if(!body) return;
+  body.innerHTML = 'Loading...';
+  try{
+    const { data: entries } = await sb.from('app_entries').select('*').eq('app_id', appId).order('updated_at', { ascending: false });
+    const userIds = (entries||[]).map(e=>e.user_id);
+    let umap = {};
+    if(userIds.length){
+      const { data: users } = await sb.from('app_users').select('id,mobile,created_at,last_login').in('id', userIds);
+      (users||[]).forEach(u => umap[u.id] = u);
+    }
+    let rows = (entries||[]).map(e => {
+      const u = umap[e.user_id] || { mobile: 'unknown' };
+      const n = countStateEntries(e.state);
+      const when = e.updated_at ? fmtDate(new Date(e.updated_at).getTime()) : '--';
+      return '<div class="admin-row" data-entry="'+esc(e.id)+'" style="cursor:pointer">' +
+        '<div class="ic">📱</div>' +
+        '<div class="info">' +
+          '<div class="nm">'+esc(u.mobile)+'</div>' +
+          '<div class="meta">'+n+' entries • Last: '+esc(when)+'</div>' +
+        '</div>' +
+        '<div style="color:#8b97b5;font-size:18px">›</div>' +
+      '</div>';
+    }).join('');
+    if(!rows) rows = '<div style="text-align:center;padding:30px;color:#8b97b5">Koi entries nahi</div>';
+    body.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:10px">' +
+      '<button id="pubAdminBack" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#dbe3f7;border-radius:10px;padding:8px 14px;cursor:pointer;font-family:inherit">← Back</button>' +
+      '<div style="flex:1;color:#eef2ff;font-weight:650;font-size:14px;align-self:center">'+esc(appName||'')+'</div>' +
+      '</div>' + rows;
+    document.getElementById('pubAdminBack').onclick = () => showPubAdmin();
+    body.onclick = (e)=>{
+      const row = e.target.closest('[data-entry]'); if(!row) return;
+      pubAdminShowEntry(row.dataset.entry, appId, appName);
+    };
+  }catch(e){ body.innerHTML = '<div style="color:#fca5a5">'+esc(e.message||e)+'</div>'; }
+}
+
+async function pubAdminShowEntry(entryId, appId, appName){
+  const body = document.getElementById('pubAdminBody'); if(!body) return;
+  body.innerHTML = 'Loading...';
+  try{
+    const { data: e } = await sb.from('app_entries').select('*').eq('id', entryId).maybeSingle();
+    if(!e){ body.innerHTML = 'Not found'; return; }
+    const { data: u } = await sb.from('app_users').select('mobile').eq('id', e.user_id).maybeSingle();
+    const jsonStr = JSON.stringify(e.state || {}, null, 2);
+    body.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:10px">' +
+      '<button id="pubAdminBack2" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:#dbe3f7;border-radius:10px;padding:8px 14px;cursor:pointer;font-family:inherit">← Back</button>' +
+      '<div style="flex:1;color:#eef2ff;font-weight:650;font-size:14px;align-self:center">📱 '+esc(u ? u.mobile : '--')+'</div>' +
+      '</div>' +
+      '<div style="font-size:11.5px;color:#93a0bd;margin-bottom:8px">'+countStateEntries(e.state)+' entries • Updated '+esc(fmtDate(new Date(e.updated_at).getTime()))+'</div>' +
+      '<pre style="background:#080d18;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;font-size:11px;line-height:1.55;color:#9fb0d1;max-height:60vh;overflow:auto;white-space:pre-wrap;word-break:break-word;margin:0">'+esc(jsonStr.slice(0,8000))+'</pre>';
+    document.getElementById('pubAdminBack2').onclick = () => pubAdminShowApp(appId, appName);
+  }catch(e){ body.innerHTML = '<div style="color:#fca5a5">'+esc(e.message||e)+'</div>'; }
+}
+
+/* =============== BOOT =============== */
+async function boot(){
+  const hash = location.hash || '';
+
+  if(hash.startsWith('#/p/')){
+    const slug = decodeURIComponent(hash.slice(4));
+    if(slug) return bootPublicViewer(slug);
+  }
+
+  const embeddedData = window.__WEBBOX_PORTABLE_DATA__;
+  const embeddedId   = window.__WEBBOX_PORTABLE_ID__;
+  const lastSeenId   = safeLsGet(EXPORT_ID_STORAGE);
+  const hasEmbedded  = Array.isArray(embeddedData);
+  const isFresh      = hasEmbedded && embeddedId && (embeddedId !== lastSeenId);
+  try{
+    if(isFresh){
+      await Store.clear();
+      for(const it of embeddedData){ await Store.put(it); }
+      items = embeddedData.slice();
+      safeLsSet(EXPORT_ID_STORAGE, embeddedId);
+    } else {
+      items = await Store.all();
+      if((!items || items.length === 0) && hasEmbedded){
+        for(const it of embeddedData){ await Store.put(it); }
+        items = embeddedData.slice();
+        if(embeddedId) safeLsSet(EXPORT_ID_STORAGE, embeddedId);
+      }
+    }
+    if(!Array.isArray(items)) items = [];
+  }catch(e){
+    console.error('[WebBox] Boot error:', e);
+    items = hasEmbedded ? embeddedData.slice() : [];
+  }
+  items = items.map(i => {
+    if(typeof i.icon === 'undefined') i.icon = null;
+    if(typeof i.deletedAt === 'undefined') i.deletedAt = null;
+    if(typeof i.publishedSlug === 'undefined') i.publishedSlug = null;
+    return i;
+  });
+  await purgeTrash();
+  render();
+
+  await checkSchemaHealth();
+
+  attachAuthListeners();
+  updateCloudIndicator();
+}
+
+window.addEventListener('hashchange', ()=>{
+  const h = location.hash || '';
+  if(h.startsWith('#/p/') && !document.getElementById('pubRoot')){
+    location.reload();
+  }
+});
+
+boot();
+
+})();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('[WebBox] SW registered:', reg.scope))
+        .catch(err => console.error('[WebBox] SW failed:', err));
+    });
+  }
+</script>
+</body>
+</html>
