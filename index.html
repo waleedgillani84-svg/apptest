@@ -1,0 +1,1410 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML App Studio</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0b1020; --panel:#111a2e; --panel2:#0e1626; --line:#22304d;
+  --txt:#e6edf7; --muted:#8fa3c0; --accent:#4f8cff; --green:#22c55e;
+  --danger:#ef4444; --warn:#f59e0b; --radius:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Nastaliq Urdu",sans-serif;
+  overflow:hidden;
+}
+.hidden{display:none !important}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#24334f;border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- topbar ---------- */
+.topbar{
+  height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;
+  background:var(--panel);border-bottom:1px solid var(--line);flex-shrink:0;
+}
+.brand{font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:8px;font-size:15px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chip{
+  background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+  padding:6px 11px;border-radius:999px;font-size:12.5px;cursor:pointer;
+  transition:.15s;white-space:nowrap;
+}
+.chip:hover{border-color:#3b5480;color:var(--txt)}
+.chip.on{background:rgba(34,197,94,.14);border-color:rgba(34,197,94,.5);color:#5ee08a}
+.chip.user{color:var(--txt);border-color:#3b5480}
+.icon-btn{background:none;border:none;color:var(--txt);font-size:20px;cursor:pointer;padding:4px 8px}
+.only-mobile{display:none}
+
+/* ---------- layout ---------- */
+.app{display:flex;flex-direction:column;height:100vh}
+.layout{flex:1;display:flex;min-height:0}
+.sidebar{
+  width:280px;flex-shrink:0;background:var(--panel2);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;
+}
+.side-head{padding:12px;display:flex;flex-direction:column;gap:8px}
+.input{
+  width:100%;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  padding:10px 12px;border-radius:10px;font-size:14px;outline:none;
+}
+.input:focus{border-color:var(--accent)}
+.btn{
+  background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  padding:9px 13px;border-radius:10px;font-size:13.5px;cursor:pointer;transition:.15s;
+  white-space:nowrap;
+}
+.btn:hover{border-color:#3b5480;background:#16203a}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.primary:hover{background:#3d7bf0}
+.btn.accent{background:var(--green);border-color:var(--green);color:#04240f;font-weight:700}
+.btn.danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.5);color:#ff8b8b}
+.btn.ghost{background:transparent}
+.btn.block{width:100%;display:block}
+.file-list{flex:1;overflow-y:auto;padding:4px 8px 8px}
+.file-item{
+  padding:10px 11px;border-radius:10px;cursor:pointer;margin-bottom:5px;
+  border:1px solid transparent;transition:.12s;
+}
+.file-item:hover{background:#16203a}
+.file-item.active{background:#16203a;border-color:var(--accent)}
+.file-item .fi-name{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-item .fi-meta{font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;gap:6px;align-items:center}
+.badge{font-size:10px;padding:1px 6px;border-radius:6px;border:1px solid var(--line)}
+.badge.pub{color:#5ee08a;border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.1)}
+.badge.priv{color:#f0b34a;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.1)}
+.trash-btn{margin:8px;width:calc(100% - 16px)}
+
+/* ---------- editor ---------- */
+.editor{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--muted);gap:10px;text-align:center;padding:24px;
+}
+.empty h2{color:var(--txt);margin:0;font-size:20px}
+.pane{flex:1;display:flex;flex-direction:column;min-height:0}
+.editor-head{
+  display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);
+  align-items:center;background:var(--panel);flex-wrap:wrap;
+}
+.name-input{flex:1;min-width:140px;font-weight:600}
+.editor-actions{display:flex;gap:6px;flex-wrap:wrap}
+.tabs{
+  display:flex;align-items:center;gap:4px;padding:6px 12px;
+  border-bottom:1px solid var(--line);background:var(--panel2);
+}
+.tab{
+  background:none;border:none;color:var(--muted);padding:6px 12px;border-radius:8px;
+  cursor:pointer;font-size:13px;
+}
+.tab.active{background:#1a2540;color:var(--txt)}
+.status{margin-left:auto;font-size:11.5px;color:var(--muted);padding-right:4px}
+.status.ok{color:#5ee08a}.status.err{color:#ff8b8b}.status.busy{color:#f0b34a}
+.panes{flex:1;position:relative;min-height:0}
+.code{
+  position:absolute;inset:0;width:100%;height:100%;resize:none;border:none;outline:none;
+  background:#0a0f1d;color:#cfe1ff;padding:14px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:13.5px;line-height:1.55;tab-size:2;
+}
+.preview{position:absolute;inset:0;width:100%;height:100%;border:none;background:#fff}
+.share-bar{
+  padding:9px 12px;background:rgba(79,140,255,.1);border-top:1px solid var(--line);
+  display:flex;gap:8px;align-items:center;font-size:12.5px;flex-wrap:wrap;
+}
+.share-bar input{
+  flex:1;min-width:180px;background:#0a0f1d;border:1px solid var(--line);color:#9fc2ff;
+  padding:7px 10px;border-radius:8px;font-size:12px;outline:none;
+}
+
+/* ---------- viewer ---------- */
+.viewer-body{flex:1;min-height:0;background:#fff}
+#viewerFrame{width:100%;height:100%;border:none;display:block}
+
+/* ---------- modal ---------- */
+.modal{
+  position:fixed;inset:0;background:rgba(4,8,18,.78);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:16px;z-index:100;
+}
+.modal-box{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:20px;
+  box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.modal-box.wide{max-width:760px}
+.modal-box h2{margin:0 0 4px;font-size:19px}
+.modal-box p.sub{margin:0 0 16px;color:var(--muted);font-size:13px}
+.modal-box .field{margin-bottom:11px}
+.modal-box label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.modal-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+pre.sql{
+  background:#080d18;border:1px solid var(--line);border-radius:10px;padding:12px;
+  font-size:11.5px;line-height:1.5;overflow:auto;max-height:320px;color:#a9c6ff;
+  font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre;
+}
+.entry-row{
+  border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px;
+  display:flex;justify-content:space-between;gap:10px;align-items:flex-start;background:var(--panel2);
+}
+.entry-row .etxt{font-size:13.5px;word-break:break-word}
+.entry-row .emeta{font-size:11px;color:var(--muted);margin-top:4px}
+.trash-row{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+}
+
+/* ---------- toast ---------- */
+#toastWrap{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{
+  background:#16203a;border:1px solid var(--line);color:var(--txt);padding:10px 16px;
+  border-radius:10px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.5);
+  animation:pop .2s ease;max-width:90vw;text-align:center;
+}
+.toast.ok{border-color:rgba(34,197,94,.6)}
+.toast.err{border-color:rgba(239,68,68,.6)}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.banner{
+  padding:9px 12px;background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.35);
+  font-size:12.5px;color:#f3c167;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+}
+
+@media (max-width:820px){
+  .only-mobile{display:block}
+  .sidebar{
+    position:fixed;top:56px;bottom:0;left:0;z-index:60;transform:translateX(-100%);
+    transition:transform .22s ease;box-shadow:12px 0 40px rgba(0,0,0,.5);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .tools .chip{font-size:11.5px;padding:5px 9px}
+  .brand{font-size:13.5px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= STUDIO ================= -->
+<div id="studio" class="app hidden">
+  <header class="topbar">
+    <button id="menuBtn" class="icon-btn only-mobile">☰</button>
+    <div class="brand"><span class="dot"></span> HTML App Studio</div>
+    <div class="spacer"></div>
+    <div class="tools">
+      <button id="autoSyncBtn" class="chip on" title="خودکار سنک">⟳ Auto Sync</button>
+      <button id="autoBackupBtn" class="chip on" title="خودکار بیک اپ">☁ Auto Backup</button>
+      <button id="restoreBtn" class="chip" title="ری اسٹور">↺ Restore</button>
+      <button id="setupBtn" class="chip" title="ڈیٹا بیس سیٹ اپ">⚙ DB Setup</button>
+      <button id="userBtn" class="chip user">👤</button>
+    </div>
+  </header>
+
+  <div id="dbBanner" class="banner hidden"></div>
+
+  <div class="layout">
+    <aside id="sidebar" class="sidebar">
+      <div class="side-head">
+        <input id="searchInput" class="input" placeholder="🔍 فائل تلاش کریں...">
+        <button id="newFileBtn" class="btn primary block">+ نئی HTML فائل</button>
+      </div>
+      <div id="fileList" class="file-list"></div>
+      <button id="trashBtn" class="btn ghost trash-btn">🗑 Trash</button>
+    </aside>
+
+    <main class="editor">
+      <div id="editorEmpty" class="empty">
+        <h2>کوئی فائل نہیں کھلی</h2>
+        <div>بائیں طرف سے فائل منتخب کریں یا نئی بنائیں</div>
+        <button id="newFileBtn2" class="btn primary">+ نئی HTML فائل بنائیں</button>
+      </div>
+
+      <div id="editorPane" class="pane hidden">
+        <div class="editor-head">
+          <input id="fileName" class="input name-input" placeholder="فائل کا نام">
+          <div class="editor-actions">
+            <button id="saveBtn" class="btn">💾 Save</button>
+            <button id="publishBtn" class="btn accent">🚀 Publish</button>
+            <button id="entriesBtn" class="btn ghost" title="Entries">📋</button>
+            <button id="deleteBtn" class="btn danger" title="Delete">🗑</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="code">Code</button>
+          <button class="tab" data-tab="preview">Preview</button>
+          <span id="statusText" class="status"></span>
+        </div>
+
+        <div class="panes">
+          <textarea id="codeInput" class="code" spellcheck="false" placeholder="یہاں HTML لکھیں..."></textarea>
+          <iframe id="previewFrame" class="preview hidden"
+                  sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads"></iframe>
+        </div>
+
+        <div id="shareBar" class="share-bar hidden">
+          <span>🔗 Share Link:</span>
+          <input id="shareLink" readonly>
+          <button id="copyLinkBtn" class="btn">Copy</button>
+          <button id="unpublishBtn" class="btn ghost">Unpublish</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ================= VIEWER ================= -->
+<div id="viewer" class="app hidden">
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span> <span id="viewerTitle">App</span></div>
+    <div class="spacer"></div>
+    <div class="tools">
+      <span id="viewerUser" class="chip user"></span>
+      <button id="viewerSwitch" class="chip">Logout</button>
+    </div>
+  </header>
+  <div class="viewer-body">
+    <iframe id="viewerFrame" sandbox="allow-scripts allow-forms allow-modals allow-popups allow-downloads"></iframe>
+  </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-box">
+    <h2 id="loginTitle">لاگ ان</h2>
+    <p class="sub" id="loginSub">اپنا نام اور موبائل نمبر درج کریں</p>
+    <div class="field">
+      <label>نام</label>
+      <input id="loginName" class="input" placeholder="مثلاً: علی احمد">
+    </div>
+    <div class="field">
+      <label>موبائل نمبر</label>
+      <input id="loginPhone" class="input" type="tel" inputmode="tel" placeholder="03xxxxxxxxx">
+    </div>
+    <div class="modal-actions">
+      <button id="loginGo" class="btn primary" style="flex:1">شروع کریں</button>
+    </div>
+  </div>
+</div>
+
+<div id="trashModal" class="modal hidden">
+  <div class="modal-box wide">
+    <h2>🗑 Trash</h2>
+    <p class="sub">حذف شدہ فائلیں -- بحال کریں یا ہمیشہ کے لیے مٹا دیں</p>
+    <div id="trashList"></div>
+    <div class="modal-actions"><button class="btn" data-close>بند کریں</button></div>
+  </div>
+</div>
+
+<div id="restoreModal" class="modal hidden">
+  <div class="modal-box wide">
+    <h2>↺ Restore</h2>
+    <p class="sub">کلاؤڈ یا لوکل بیک اپ سے فائل بحال کریں</p>
+    <div class="modal-actions" style="margin-top:0;margin-bottom:14px">
+      <button id="restoreFromCloud" class="btn primary">☁ کلاؤڈ سے بحال کریں (موجودہ فائل)</button>
+    </div>
+    <div id="backupList"></div>
+    <div class="modal-actions"><button class="btn" data-close>بند کریں</button></div>
+  </div>
+</div>
+
+<div id="entriesModal" class="modal hidden">
+  <div class="modal-box wide">
+    <h2>📋 Entries</h2>
+    <p class="sub" id="entriesSub">اس فائل میں محفوظ کی گئی entries</p>
+    <div id="entriesList"></div>
+    <div class="modal-actions"><button class="btn" data-close>بند کریں</button></div>
+  </div>
+</div>
+
+<div id="setupModal" class="modal hidden">
+  <div class="modal-box wide">
+    <h2>⚙ Database Setup</h2>
+    <p class="sub">Supabase Dashboard → SQL Editor میں جا کر یہ سکرپٹ چلائیں (صرف ایک بار)</p>
+    <pre class="sql" id="sqlBox"></pre>
+    <div class="modal-actions">
+      <button id="copySqlBtn" class="btn primary">📋 SQL Copy کریں</button>
+      <button id="testDbBtn" class="btn">🔌 Connection Test</button>
+      <button class="btn ghost" data-close>بند کریں</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastWrap"></div>
+
+<script>
+/* =========================================================
+   CONFIG
+   ========================================================= */
+const SUPABASE_URL = "https://uhemlvqwulybmczsuige.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6-OMaFfVDOYcPDzYOnh4Qw_cYfDZ3qO";
+
+let sb = null;
+try {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+  console.error("Supabase init failed:", e);
+}
+
+const LS = {
+  user:   "hs.user",
+  sync:   "hs.autosync",
+  backup: "hs.autobackup",
+  cache:  "hs.cache",
+  snaps:  "hs.snapshots"
+};
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const q = (id) => document.getElementById(id);
+const show = (el) => el && el.classList.remove("hidden");
+const hide = (el) => el && el.classList.add("hidden");
+
+function toast(msg, type) {
+  const d = document.createElement("div");
+  d.className = "toast" + (type ? " " + type : "");
+  d.textContent = msg;
+  q("toastWrap").appendChild(d);
+  setTimeout(() => {
+    d.style.transition = "opacity .3s";
+    d.style.opacity = "0";
+    setTimeout(() => d.remove(), 320);
+  }, 2400);
+}
+
+function uuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === "x" ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function timeAgo(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  const s = (Date.now() - d.getTime()) / 1000;
+  if (s < 60) return "ابھی";
+  if (s < 3600) return Math.floor(s / 60) + " منٹ پہلے";
+  if (s < 86400) return Math.floor(s / 3600) + " گھنٹے پہلے";
+  if (s < 604800) return Math.floor(s / 86400) + " دن پہلے";
+  return d.toLocaleDateString();
+}
+
+function setStatus(txt, cls) {
+  const el = q("statusText");
+  if (!el) return;
+  el.textContent = txt || "";
+  el.className = "status" + (cls ? " " + cls : "");
+}
+
+function lsGet(k, def) {
+  try {
+    const v = localStorage.getItem(k);
+    return v === null ? def : JSON.parse(v);
+  } catch (e) { return def; }
+}
+function lsSet(k, v) {
+  try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+}
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const S = {
+  user: null,
+  files: [],
+  currentId: null,
+  autoSync: true,
+  autoBackup: true,
+  dirty: false,
+  saveTimer: null,
+  dbOk: true,
+  viewFile: null,
+  viewUser: null,
+  mode: "studio"
+};
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+let loginCallback = null;
+
+function getUser() { return lsGet(LS.user, null); }
+
+function askLogin(cb) {
+  loginCallback = cb;
+  const u = getUser();
+  if (u) {
+    q("loginName").value = u.name || "";
+    q("loginPhone").value = u.phone || "";
+  }
+  show(q("loginModal"));
+  setTimeout(() => q("loginName").focus(), 100);
+}
+
+q("loginGo").onclick = () => {
+  const name = q("loginName").value.trim();
+  const phone = q("loginPhone").value.trim().replace(/\s+/g, "");
+  if (!name) { toast("نام درج کریں", "err"); return; }
+  if (phone.length < 7) { toast("درست موبائل نمبر درج کریں", "err"); return; }
+  const user = { name, phone };
+  lsSet(LS.user, user);
+  S.user = user;
+  hide(q("loginModal"));
+  updateUserChip();
+  if (loginCallback) { const cb = loginCallback; loginCallback = null; cb(user); }
+};
+
+q("loginPhone").addEventListener("keydown", e => { if (e.key === "Enter") q("loginGo").click(); });
+q("loginName").addEventListener("keydown", e => { if (e.key === "Enter") q("loginPhone").focus(); });
+
+function updateUserChip() {
+  if (!S.user) return;
+  q("userBtn").textContent = "👤 " + S.user.name;
+}
+
+q("userBtn").onclick = () => {
+  if (confirm("لاگ آؤٹ کرنا چاہتے ہیں؟")) {
+    localStorage.removeItem(LS.user);
+    location.reload();
+  }
+};
+
+/* =========================================================
+   SQL SETUP
+   ========================================================= */
+const SETUP_SQL = [
+"-- ===== HTML App Studio Schema =====",
+"create extension if not exists pgcrypto;",
+"",
+"create table if not exists public.app_files (",
+"  id uuid primary key default gen_random_uuid(),",
+"  share_id text unique not null default replace(gen_random_uuid()::text,'-',''),",
+"  name text not null default 'Untitled',",
+"  html text not null default '',",
+"  owner_phone text not null,",
+"  owner_name text default '',",
+"  is_public boolean not null default false,",
+"  deleted boolean not null default false,",
+"  deleted_at timestamptz,",
+"  created_at timestamptz not null default now(),",
+"  updated_at timestamptz not null default now()",
+");",
+"",
+"create table if not exists public.file_entries (",
+"  id uuid primary key default gen_random_uuid(),",
+"  file_id uuid not null references public.app_files(id) on delete cascade,",
+"  user_phone text default '',",
+"  user_name text default '',",
+"  data jsonb not null default '{}'::jsonb,",
+"  created_at timestamptz not null default now(),",
+"  updated_at timestamptz not null default now()",
+");",
+"",
+"create index if not exists app_files_owner_idx on public.app_files(owner_phone);",
+"create index if not exists app_files_share_idx on public.app_files(share_id);",
+"create index if not exists file_entries_file_idx on public.file_entries(file_id);",
+"",
+"alter table public.app_files enable row level security;",
+"alter table public.file_entries enable row level security;",
+"",
+"drop policy if exists app_files_all on public.app_files;",
+"create policy app_files_all on public.app_files",
+"  for all using (true) with check (true);",
+"",
+"drop policy if exists file_entries_all on public.file_entries;",
+"create policy file_entries_all on public.file_entries",
+"  for all using (true) with check (true);"
+].join("\n");
+
+q("sqlBox").textContent = SETUP_SQL;
+
+q("setupBtn").onclick = () => show(q("setupModal"));
+q("copySqlBtn").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(SETUP_SQL);
+    toast("SQL کاپی ہو گیا ✔", "ok");
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = SETUP_SQL; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); ta.remove();
+    toast("SQL کاپی ہو گیا ✔", "ok");
+  }
+};
+q("testDbBtn").onclick = async () => {
+  toast("ٹیسٹ ہو رہا ہے...");
+  const r = await testDb();
+  toast(r ? "کنکشن ٹھیک ہے ✔" : "کنکشن ناکام -- SQL چلائیں", r ? "ok" : "err");
+};
+
+async function testDb() {
+  if (!sb) return false;
+  const { error } = await sb.from("app_files").select("id").limit(1);
+  return !error;
+}
+
+document.querySelectorAll("[data-close]").forEach(b => {
+  b.onclick = () => b.closest(".modal").classList.add("hidden");
+});
+document.querySelectorAll(".modal").forEach(m => {
+  m.addEventListener("click", e => { if (e.target === m) m.classList.add("hidden"); });
+});
+
+/* =========================================================
+   TOGGLES
+   ========================================================= */
+function applyToggles() {
+  q("autoSyncBtn").classList.toggle("on", S.autoSync);
+  q("autoBackupBtn").classList.toggle("on", S.autoBackup);
+}
+q("autoSyncBtn").onclick = () => {
+  S.autoSync = !S.autoSync;
+  lsSet(LS.sync, S.autoSync);
+  applyToggles();
+  toast("Auto Sync " + (S.autoSync ? "ON" : "OFF"));
+};
+q("autoBackupBtn").onclick = () => {
+  S.autoBackup = !S.autoBackup;
+  lsSet(LS.backup, S.autoBackup);
+  applyToggles();
+  toast("Auto Backup " + (S.autoBackup ? "ON" : "OFF"));
+};
+
+/* =========================================================
+   CLOUD DB
+   ========================================================= */
+async function dbLoadFiles() {
+  if (!sb || !S.user) return [];
+  const { data, error } = await sb
+    .from("app_files")
+    .select("*")
+    .eq("owner_phone", S.user.phone)
+    .eq("deleted", false)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    S.dbOk = false;
+    showBanner('⚠ ڈیٹا بیس ٹیبلز نہیں ملیں -- "DB Setup" پر کلک کر کے SQL چلائیں۔ (' + error.message + ")");
+    return null;
+  }
+  S.dbOk = true;
+  hideBanner();
+  return data || [];
+}
+
+async function dbLoadTrash() {
+  if (!sb || !S.user) return [];
+  const { data, error } = await sb
+    .from("app_files")
+    .select("*")
+    .eq("owner_phone", S.user.phone)
+    .eq("deleted", true)
+    .order("deleted_at", { ascending: false });
+  if (error) return [];
+  return data || [];
+}
+
+async function dbUpsertFile(file) {
+  if (!sb) throw new Error("Supabase available نہیں");
+  const row = {
+    id: file.id,
+    share_id: file.share_id,
+    name: file.name || "Untitled",
+    html: file.html || "",
+    owner_phone: S.user.phone,
+    owner_name: S.user.name,
+    is_public: !!file.is_public,
+    deleted: !!file.deleted,
+    deleted_at: file.deleted_at || null,
+    updated_at: new Date().toISOString()
+  };
+  const { data, error } = await sb
+    .from("app_files")
+    .upsert(row, { onConflict: "id" })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+function showBanner(txt) {
+  const b = q("dbBanner");
+  b.innerHTML = escapeHtml(txt) +
+    ' <button class="btn" style="padding:4px 10px;font-size:11.5px" onclick="document.getElementById(\'setupModal\').classList.remove(\'hidden\')">DB Setup</button>';
+  show(b);
+}
+function hideBanner() { hide(q("dbBanner")); }
+
+/* =========================================================
+   LOCAL CACHE / BACKUP
+   ========================================================= */
+function cacheSave() {
+  lsSet(LS.cache, S.files);
+}
+
+function snapshot(file) {
+  if (!S.autoBackup) return;
+  const all = lsGet(LS.snaps, {});
+  const arr = all[file.id] || [];
+  arr.unshift({ ts: Date.now(), name: file.name, html: file.html });
+  all[file.id] = arr.slice(0, 20);
+  lsSet(LS.snaps, all);
+}
+
+/* =========================================================
+   FILE LIST RENDER
+   ========================================================= */
+function renderList() {
+  const wrap = q("fileList");
+  const term = (q("searchInput").value || "").toLowerCase();
+  wrap.innerHTML = "";
+
+  const list = S.files.filter(f => !term || (f.name || "").toLowerCase().includes(term));
+
+  if (!list.length) {
+    const d = document.createElement("div");
+    d.style.cssText = "padding:22px;text-align:center;color:#8fa3c0;font-size:13px";
+    d.textContent = term ? "کچھ نہیں ملا" : "ابھی کوئی فائل نہیں";
+    wrap.appendChild(d);
+    return;
+  }
+
+  list.forEach(f => {
+    const el = document.createElement("div");
+    el.className = "file-item" + (f.id === S.currentId ? " active" : "");
+
+    const name = document.createElement("div");
+    name.className = "fi-name";
+    name.textContent = f.name || "Untitled";
+
+    const meta = document.createElement("div");
+    meta.className = "fi-meta";
+
+    const b = document.createElement("span");
+    b.className = "badge " + (f.is_public ? "pub" : "priv");
+    b.textContent = f.is_public ? "PUBLISHED" : "PRIVATE";
+
+    const t = document.createElement("span");
+    t.textContent = timeAgo(f.updated_at || f.created_at);
+
+    meta.appendChild(b);
+    meta.appendChild(t);
+
+    el.appendChild(name);
+    el.appendChild(meta);
+    el.onclick = () => openFile(f.id);
+    wrap.appendChild(el);
+  });
+}
+
+q("searchInput").addEventListener("input", renderList);
+
+/* =========================================================
+   OPEN / NEW FILE
+   ========================================================= */
+function openFile(id) {
+  const f = S.files.find(x => x.id === id);
+  if (!f) return;
+
+  if (S.dirty && S.currentId && S.currentId !== id) {
+    if (S.autoSync) flushSave();
+  }
+
+  S.currentId = id;
+  S.dirty = false;
+
+  hide(q("editorEmpty"));
+  show(q("editorPane"));
+
+  q("fileName").value = f.name || "";
+  q("codeInput").value = f.html || "";
+  renderList();
+  renderShareBar();
+  refreshPreview();
+  setStatus(S.dbOk ? "Ready" : "Offline mode", S.dbOk ? "ok" : "err");
+  loadEntryCount();
+
+  if (window.innerWidth <= 820) q("sidebar").classList.remove("open");
+}
+
+function newFile() {
+  const f = {
+    id: uuid(),
+    share_id: uuid().replace(/-/g, ""),
+    name: "نئی فائل " + new Date().toLocaleTimeString().slice(0, 5),
+    html: DEFAULT_HTML,
+    is_public: false,
+    deleted: false,
+    owner_phone: S.user.phone,
+    owner_name: S.user.name,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  S.files.unshift(f);
+  cacheSave();
+  renderList();
+  openFile(f.id);
+  toast("نئی فائل بن گئی -- Save دبائیں");
+}
+
+q("newFileBtn").onclick = newFile;
+q("newFileBtn2").onclick = newFile;
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+q("fileName").addEventListener("input", markDirty);
+q("codeInput").addEventListener("input", markDirty);
+
+function markDirty() {
+  S.dirty = true;
+  setStatus("Unsaved...", "busy");
+  if (S.autoSync) {
+    clearTimeout(S.saveTimer);
+    S.saveTimer = setTimeout(() => flushSave(), 1600);
+  }
+}
+
+q("saveBtn").onclick = () => flushSave(true);
+
+async function flushSave(manual) {
+  if (!S.currentId) return;
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f) return;
+
+  f.name = q("fileName").value.trim() || "Untitled";
+  f.html = q("codeInput").value;
+  f.updated_at = new Date().toISOString();
+
+  cacheSave();
+  snapshot(f);
+  renderList();
+
+  if (!sb) { setStatus("Local only", "err"); return; }
+
+  setStatus("Saving...", "busy");
+  try {
+    const saved = await dbUpsertFile(f);
+    Object.assign(f, saved);
+    cacheSave();
+    S.dirty = false;
+    setStatus("Saved ✔", "ok");
+    renderShareBar();
+    if (manual) toast("محفوظ ہو گیا ✔", "ok");
+  } catch (e) {
+    console.error(e);
+    setStatus("Save failed", "err");
+    showBanner("Save ناکام: " + e.message);
+    if (manual) toast("Save ناکام: " + e.message, "err");
+  }
+}
+
+/* =========================================================
+   PUBLISH
+   ========================================================= */
+function shareUrl(f) {
+  const base = location.origin + location.pathname;
+  return base + "?view=" + f.share_id;
+}
+
+function renderShareBar() {
+  const f = S.files.find(x => x.id === S.currentId);
+  const bar = q("shareBar");
+  if (!f || !f.is_public) { hide(bar); return; }
+  show(bar);
+  q("shareLink").value = shareUrl(f);
+}
+
+q("publishBtn").onclick = async () => {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f) return;
+  f.is_public = true;
+  await flushSave();
+  renderShareBar();
+  toast("Publish ہو گیا 🚀 -- لنک کاپی کریں", "ok");
+  renderList();
+};
+
+q("unpublishBtn").onclick = async () => {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f) return;
+  f.is_public = false;
+  await flushSave();
+  renderShareBar();
+  renderList();
+  toast("Unpublish کر دیا گیا");
+};
+
+q("copyLinkBtn").onclick = async () => {
+  const v = q("shareLink").value;
+  if (!v) return;
+  try { await navigator.clipboard.writeText(v); toast("لنک کاپی ✔", "ok"); }
+  catch (e) { q("shareLink").select(); document.execCommand("copy"); toast("لنک کاپی ✔", "ok"); }
+};
+
+/* =========================================================
+   DELETE / TRASH
+   ========================================================= */
+q("deleteBtn").onclick = async () => {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f) return;
+  if (!confirm("فائل Trash میں بھیج دی جائے؟")) return;
+
+  f.deleted = true;
+  f.deleted_at = new Date().toISOString();
+  f.is_public = false;
+
+  try {
+    if (sb) await dbUpsertFile(f);
+  } catch (e) { console.error(e); }
+
+  S.files = S.files.filter(x => x.id !== f.id);
+  cacheSave();
+  S.currentId = null;
+  hide(q("editorPane"));
+  show(q("editorEmpty"));
+  renderList();
+  toast("Trash میں چلی گئی 🗑");
+};
+
+q("trashBtn").onclick = async () => {
+  const list = await dbLoadTrash();
+  const wrap = q("trashList");
+  wrap.innerHTML = "";
+
+  if (!list.length) {
+    wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#8fa3c0">Trash خالی ہے</div>';
+  }
+
+  list.forEach(f => {
+    const row = document.createElement("div");
+    row.className = "trash-row";
+
+    const info = document.createElement("div");
+    info.innerHTML = '<div style="font-weight:600">' + escapeHtml(f.name) + '</div>' +
+      '<div style="font-size:11.5px;color:#8fa3c0">' + timeAgo(f.deleted_at) + '</div>';
+
+    const btns = document.createElement("div");
+    btns.style.cssText = "display:flex;gap:6px";
+
+    const rb = document.createElement("button");
+    rb.className = "btn";
+    rb.textContent = "↺ بحال";
+    rb.onclick = async () => {
+      f.deleted = false;
+      f.deleted_at = null;
+      try { await dbUpsertFile(f); toast("بحال ہو گئی ✔", "ok"); } catch (e) { toast(e.message, "err"); }
+      q("trashBtn").click();
+      await refreshAll();
+    };
+
+    const db = document.createElement("button");
+    db.className = "btn danger";
+    db.textContent = "🗑 ہمیشہ کے لیے";
+    db.onclick = async () => {
+      if (!confirm("ہمیشہ کے لیے مٹا دیں؟ یہ واپس نہیں آئے گی۔")) return;
+      try {
+        if (sb) {
+          await sb.from("file_entries").delete().eq("file_id", f.id);
+          await sb.from("app_files").delete().eq("id", f.id);
+        }
+        toast("مٹا دی گئی", "ok");
+      } catch (e) { toast(e.message, "err"); }
+      q("trashBtn").click();
+    };
+
+    btns.appendChild(rb);
+    btns.appendChild(db);
+    row.appendChild(info);
+    row.appendChild(btns);
+    wrap.appendChild(row);
+  });
+
+  show(q("trashModal"));
+};
+
+/* =========================================================
+   RESTORE
+   ========================================================= */
+q("restoreBtn").onclick = () => {
+  const f = S.files.find(x => x.id === S.currentId);
+  const snaps = lsGet(LS.snaps, {});
+  const arr = (f && snaps[f.id]) || [];
+  const wrap = q("backupList");
+  wrap.innerHTML = "";
+
+  if (!f) {
+    wrap.innerHTML = '<div style="padding:16px;text-align:center;color:#8fa3c0">پہلے کوئی فائل کھولیں</div>';
+  } else if (!arr.length) {
+    wrap.innerHTML = '<div style="padding:16px;text-align:center;color:#8fa3c0">کوئی لوکل بیک اپ نہیں ملا</div>';
+  } else {
+    arr.forEach(s => {
+      const row = document.createElement("div");
+      row.className = "trash-row";
+      row.innerHTML = '<div><div style="font-weight:600">' + escapeHtml(s.name) + '</div>' +
+        '<div style="font-size:11.5px;color:#8fa3c0">' + new Date(s.ts).toLocaleString() +
+        ' • ' + (s.html.length) + ' chars</div></div>';
+      const b = document.createElement("button");
+      b.className = "btn";
+      b.textContent = "↺ بحال کریں";
+      b.onclick = () => {
+        q("fileName").value = s.name;
+        q("codeInput").value = s.html;
+        markDirty();
+        hide(q("restoreModal"));
+        refreshPreview();
+        toast("بیک اپ بحال ہو گیا ✔", "ok");
+      };
+      row.appendChild(b);
+      wrap.appendChild(row);
+    });
+  }
+
+  show(q("restoreModal"));
+};
+
+q("restoreFromCloud").onclick = async () => {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f || !sb) { toast("کوئی فائل منتخب نہیں", "err"); return; }
+  const { data, error } = await sb.from("app_files").select("*").eq("id", f.id).single();
+  if (error || !data) { toast("کلاؤڈ سے نہیں ملا", "err"); return; }
+  q("fileName").value = data.name;
+  q("codeInput").value = data.html;
+  S.dirty = false;
+  refreshPreview();
+  hide(q("restoreModal"));
+  toast("کلاؤڈ سے بحال ہو گیا ✔", "ok");
+};
+
+/* =========================================================
+   ENTRIES (studio view)
+   ========================================================= */
+async function loadEntryCount() {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f || !sb) return;
+  const { count } = await sb
+    .from("file_entries")
+    .select("id", { count: "exact", head: true })
+    .eq("file_id", f.id);
+  if (typeof count === "number") {
+    q("entriesBtn").textContent = "📋 " + count;
+  }
+}
+
+q("entriesBtn").onclick = async () => {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f) return;
+  const wrap = q("entriesList");
+  wrap.innerHTML = '<div style="padding:16px;text-align:center;color:#8fa3c0">لوڈ ہو رہا ہے...</div>';
+  show(q("entriesModal"));
+
+  if (!sb) { wrap.innerHTML = '<div style="padding:16px;text-align:center;color:#ff8b8b">Supabase دستیاب نہیں</div>'; return; }
+
+  const { data, error } = await sb
+    .from("file_entries")
+    .select("*")
+    .eq("file_id", f.id)
+    .order("created_at", { ascending: false });
+
+  if (error) { wrap.innerHTML = '<div style="padding:16px;color:#ff8b8b">' + escapeHtml(error.message) + '</div>'; return; }
+  if (!data.length) { wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#8fa3c0">ابھی کوئی entry نہیں</div>'; return; }
+
+  wrap.innerHTML = "";
+  data.forEach(e => {
+    const row = document.createElement("div");
+    row.className = "entry-row";
+    const left = document.createElement("div");
+    left.innerHTML = '<div class="etxt">' + escapeHtml(JSON.stringify(e.data)) + '</div>' +
+      '<div class="emeta">' + escapeHtml(e.user_name || "-") + ' • ' + escapeHtml(e.user_phone || "") +
+      ' • ' + new Date(e.created_at).toLocaleString() + '</div>';
+    const del = document.createElement("button");
+    del.className = "btn danger";
+    del.textContent = "🗑";
+    del.onclick = async () => {
+      if (!confirm("یہ entry مٹا دیں؟")) return;
+      await sb.from("file_entries").delete().eq("id", e.id);
+      row.remove();
+      loadEntryCount();
+    };
+    row.appendChild(left);
+    row.appendChild(del);
+    wrap.appendChild(row);
+  });
+};
+
+/* =========================================================
+   PREVIEW
+   ========================================================= */
+const BRIDGE_JS = [
+"(function(){",
+"  if(window.AppDB) return;",
+"  var pending={},seq=0;",
+"  function call(type,payload){",
+"    return new Promise(function(res,rej){",
+"      var id=++seq; pending[id]={res:res,rej:rej};",
+"      try{ parent.postMessage({__appdb:1,id:id,type:type,payload:payload||{}},'*'); }",
+"      catch(e){ rej(e); }",
+"    });",
+"  }",
+"  window.AppDB={",
+"    user:null,",
+"    getUser:function(){ return call('getUser'); },",
+"    list:function(){ return call('list'); },",
+"    add:function(data){ return call('add',{data:data}); },",
+"    update:function(id,data){ return call('update',{id:id,data:data}); },",
+"    remove:function(id){ return call('remove',{id:id}); },",
+"    ready:function(cb){",
+"      call('getUser').then(function(u){ window.AppDB.user=u; if(cb) cb(u); })",
+"        .catch(function(){ if(cb) cb({name:'Guest',phone:''}); });",
+"    }",
+"  };",
+"  window.addEventListener('message',function(e){",
+"    var m=e.data; if(!m||!m.__appdb_res) return;",
+"    var p=pending[m.id]; if(!p) return; delete pending[m.id];",
+"    if(m.error) p.rej(new Error(m.error)); else p.res(m.result);",
+"  });",
+"  parent.postMessage({__appdb_ready:1},'*');",
+"})();"
+].join("\n");
+
+const BRIDGE_TAG = "<script>" + BRIDGE_JS + "<\/script>";
+
+function injectBridge(html) {
+  const h = html || "";
+  if (/<head[^>]*>/i.test(h)) return h.replace(/<head[^>]*>/i, m => m + BRIDGE_TAG);
+  if (/<html[^>]*>/i.test(h)) return h.replace(/<html[^>]*>/i, m => m + BRIDGE_TAG);
+  return BRIDGE_TAG + h;
+}
+
+function refreshPreview() {
+  const f = S.files.find(x => x.id === S.currentId);
+  if (!f) return;
+  q("previewFrame").srcdoc = injectBridge(f.html || "");
+}
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    const which = t.dataset.tab;
+    if (which === "code") {
+      show(q("codeInput")); hide(q("previewFrame"));
+    } else {
+      hide(q("codeInput")); show(q("previewFrame"));
+      refreshPreview();
+    }
+  };
+});
+
+/* =========================================================
+   DEFAULT TEMPLATE
+   ========================================================= */
+const DEFAULT_HTML = [
+'<!DOCTYPE html>',
+'<html lang="ur">',
+'<head>',
+'<meta charset="utf-8">',
+'<meta name="viewport" content="width=device-width,initial-scale=1">',
+'<title>میری ایپ</title>',
+'<style>',
+'  body{font-family:system-ui,sans-serif;margin:0;padding:18px;background:#0f172a;color:#e2e8f0}',
+'  h2{margin-top:0}',
+'  .row{display:flex;gap:8px;margin-bottom:16px}',
+'  input{flex:1;padding:11px;border-radius:9px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:15px;outline:none}',
+'  button{padding:11px 16px;border-radius:9px;border:none;background:#3b82f6;color:#fff;font-size:15px;cursor:pointer;font-weight:600}',
+'  .item{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:11px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center}',
+'  .who{font-size:11.5px;color:#94a3b8;margin-top:4px}',
+'  .del{background:#7f1d1d;padding:6px 11px;font-size:13px}',
+'</style>',
+'</head>',
+'<body>',
+'<h2>میری ایپ</h2>',
+'<div style="font-size:13px;color:#94a3b8;margin-bottom:14px">لاگ ان: <b id="who">...</b></div>',
+'<div class="row">',
+'  <input id="inp" placeholder="کچھ لکھیں...">',
+'  <button id="addBtn">Add</button>',
+'</div>',
+'<div id="list"></div>',
+'<scr' + 'ipt>',
+'var me = null;',
+'',
+'AppDB.ready(function(u){',
+'  me = u;',
+'  document.getElementById("who").textContent = u.name + " (" + u.phone + ")";',
+'  load();',
+'});',
+'',
+'function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){',
+'  return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;"}[c]; }); }',
+'',
+'function load(){',
+'  AppDB.list().then(function(rows){',
+'    var html = "";',
+'    for (var i=0;i<rows.length;i++){',
+'      var r = rows[i];',
+'      html += \'<div class="item"><div><div>\' + esc(r.data.text) + \'</div>\' +',
+'              \'<div class="who">\' + esc(r.user_name) + " • " + new Date(r.created_at).toLocaleString() + \'</div></div>\' +',
+'              \'<button class="del" data-id="\' + r.id + \'">✕</button></div>\';',
+'    }',
+'    document.getElementById("list").innerHTML = html || \'<div style="color:#64748b">ابھی کچھ نہیں</div>\';',
+'    var btns = document.querySelectorAll(".del");',
+'    for (var j=0;j<btns.length;j++){',
+'      btns[j].onclick = function(){',
+'        var id = this.getAttribute("data-id");',
+'        AppDB.remove(id).then(load);',
+'      };',
+'    }',
+'  }).catch(function(e){',
+'    document.getElementById("list").innerHTML = \'<div style="color:#f87171">\' + esc(e.message) + \'</div>\';',
+'  });',
+'}',
+'',
+'function add(){',
+'  var v = document.getElementById("inp").value.trim();',
+'  if (!v) return;',
+'  AppDB.add({ text: v, at: new Date().toISOString() }).then(function(){',
+'    document.getElementById("inp").value = "";',
+'    load();',
+'  }).catch(function(e){ alert("Error: " + e.message); });',
+'}',
+'',
+'document.getElementById("addBtn").onclick = add;',
+'document.getElementById("inp").addEventListener("keydown", function(e){',
+'  if (e.key === "Enter") add();',
+'});',
+'<\/scr' + 'ipt>',
+'</body>',
+'</html>'
+].join("\n");
+
+/* =========================================================
+   REFRESH
+   ========================================================= */
+async function refreshAll() {
+  if (!S.user) return;
+  setStatus("Syncing...", "busy");
+  const data = await dbLoadFiles();
+  if (data) {
+    S.files = data;
+    cacheSave();
+    setStatus("Synced ✔", "ok");
+  }
+  renderList();
+  if (S.currentId) {
+    const still = S.files.find(f => f.id === S.currentId);
+    if (!still) { S.currentId = null; hide(q("editorPane")); show(q("editorEmpty")); }
+  }
+}
+
+/* =========================================================
+   VIEWER MODE
+   ========================================================= */
+function initViewer(shareId) {
+  S.mode = "viewer";
+  hide(q("studio"));
+  show(q("viewer"));
+
+  (async () => {
+    if (!sb) { q("viewerTitle").textContent = "Error"; return; }
+
+    const { data, error } = await sb
+      .from("app_files")
+      .select("*")
+      .eq("share_id", shareId)
+      .maybeSingle();
+
+    if (error || !data) {
+      q("viewerTitle").textContent = "فائل نہیں ملی";
+      q("viewerFrame").srcdoc =
+        '<div style="font-family:system-ui;padding:40px;text-align:center;color:#334155">' +
+        '<h2>404 -- فائل موجود نہیں</h2><p>لنک غلط ہے یا فائل ڈیلیٹ ہو گئی ہے۔</p></div>';
+      return;
+    }
+
+    if (!data.is_public) {
+      q("viewerTitle").textContent = data.name;
+      q("viewerFrame").srcdoc =
+        '<div style="font-family:system-ui;padding:40px;text-align:center;color:#334155">' +
+        '<h2>🔒 یہ فائل Publish نہیں ہے</h2><p>مالک نے اسے ابھی شائع نہیں کیا۔</p></div>';
+      return;
+    }
+
+    S.viewFile = data;
+    q("viewerTitle").textContent = data.name || "App";
+    document.title = data.name || "App";
+
+    const existing = getUser();
+    if (existing) {
+      S.viewUser = existing;
+      startViewerApp();
+    } else {
+      q("loginTitle").textContent = "داخل ہوں";
+      q("loginSub").textContent = "اس ایپ میں داخل ہونے کے لیے نام اور موبائل نمبر دیں";
+      askLogin((u) => {
+        S.viewUser = u;
+        startViewerApp();
+      });
+    }
+  })();
+}
+
+function startViewerApp() {
+  if (!S.viewFile || !S.viewUser) return;
+  q("viewerUser").textContent = "👤 " + S.viewUser.name;
+  q("viewerFrame").srcdoc = injectBridge(S.viewFile.html || "");
+  document.title = S.viewFile.name || "App";
+}
+
+q("viewerSwitch").onclick = () => {
+  if (confirm("لاگ آؤٹ کر کے دوبارہ لاگ ان کریں؟")) {
+    localStorage.removeItem(LS.user);
+    location.reload();
+  }
+};
+
+/* =========================================================
+   BRIDGE -- parent side
+   ========================================================= */
+window.addEventListener("message", async (e) => {
+  const m = e.data;
+  if (!m || m.__appdb !== 1) return;
+
+  const { id, type, payload } = m;
+  const src = e.source;
+  const reply = (result, error) => {
+    try { src.postMessage({ __appdb_res: 1, id, result: result === undefined ? null : result, error: error || null }, "*"); }
+    catch (_) {}
+  };
+
+  if (!S.viewFile || !S.viewUser) return reply(null, "Not logged in");
+  if (!sb) return reply(null, "Supabase unavailable");
+
+  try {
+    if (type === "getUser") {
+      return reply({ name: S.viewUser.name, phone: S.viewUser.phone, file: S.viewFile.name });
+    }
+
+    if (type === "list") {
+      const { data, error } = await sb
+        .from("file_entries")
+        .select("*")
+        .eq("file_id", S.viewFile.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return reply(data || []);
+    }
+
+    if (type === "add") {
+      const row = {
+        file_id: S.viewFile.id,
+        user_phone: S.viewUser.phone,
+        user_name: S.viewUser.name,
+        data: (payload && payload.data) || {}
+      };
+      const { data, error } = await sb.from("file_entries").insert(row).select().single();
+      if (error) throw error;
+      return reply(data);
+    }
+
+    if (type === "update") {
+      const { data, error } = await sb
+        .from("file_entries")
+        .update({ data: (payload && payload.data) || {}, updated_at: new Date().toISOString() })
+        .eq("id", payload.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return reply(data);
+    }
+
+    if (type === "remove") {
+      const { error } = await sb.from("file_entries").delete().eq("id", payload.id);
+      if (error) throw error;
+      return reply(true);
+    }
+
+    reply(null, "Unknown type: " + type);
+  } catch (err) {
+    reply(null, (err && err.message) ? err.message : String(err));
+  }
+});
+
+/* =========================================================
+   MISC UI
+   ========================================================= */
+q("menuBtn").onclick = () => q("sidebar").classList.toggle("open");
+
+q("codeInput").addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const ta = e.target;
+    const s = ta.selectionStart, en = ta.selectionEnd;
+    ta.value = ta.value.substring(0, s) + "  " + ta.value.substring(en);
+    ta.selectionStart = ta.selectionEnd = s + 2;
+    markDirty();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+    e.preventDefault();
+    flushSave(true);
+  }
+});
+
+window.addEventListener("beforeunload", (e) => {
+  if (S.dirty && !S.autoSync) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+(async function init() {
+  S.autoSync = lsGet(LS.sync, true);
+  S.autoBackup = lsGet(LS.backup, true);
+  applyToggles();
+
+  const params = new URLSearchParams(location.search);
+  const viewId = params.get("view");
+
+  if (viewId) {
+    initViewer(viewId);
+    return;
+  }
+
+  // ---- studio mode ----
+  hide(q("viewer"));
+  show(q("studio"));
+
+  // instant local cache
+  const cached = lsGet(LS.cache, []);
+  if (Array.isArray(cached) && cached.length) {
+    S.files = cached;
+    renderList();
+  }
+
+  askLogin(async (user) => {
+    S.user = user;
+    await refreshAll();
+    if (!S.files.length && S.dbOk) {
+      // nothing yet -- user can create
+    }
+  });
+})();
+</script>
+</body>
+</html>
