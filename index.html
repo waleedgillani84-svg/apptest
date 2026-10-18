@@ -1,0 +1,2028 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Gillani Suite</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;margin:0;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+.tab-content{display:none}
+.tab-content.active{display:block}
+#screen-home{padding-bottom:100px}
+#screen-pos,#screen-whatsdirect{padding-bottom:100px}
+#screen-cashbook{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+
+/* ===== CENTERED HEADERS ===== */
+.home-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(226,232,240,.7)}
+.dark .home-header{background:rgba(15,23,42,.9);border-color:rgba(51,65,85,.7)}
+.header-row{max-width:520px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;justify-content:center;position:relative;min-height:56px}
+.header-center{display:flex;align-items:center;gap:10px;justify-content:center;flex:1}
+.header-actions{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;gap:6px}
+.header-left-btn{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
+
+.brand-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(99,102,241,.3);flex-shrink:0}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:#f1f5f9;border:none;display:flex;align-items:center;justify-content:center;color:#475569;cursor:pointer;transition:transform .12s;font-family:inherit;flex-shrink:0;position:relative}
+.dark .icon-btn{background:#1e293b;color:#cbd5e1}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn .badge{position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid #fff}
+.dark .icon-btn .badge{border-color:#0f172a}
+.back-btn{width:36px;height:36px;border-radius:10px;background:#f1f5f9;border:none;display:flex;align-items:center;justify-content:center;color:#475569;cursor:pointer;font-family:inherit;flex-shrink:0}
+.dark .back-btn{background:#1e293b;color:#cbd5e1}
+.back-btn:active{transform:scale(.9)}
+
+.apps-list{display:flex;flex-direction:column;gap:12px;padding:20px 16px}
+.app-tile{display:flex;align-items:center;gap:14px;padding:18px 16px;border-radius:22px;border:none;cursor:pointer;text-align:left;width:100%;transition:transform .12s;box-shadow:0 4px 20px rgba(0,0,0,.07);color:#1e293b;font-family:inherit;font-size:14px}
+.app-tile:active{transform:scale(.97)}
+.app-tile.blue{background:linear-gradient(135deg,#dbeafe,#93c5fd);color:#1e3a8a}
+.dark .app-tile.blue{background:linear-gradient(135deg,#1e40af,#1e3a8a);color:#dbeafe;box-shadow:0 4px 20px rgba(30,64,175,.4)}
+.app-tile.orange{background:linear-gradient(135deg,#fed7aa,#fdba74);color:#c2410c}
+.dark .app-tile.orange{background:linear-gradient(135deg,#9a3412,#7c2d12);color:#fed7aa;box-shadow:0 4px 20px rgba(154,52,18,.4)}
+.app-tile.green{background:linear-gradient(135deg,#bbf7d0,#86efac);color:#15803d}
+.dark .app-tile.green{background:linear-gradient(135deg,#166534,#14532d);color:#bbf7d0;box-shadow:0 4px 20px rgba(22,101,52,.4)}
+.app-tile.violet{background:linear-gradient(135deg,#e9d5ff,#c4b5fd);color:#5b21b6}
+.dark .app-tile.violet{background:linear-gradient(135deg,#5b21b6,#4c1d95);color:#e9d5ff;box-shadow:0 4px 20px rgba(91,33,182,.4)}
+.app-tile-icon{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.dark .app-tile-icon{background:rgba(255,255,255,.15)}
+.app-tile-info{flex:1;min-width:0}
+.app-tile-name{font-size:15px;font-weight:800;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-tile-desc{font-size:11px;opacity:.75;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-tile-badge{padding:4px 9px;border-radius:8px;background:rgba(255,255,255,.55);font-size:10px;font-weight:800;flex-shrink:0}
+.dark .app-tile-badge{background:rgba(255,255,255,.2)}
+.app-tile-arrow{font-size:13px;opacity:.4;flex-shrink:0}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(226,232,240,.7);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));z-index:30;max-width:520px;margin:0 auto}
+.dark .bottom-nav{background:rgba(15,23,42,.96);border-color:rgba(51,65,85,.7)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:9px;font-weight:700;letter-spacing:.3px;transition:color .15s;position:relative;font-family:inherit}
+.nav-item.active{color:#3b82f6}
+.nav-item.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:0 0 3px 3px;background:#3b82f6}
+.nav-icon{font-size:19px;line-height:1}
+
+.cashbook-actions{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom,0px));left:0;right:0;display:grid;grid-template-columns:1fr 1fr 0.6fr;gap:8px;padding:10px 12px;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(226,232,240,.7);z-index:25;max-width:520px;margin:0 auto}
+.dark .cashbook-actions{background:rgba(15,23,42,.96);border-color:rgba(51,65,85,.7)}
+.action-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 8px;border-radius:12px;font-size:12px;font-weight:800;border:none;cursor:pointer;transition:transform .12s;font-family:inherit;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.action-btn:active{transform:scale(.95)}
+.action-btn.in{background:linear-gradient(135deg,#10b981,#059669)}
+.action-btn.out{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.action-btn.stats{background:linear-gradient(135deg,#1e293b,#0f172a)}
+.action-btn i{font-size:14px}
+
+.app-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(226,232,240,.7)}
+.dark .app-header{background:rgba(15,23,42,.9);border-color:rgba(51,65,85,.7)}
+.header-search{max-width:520px;margin:0 auto;padding:0 14px 10px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* Filter banner */
+.filter-banner{max-width:520px;margin:0 auto;padding:0 14px 8px;display:none}
+.filter-banner.show{display:block}
+.filter-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:600;color:#1e40af}
+.dark .filter-banner-inner{background:rgba(30,64,175,.15);border-color:#1e40af;color:#bfdbfe}
+.filter-banner-inner button{background:none;border:none;color:inherit;cursor:pointer;font-size:11px;font-weight:800;font-family:inherit;padding:2px 6px;border-radius:6px}
+.filter-banner-inner button:hover{background:rgba(255,255,255,.4)}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.modal.center{align-items:center}
+.modal-box{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:20px 16px;animation:slideUp .3s ease}
+.dark .modal-box{background:#1e293b;color:#e2e8f0}
+.modal-box.center{border-radius:16px;max-width:380px;animation:popIn .2s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.form-input{width:100%;padding:10px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#0f172a;font-family:inherit;outline:none;transition:border-color .2s}
+.dark .form-input{background:#0f172a;border-color:#334155;color:#e2e8f0}
+.form-input:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+.form-label{display:block;font-size:10px;color:#64748b;margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.dark .form-label{color:#94a3b8}
+.btn{background:#10b981;color:#fff;font-weight:700;border:none;border-radius:10px;padding:11px 16px;font-size:14px;cursor:pointer;width:100%;transition:transform .12s;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn-outline{background:transparent;border:1.5px solid #cbd5e1;color:#475569;border-radius:10px;padding:9px 14px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit}
+.dark .btn-outline{border-color:#475569;color:#cbd5e1}
+.btn-danger{background:#ef4444;color:#fff;font-weight:600;border:none;border-radius:10px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px}
+.dark .card{background:#1e293b;border-color:#334155}
+.balance-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:9px 6px;text-align:center}
+.dark .balance-card{background:#1e293b;border-color:#334155}
+.balance-card .label{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.dark .balance-card .label{color:#94a3b8}
+.balance-card .value{font-size:14px;font-weight:800}
+.entry-item{display:flex;align-items:center;padding:9px 10px;border-radius:10px;background:#fff;border:1px solid #e2e8f0;border-left:3px solid transparent;gap:8px;margin-bottom:6px}
+.dark .entry-item{background:#1e293b;border-color:#334155}
+.entry-item.in{border-left-color:#10b981}
+.entry-item.out{border-left-color:#ef4444}
+.chip{padding:6px 12px;border-radius:20px;border:1px solid #cbd5e1;background:#fff;color:#64748b;font-size:12px;cursor:pointer;font-weight:600;font-family:inherit}
+.dark .chip{background:#0f172a;border-color:#334155;color:#94a3b8}
+.chip.active{background:#10b981;border-color:#10b981;color:#fff}
+.trash-item{display:flex;align-items:center;gap:8px;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:6px}
+.dark .trash-item{background:#0f172a;border-color:#334155}
+.acct-item{display:flex;align-items:center;gap:10px;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;margin-bottom:6px}
+.dark .acct-item{background:#0f172a;border-color:#334155}
+.acct-item.active{border-color:#10b981;background:#ecfdf5}
+.dark .acct-item.active{background:rgba(16,185,129,.1)}
+.tab-pill{padding:8px 16px;border-radius:20px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.dark .tab-pill{background:#0f172a;border-color:#334155;color:#94a3b8}
+.tab-pill.active{background:#10b981;color:#fff;border-color:#10b981}
+.friend-card{display:flex;align-items:center;gap:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:8px}
+.dark .friend-card{background:#0f172a;border-color:#334155}
+.friend-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-20px);background:#1e293b;color:#fff;padding:11px 18px;border-radius:22px;font-size:13px;font-weight:600;z-index:500;opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.dark{color-scheme:dark}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:rgba(156,163,175,.4);border-radius:9999px}
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *,#stmtPreview,#stmtPreview *{visibility:visible!important}
+  #printArea,#stmtPreview{position:absolute;left:0;top:0;width:100%;padding:20px;background:#fff!important}
+}
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+
+<!-- ==================== HOME ==================== -->
+<div id="screen-home" class="screen active">
+  <header class="home-header">
+    <div class="header-row">
+      <div class="header-center">
+        <div class="brand-icon">🏛️</div>
+        <div class="text-center">
+          <h1 class="font-black text-base leading-tight">Gillani Suite</h1>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold" id="homeDate">--</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openModal('friendsModal')" title="Friends">
+          <i class="fa-solid fa-user-group text-sm"></i>
+          <span id="friendReqBadge" class="badge hidden">0</span>
+        </button>
+        <button class="icon-btn" onclick="toggleDark()"><i class="fa-solid fa-moon text-sm" id="darkIcon"></i></button>
+        <button class="icon-btn" onclick="openModal('settingsModal')"><i class="fa-solid fa-gear text-sm"></i></button>
+      </div>
+    </div>
+  </header>
+  <div class="max-w-lg mx-auto">
+    <div class="apps-list">
+      <button class="app-tile blue" onclick="openApp('cashbook')">
+        <div class="app-tile-icon">💳</div>
+        <div class="app-tile-info"><div class="app-tile-name">Cashbook Pro</div><div class="app-tile-desc">Multi-account ledger & reports</div></div>
+        <div class="app-tile-badge" id="hCbCount">0</div>
+        <div class="app-tile-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </button>
+      <button class="app-tile orange" onclick="openApp('pos')">
+        <div class="app-tile-icon">🧾</div>
+        <div class="app-tile-info"><div class="app-tile-name">Gillani POS</div><div class="app-tile-desc">Receipt generator & history</div></div>
+        <div class="app-tile-badge" id="hSlipCount">0</div>
+        <div class="app-tile-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </button>
+      <button class="app-tile green" onclick="openApp('whatsdirect')">
+        <div class="app-tile-icon"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="app-tile-info"><div class="app-tile-name">WhatsDirect</div><div class="app-tile-desc">Contacts & direct chat</div></div>
+        <div class="app-tile-badge" id="hContactCount">0</div>
+        <div class="app-tile-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </button>
+      <button class="app-tile violet" onclick="openModal('friendsModal')">
+        <div class="app-tile-icon">👥</div>
+        <div class="app-tile-info"><div class="app-tile-name">Friends</div><div class="app-tile-desc">Add friends & view their data</div></div>
+        <div class="app-tile-badge" id="hFriendCount">0</div>
+        <div class="app-tile-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      </button>
+    </div>
+    <div class="text-center text-[10px] text-slate-400 dark:text-slate-500 py-4 px-6"><i class="fa-solid fa-shield-halved mr-1"></i> All data stored locally on your device</div>
+  </div>
+</div>
+
+<!-- ==================== CASHBOOK ==================== -->
+<div id="screen-cashbook" class="screen">
+  <header class="app-header">
+    <div class="header-row">
+      <div class="header-left-btn">
+        <button class="back-btn" onclick="openApp('home')"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+      </div>
+      <div class="header-center">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm">💳</div>
+        <div class="text-center"><h1 class="font-bold text-sm">Cashbook Pro</h1><p class="text-[10px] text-slate-500">Multi-Account Ledger</p></div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openModal('cbMoreModal')"><i class="fa-solid fa-ellipsis-vertical text-sm"></i></button>
+      </div>
+    </div>
+    <div class="header-search">
+      <div onclick="openAccountModal()" class="flex-1 flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 cursor-pointer">
+        <span id="cbIcon" class="text-sm">💵</span>
+        <span id="cbName" class="flex-1 text-xs font-bold truncate">Main Cash</span>
+        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+      </div>
+      <button onclick="openFilterModal()" class="w-9 h-9 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center relative">
+        <i class="fa-solid fa-magnifying-glass text-xs text-slate-500"></i>
+        <span id="cbFilterDot" class="hidden absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500"></span>
+      </button>
+    </div>
+    <div class="filter-banner" id="cbFilterBanner">
+      <div class="filter-banner-inner">
+        <span><i class="fa-solid fa-filter mr-1"></i> <span id="cbFilterBannerText">Filtered</span> -- totals below show filtered results</span>
+        <button onclick="resetCbFilters()">✕ Clear</button>
+      </div>
+    </div>
+  </header>
+  <main class="max-w-4xl mx-auto px-3 py-3">
+    <div class="grid grid-cols-3 gap-2 mb-3">
+      <div class="balance-card"><div class="label">Net</div><div id="cbNet" class="value text-blue-600">Rs 0</div></div>
+      <div class="balance-card"><div class="label">In</div><div id="cbIn" class="value text-emerald-600">Rs 0</div></div>
+      <div class="balance-card"><div class="label">Out</div><div id="cbOut" class="value text-red-600">Rs 0</div></div>
+    </div>
+    <div class="flex items-center justify-between mb-2">
+      <h3 id="cbEntryCount" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">0 Entries</h3>
+      <button onclick="openStatementExport()" class="text-xs text-blue-600 dark:text-blue-400 font-semibold"><i class="fa-solid fa-file-export"></i> Statement</button>
+    </div>
+    <div id="cbEntries"></div>
+    <div id="cbEmpty" class="text-center py-10 text-slate-400 text-xs">
+      <i class="fa-solid fa-inbox text-4xl mb-2 opacity-40 block"></i>
+      <p>No entries yet. Tap <b>Cash In</b> or <b>Cash Out</b> below.</p>
+    </div>
+  </main>
+  <div class="cashbook-actions">
+    <button class="action-btn in" onclick="openEntryModal('in')"><i class="fa-solid fa-arrow-down"></i> Cash In</button>
+    <button class="action-btn out" onclick="openEntryModal('out')"><i class="fa-solid fa-arrow-up"></i> Cash Out</button>
+    <button class="action-btn stats" onclick="openAnalyticsModal()"><i class="fa-solid fa-chart-simple"></i> Stats</button>
+  </div>
+</div>
+
+<!-- ==================== POS ==================== -->
+<div id="screen-pos" class="screen">
+  <header class="app-header">
+    <div class="header-row">
+      <div class="header-left-btn">
+        <button class="back-btn" onclick="openApp('home')"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+      </div>
+      <div class="header-center">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center text-white text-sm">🧾</div>
+        <div class="text-center"><h1 class="font-bold text-sm">Gillani POS</h1><p class="text-[10px] text-slate-500">Receipt Generator</p></div>
+      </div>
+    </div>
+  </header>
+  <main class="max-w-4xl mx-auto px-3 py-3">
+    <div class="flex gap-2 mb-3 overflow-x-auto pb-1 justify-center">
+      <button class="tab-pill active" data-pos-tab="slip" onclick="switchPosTab('slip')">📝 New</button>
+      <button class="tab-pill" data-pos-tab="history" onclick="switchPosTab('history')">📚 History</button>
+      <button class="tab-pill" data-pos-tab="settings" onclick="switchPosTab('settings')">⚙️ Settings</button>
+    </div>
+    <div id="pos-tab-slip" class="tab-content active">
+      <div class="card mb-3">
+        <div class="mb-3"><label class="form-label">Customer</label><select id="slipContact" onchange="onSlipContactChange()" class="form-input"><option value="">-- Walk-in --</option></select></div>
+        <div class="mb-3"><label class="form-label">Or Custom Name</label><input type="text" id="slipCustomName" placeholder="Customer name" class="form-input"></div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <div><label class="form-label">Amount (Rs) *</label><input type="number" id="slipAmount" placeholder="0" class="form-input" style="font-weight:700;font-size:16px;color:#10b981"></div>
+          <div><label class="form-label">Note</label><input type="text" id="slipNote" placeholder="Optional" class="form-input"></div>
+        </div>
+        <button class="btn" onclick="createSlip()"><i class="fa-solid fa-receipt"></i> Generate Slip</button>
+      </div>
+    </div>
+    <div id="pos-tab-history" class="tab-content">
+      <div class="mb-3 flex gap-2 max-w-md mx-auto">
+        <input type="text" id="slipSearch" placeholder="Search..." oninput="renderSlips()" class="form-input flex-1">
+        <button onclick="clearAllSlips()" class="btn-danger text-xs px-3">Clear</button>
+      </div>
+      <div id="slipList" class="space-y-2"></div>
+      <div id="slipEmpty" class="text-center py-10 text-slate-400 text-xs"><i class="fa-solid fa-receipt text-4xl mb-2 opacity-40 block"></i><p>No slips yet</p></div>
+    </div>
+    <div id="pos-tab-settings" class="tab-content">
+      <div class="card mb-3"><h3 class="text-sm font-bold mb-2">🎨 Design</h3><div class="grid grid-cols-3 gap-2" id="posPresetGrid"></div></div>
+      <div class="card mb-3">
+        <h3 class="text-sm font-bold mb-2">🏪 Shop Info</h3>
+        <div class="space-y-2">
+          <input type="text" id="posShopName" placeholder="Shop Name" class="form-input">
+          <input type="text" id="posSubtitle" placeholder="Subtitle (optional)" class="form-input">
+          <input type="text" id="posFooter" placeholder="Footer" class="form-input">
+          <button onclick="saveShopInfo()" class="btn text-xs">Save</button>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <h3 class="text-sm font-bold mb-2">📞 Shop Numbers</h3>
+        <div id="posShopNumbers" class="space-y-1.5 mb-2"></div>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <input type="text" id="posNumName" placeholder="Name" class="form-input">
+          <input type="tel" id="posNumPhone" placeholder="Phone" class="form-input">
+        </div>
+        <button onclick="addShopNumber()" class="btn-outline w-full text-xs">+ Add</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ==================== WHATSDIRECT ==================== -->
+<div id="screen-whatsdirect" class="screen">
+  <header class="app-header">
+    <div class="header-row">
+      <div class="header-left-btn">
+        <button class="back-btn" onclick="openApp('home')"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+      </div>
+      <div class="header-center">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-700 flex items-center justify-center text-white"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="text-center"><h1 class="font-bold text-sm">WhatsDirect</h1><p class="text-[10px] text-slate-500">Contacts</p></div>
+      </div>
+      <div class="header-actions">
+        <button onclick="openWAContactModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold"><i class="fa-solid fa-user-plus"></i> Add</button>
+      </div>
+    </div>
+    <div class="header-search">
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="waSearch" oninput="renderWAContacts()" placeholder="Search contacts..." class="w-full pl-8 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
+      </div>
+      <input type="tel" id="waQuickPhone" placeholder="Quick number..." class="w-32 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
+      <button onclick="waQuickChat()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold"><i class="fa-brands fa-whatsapp"></i></button>
+    </div>
+  </header>
+  <main class="max-w-4xl mx-auto px-3 py-3">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Contacts <span id="waCount" class="bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded-full text-[10px]">0</span></h3>
+      <button onclick="openTrash('contacts')" class="text-xs text-red-500 font-bold"><i class="fa-solid fa-trash"></i> Trash</button>
+    </div>
+    <div id="waGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    <div id="waEmpty" class="text-center py-10 text-slate-400 text-xs"><i class="fa-solid fa-address-book text-4xl mb-2 opacity-40 block"></i><p>No contacts yet</p></div>
+  </main>
+</div>
+
+<!-- ==================== SHARED ==================== -->
+<div id="screen-shared" class="screen">
+  <header class="app-header">
+    <div class="header-row">
+      <div class="header-left-btn">
+        <button class="back-btn" onclick="closeSharedView()"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+      </div>
+      <div class="header-center">
+        <div class="text-center"><h1 class="font-bold text-sm" id="sharedTitle">📊 Shared Data</h1><p class="text-[10px] text-slate-500" id="sharedLabel">Read-only</p></div>
+      </div>
+    </div>
+  </header>
+  <main class="max-w-4xl mx-auto px-3 py-3"><div id="sharedContent"></div></main>
+</div>
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" data-nav="home" onclick="openApp('home')"><i class="fa-solid fa-house nav-icon"></i><span>Home</span></button>
+  <button class="nav-item" data-nav="cashbook" onclick="openApp('cashbook')"><i class="fa-solid fa-wallet nav-icon"></i><span>Cashbook</span></button>
+  <button class="nav-item" data-nav="pos" onclick="openApp('pos')"><i class="fa-solid fa-receipt nav-icon"></i><span>POS</span></button>
+  <button class="nav-item" data-nav="whatsdirect" onclick="openApp('whatsdirect')"><i class="fa-solid fa-address-book nav-icon"></i><span>Contacts</span></button>
+</nav>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Friends Modal -->
+<div id="friendsModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold"><i class="fa-solid fa-user-group text-violet-600"></i> Friends</h3>
+      <button onclick="closeModal('friendsModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- My ID -->
+    <div class="p-3 mb-3 bg-violet-50 dark:bg-violet-950/40 rounded-xl border border-violet-200 dark:border-violet-800">
+      <p class="text-[10px] font-bold text-violet-700 dark:text-violet-300 uppercase mb-1">My Friend ID</p>
+      <div class="flex items-center gap-2">
+        <input type="text" id="myFriendId" readonly class="flex-1 text-[11px] font-mono bg-white dark:bg-slate-900 border border-violet-200 dark:border-violet-800 rounded-lg px-2 py-1.5" value="--">
+        <button onclick="copyMyFriendId()" class="px-2.5 py-1.5 bg-violet-600 text-white rounded-lg text-[10px] font-bold"><i class="fa-solid fa-copy"></i></button>
+      </div>
+      <p class="text-[9px] text-slate-500 dark:text-slate-400 mt-1.5">Share this ID with friends so they can send you a request.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-3 overflow-x-auto justify-center">
+      <button class="tab-pill active" data-fr-tab="add" onclick="switchFriendTab('add')">➕ Add</button>
+      <button class="tab-pill" data-fr-tab="incoming" onclick="switchFriendTab('incoming')">📥 Incoming <span id="incomingCount" class="ml-1 bg-red-500 text-white text-[9px] px-1 rounded-full hidden">0</span></button>
+      <button class="tab-pill" data-fr-tab="outgoing" onclick="switchFriendTab('outgoing')">📤 Sent</button>
+      <button class="tab-pill" data-fr-tab="friends" onclick="switchFriendTab('friends')">👥 Friends</button>
+    </div>
+
+    <div id="fr-tab-add" class="tab-content active">
+      <label class="form-label">Friend's ID or Phone</label>
+      <input type="text" id="frTargetId" placeholder="Paste friend ID or phone number" class="form-input mb-2">
+      <label class="form-label">Your Name</label>
+      <input type="text" id="frMyName" placeholder="Your name" class="form-input mb-3">
+      <button class="btn" onclick="sendFriendRequest()"><i class="fa-solid fa-paper-plane"></i> Send Request</button>
+      <p class="text-[10px] text-slate-500 mt-2 text-center">Your friend must share their ID with you first.</p>
+    </div>
+
+    <div id="fr-tab-incoming" class="tab-content">
+      <div id="frIncomingList" class="space-y-2"></div>
+      <div id="frIncomingEmpty" class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-inbox text-3xl mb-2 opacity-40 block"></i>No incoming requests</div>
+    </div>
+
+    <div id="fr-tab-outgoing" class="tab-content">
+      <div id="frOutgoingList" class="space-y-2"></div>
+      <div id="frOutgoingEmpty" class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-paper-plane text-3xl mb-2 opacity-40 block"></i>No sent requests</div>
+    </div>
+
+    <div id="fr-tab-friends" class="tab-content">
+      <div id="frFriendsList" class="space-y-2"></div>
+      <div id="frFriendsEmpty" class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-user-group text-3xl mb-2 opacity-40 block"></i>No friends yet</div>
+    </div>
+  </div>
+</div>
+
+<!-- Friend request received (auto-popup) -->
+<div id="friendReqReceivedModal" class="modal center">
+  <div class="modal-box center">
+    <div class="text-center mb-3">
+      <div class="w-12 h-12 rounded-2xl bg-violet-100 text-violet-600 flex items-center justify-center mx-auto text-2xl mb-2">👋</div>
+      <h3 id="frReqTitle" class="text-base font-bold mb-1">Friend Request</h3>
+      <p id="frReqMsg" class="text-xs text-slate-500"></p>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="declineIncomingFromPopup()" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Decline</button>
+      <button onclick="acceptIncomingFromPopup()" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white font-semibold text-xs">Accept</button>
+    </div>
+  </div>
+</div>
+
+<!-- View friend's data -->
+<div id="friendDataModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold"><i class="fa-solid fa-user-group text-violet-600"></i> <span id="friendDataName">Friend's Data</span></h3>
+      <button onclick="closeModal('friendDataModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="friendDataContent"></div>
+  </div>
+</div>
+
+<div id="cbMoreModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">⚙️ Cashbook Options</h3>
+      <button onclick="closeModal('cbMoreModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-1.5">
+      <button onclick="closeModal('cbMoreModal');openAnalyticsModal()" class="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-700 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-chart-line text-blue-500 w-5"></i> Analytics</button>
+      <button onclick="closeModal('cbMoreModal');openAccountModal()" class="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-700 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-wallet text-purple-500 w-5"></i> Manage Accounts</button>
+      <button onclick="closeModal('cbMoreModal');openTrash('cashbook')" class="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-700 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-trash text-red-500 w-5"></i> Trash</button>
+      <button onclick="closeModal('cbMoreModal');openModal('settingsModal')" class="w-full p-3 rounded-lg bg-slate-50 dark:bg-slate-700 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-gear text-slate-500 w-5"></i> App Settings</button>
+    </div>
+  </div>
+</div>
+
+<div id="waContactModal" class="modal center">
+  <div class="modal-box center">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 id="waContactTitle" class="text-base font-bold"><i class="fa-solid fa-user-plus text-emerald-600"></i> Add Contact</h3>
+      <button onclick="closeModal('waContactModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form onsubmit="saveWAContact(event)" class="space-y-3">
+      <input type="hidden" id="waContactId">
+      <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+        <img id="waPicPreview" src="https://placehold.co/80x80/e2e8f0/64748b?text=?" class="w-14 h-14 rounded-full object-cover border-2 border-emerald-500/30" alt="">
+        <div class="flex-1">
+          <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Photo</label>
+          <input type="file" id="waPicInput" accept="image/*" onchange="handleWAPic(event)" class="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700">
+          <p id="waPicSize" class="text-[10px] text-slate-400 mt-1">~0 KB</p>
+        </div>
+      </div>
+      <div><label class="form-label">Name *</label><input type="text" id="waName" required class="form-input"></div>
+      <div>
+        <label class="form-label">Phone *</label>
+        <div class="flex gap-2">
+          <select id="waCC" class="form-input" style="width:auto"><option value="+92">🇵🇰 +92</option><option value="+91">🇮🇳 +91</option><option value="+1">🇺🇸 +1</option><option value="+44">🇬🇧 +44</option><option value="+971">🇦🇪 +971</option></select>
+          <input type="tel" id="waPhone" required placeholder="3001234567" class="form-input flex-1">
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeModal('waContactModal')" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Cancel</button>
+        <button type="submit" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white font-semibold text-xs">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="imageModal" class="modal center" onclick="closeModal('imageModal')">
+  <div class="relative max-w-lg w-full p-2" onclick="event.stopPropagation()">
+    <button onclick="closeModal('imageModal')" class="absolute -top-10 right-0 w-9 h-9 rounded-full bg-white/20 text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    <div class="text-center text-white mb-2"><h3 id="imgName" class="font-bold text-base"></h3><p id="imgPhone" class="text-xs text-slate-300"></p></div>
+    <div class="bg-slate-900 rounded-2xl overflow-hidden max-h-[75vh] flex items-center justify-center"><img id="imgLarge" src="" class="max-h-[75vh] max-w-full object-contain" alt=""></div>
+  </div>
+</div>
+
+<div id="slipModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold"><i class="fa-solid fa-receipt text-orange-600"></i> Slip Preview</h3>
+      <button onclick="closeModal('slipModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="printArea" class="overflow-auto mb-3" style="max-height:60vh"></div>
+    <div class="grid grid-cols-3 gap-2">
+      <button onclick="shareSlipWhatsApp()" class="bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+      <button onclick="downloadSlipPNG()" class="bg-blue-600 text-white font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-download"></i> PNG</button>
+      <button onclick="window.print()" class="bg-slate-700 text-white font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-print"></i> Print</button>
+    </div>
+  </div>
+</div>
+
+<div id="entryModal" class="modal center">
+  <div class="modal-box center">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 id="entryTitle" class="text-sm font-bold">Add Entry</h3>
+      <button onclick="closeModal('entryModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form onsubmit="saveCbEntry(event)" class="space-y-2">
+      <input type="hidden" id="cbEntryType">
+      <div><label class="form-label">Amount (Rs) *</label><input type="number" id="cbAmount" required placeholder="0" class="form-input" style="font-weight:700;font-size:16px"></div>
+      <div><label class="form-label">Details</label><input type="text" id="cbDetail" placeholder="Name / purpose" class="form-input"></div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeModal('entryModal')" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Cancel</button>
+        <button type="submit" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-semibold text-xs">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="cbAccountModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">💳 Accounts</h3>
+      <button onclick="closeModal('cbAccountModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="cbAccountList" class="mb-3"></div>
+    <div>
+      <label class="form-label">New Account Name</label>
+      <input type="text" id="newCbAccountName" placeholder="e.g. Main Cash" class="form-input mb-2">
+      <div class="flex flex-wrap gap-1.5 mb-2" id="cbIconSel">
+        <span class="chip active" data-icon="💵" onclick="selectCbIcon(this)">💵</span>
+        <span class="chip" data-icon="👤" onclick="selectCbIcon(this)">👤</span>
+        <span class="chip" data-icon="💼" onclick="selectCbIcon(this)">💼</span>
+        <span class="chip" data-icon="🏦" onclick="selectCbIcon(this)">🏦</span>
+        <span class="chip" data-icon="💰" onclick="selectCbIcon(this)">💰</span>
+      </div>
+      <button class="btn text-xs" onclick="addCbAccount()">+ Add Account</button>
+    </div>
+  </div>
+</div>
+
+<div id="cbFilterModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">🔍 Filters</h3>
+      <button onclick="closeModal('cbFilterModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="space-y-3">
+      <div><label class="form-label">Search</label><input type="text" id="cbSearchInput" class="form-input" placeholder="Amount or details..."></div>
+      <div><label class="form-label">Scope</label><div class="flex gap-2"><button class="chip active" data-cbf="scope" data-val="current" onclick="selectChip(this)">Current</button><button class="chip" data-cbf="scope" data-val="all" onclick="selectChip(this)">All</button></div></div>
+      <div><label class="form-label">From</label><input type="date" id="cbFilterFrom" class="form-input"></div>
+      <div><label class="form-label">To</label><input type="date" id="cbFilterTo" class="form-input"></div>
+      <div><label class="form-label">Type</label><div class="flex gap-2"><button class="chip active" data-cbf="type" data-val="all" onclick="selectChip(this)">All</button><button class="chip" data-cbf="type" data-val="in" onclick="selectChip(this)">+ In</button><button class="chip" data-cbf="type" data-val="out" onclick="selectChip(this)">- Out</button></div></div>
+      <div class="flex gap-2"><button onclick="resetCbFilters()" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Clear</button><button onclick="applyCbFilters()" class="flex-1 py-2 rounded-lg bg-blue-600 text-white font-semibold text-xs">Apply</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="cbActionModal" class="modal center" onclick="closeModal('cbActionModal')">
+  <div class="modal-box center" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-2">
+      <h3 class="text-sm font-bold">⚙️ Actions</h3>
+      <button onclick="closeModal('cbActionModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="cbActionPreview" class="p-2 mb-2 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-xs"></div>
+    <button onclick="cbActionEdit()" class="w-full p-2.5 rounded-lg mb-1.5 bg-slate-50 dark:bg-slate-700 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-pen text-blue-600"></i> Edit</button>
+    <button onclick="cbActionMoveAccount()" class="w-full p-2.5 rounded-lg mb-1.5 bg-slate-50 dark:bg-slate-700 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-right-left text-purple-600"></i> Move to Other Account</button>
+    <button onclick="cbActionDelete()" class="w-full p-2.5 rounded-lg bg-slate-50 dark:bg-slate-700 text-red-600 text-left flex items-center gap-2 font-semibold text-xs"><i class="fa-solid fa-trash"></i> Delete</button>
+  </div>
+</div>
+
+<div id="moveAccountModal" class="modal center">
+  <div class="modal-box center">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">🔀 Move to Account</h3>
+      <button onclick="closeModal('moveAccountModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="moveAccountList" class="space-y-1.5 mb-3"></div>
+    <button onclick="closeModal('moveAccountModal')" class="w-full py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Cancel</button>
+  </div>
+</div>
+
+<div id="stmtModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">📄 Statement</h3>
+      <button onclick="closeModal('stmtModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="bg-white text-slate-900 rounded-xl p-4 mb-3" id="stmtPreview"></div>
+    <div class="grid grid-cols-2 gap-2 mb-2">
+      <button onclick="downloadStatementPNG()" class="py-2 rounded-lg bg-emerald-600 text-white font-semibold text-xs">🖼️ PNG</button>
+      <button onclick="downloadStatementPDF()" class="py-2 rounded-lg bg-red-600 text-white font-semibold text-xs">📄 PDF</button>
+    </div>
+    <button onclick="window.print()" class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold text-xs">🖨️ Print / Save PDF</button>
+  </div>
+</div>
+
+<div id="analyticsModal" class="modal center">
+  <div class="modal-box center" style="max-width:420px">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">📊 Analytics</h3>
+      <button onclick="closeModal('analyticsModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <canvas id="anChart" width="400" height="200" style="width:100%;background:#f8fafc;border-radius:10px;padding:8px"></canvas>
+    <div class="grid grid-cols-3 gap-2 mt-3">
+      <div class="balance-card"><div class="label">In</div><div id="anIn" class="value text-emerald-600">Rs 0</div></div>
+      <div class="balance-card"><div class="label">Out</div><div id="anOut" class="value text-red-600">Rs 0</div></div>
+      <div class="balance-card"><div class="label">Net</div><div id="anNet" class="value text-blue-600">Rs 0</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="trashModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">🗑️ Trash</h3>
+      <button onclick="closeModal('trashModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="flex gap-2 mb-3 overflow-x-auto justify-center">
+      <button class="tab-pill active" data-trash-tab="contacts" onclick="switchTrashTab('contacts')">Contacts</button>
+      <button class="tab-pill" data-trash-tab="slips" onclick="switchTrashTab('slips')">Slips</button>
+      <button class="tab-pill" data-trash-tab="cashbook" onclick="switchTrashTab('cashbook')">Cashbook</button>
+    </div>
+    <div id="trashContent" style="max-height:50vh;overflow-y:auto"></div>
+    <div class="mt-3"><button class="btn-danger w-full" onclick="emptyAllTrash()">🗑️ Empty Trash</button></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">⚙️ Settings</h3>
+      <button onclick="closeModal('settingsModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mb-4 p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl border border-indigo-200 dark:border-indigo-800">
+      <h4 class="text-xs font-bold mb-1 text-indigo-700 dark:text-indigo-300">📦 Export App with Data</h4>
+      <p class="text-[10px] text-slate-600 dark:text-slate-400 mb-2">Single HTML file with all entries embedded. Works offline.</p>
+      <button onclick="exportEmbeddedHTML()" class="w-full py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs"><i class="fa-solid fa-file-code"></i> Download Full App</button>
+    </div>
+    <div class="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
+      <h4 class="text-xs font-bold mb-1 text-emerald-700 dark:text-emerald-300">🌐 Share Online</h4>
+      <p class="text-[10px] text-slate-600 dark:text-slate-400 mb-2">Generate a code. Anyone with it can view your data read-only.</p>
+      <button onclick="generateShareCode()" class="w-full py-2 rounded-lg bg-emerald-600 text-white font-bold text-xs mb-2"><i class="fa-solid fa-share-nodes"></i> Generate Code</button>
+      <div id="shareCodeBox" class="hidden mt-2 p-2 bg-white dark:bg-slate-900 rounded-lg border border-emerald-300">
+        <p class="text-[9px] font-bold text-slate-500 mb-1">CODE:</p>
+        <textarea id="shareCodeText" readonly class="w-full text-[9px] font-mono bg-slate-50 dark:bg-slate-800 p-2 rounded border-0 resize-none" rows="3"></textarea>
+        <div class="flex gap-1.5 mt-1.5">
+          <button onclick="copyShareCode()" class="flex-1 py-1.5 bg-emerald-600 text-white rounded text-[10px] font-bold">📋 Copy</button>
+          <button onclick="shareViaWhatsApp()" class="flex-1 py-1.5 bg-green-600 text-white rounded text-[10px] font-bold">💬 Share</button>
+        </div>
+      </div>
+      <button onclick="openViewSharedModal()" class="w-full py-2 mt-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs"><i class="fa-solid fa-eye"></i> View Someone's Data</button>
+    </div>
+    <div class="mb-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+      <h4 class="text-xs font-bold mb-2">💾 Backup</h4>
+      <div class="space-y-2">
+        <button onclick="exportBackup()" class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold text-xs">📥 Backup JSON</button>
+        <label class="w-full py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs text-center cursor-pointer block">📤 Restore JSON <input type="file" accept=".json" class="hidden" onchange="importBackup(event)"></label>
+      </div>
+    </div>
+    <div class="pt-3 border-t border-slate-200 dark:border-slate-700">
+      <button onclick="showResetConfirm()" class="w-full py-2 rounded-lg bg-red-600 text-white font-semibold text-xs">⚠️ Reset All Data</button>
+    </div>
+  </div>
+</div>
+
+<div id="viewSharedModal" class="modal center">
+  <div class="modal-box center">
+    <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700 mb-3">
+      <h3 class="text-sm font-bold">🔍 View Shared Data</h3>
+      <button onclick="closeModal('viewSharedModal')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mb-3"><label class="form-label">Paste Code</label><textarea id="viewCodeInput" placeholder="Paste the code..." rows="4" class="form-input" style="font-family:monospace;font-size:10px"></textarea></div>
+    <div class="flex gap-2">
+      <button onclick="closeModal('viewSharedModal')" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Cancel</button>
+      <button onclick="loadSharedData()" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white font-semibold text-xs"><i class="fa-solid fa-eye"></i> Load</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal center">
+  <div class="modal-box center">
+    <div class="text-center mb-3">
+      <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto text-2xl mb-2">⚠️</div>
+      <h3 id="confirmTitle" class="text-base font-bold mb-1">Confirm</h3>
+      <p id="confirmMsg" class="text-xs text-slate-500"></p>
+    </div>
+    <div id="confirmInputWrap" class="hidden mb-3"><input type="text" id="confirmInput" placeholder="Type to confirm" class="form-input text-center"></div>
+    <div class="flex gap-2">
+      <button onclick="closeModal('confirmModal')" class="flex-1 py-2 rounded-lg border border-slate-200 dark:border-slate-700 font-semibold text-xs">Cancel</button>
+      <button onclick="executeConfirm()" class="flex-1 py-2 rounded-lg bg-red-600 text-white font-semibold text-xs">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ==================== STATE ==================== */
+var S = {
+  contacts: [], contactsTrash: [], waPic: '', slips: [], deletedSlips: [], slipCounter: 1000,
+  slipSettings: { preset: 'thermal_mega', textScale: 100 },
+  slipDesign: { shopName: 'GILLANI GAS POINT', subtitle: '', footer: 'Shukriya!', font: "'Courier New',monospace", border: 'solid', bgColor: '#ffffff', textColor: '#1a1a1a' },
+  shopNumbers: [], currentSlip: null,
+  cb: {
+    accounts: [], activeAccountId: null, entries: [], trash: [],
+    filters: { scope: 'current', type: 'all', dateFrom: '', dateTo: '' },
+    searchQuery: '', editingId: null, entryType: 'in', selIcon: '💵', activeActionId: null
+  },
+  dark: false, confirmAction: null, trashTab: 'contacts', sharedData: null,
+  /* ===== FRIENDS ===== */
+  myId: '',
+  myName: '',
+  friends: [],          /* accepted: {id, name, phone, data} */
+  incoming: [],         /* {id, fromId, fromName, fromPhone, data, ts} */
+  outgoing: [],         /* {id, toId, toName, myName, data, ts, status:'pending'|'accepted'|'declined'} */
+  friendTab: 'add',
+  popupRequestId: null,
+  friendViewingId: null
+};
+
+/* ==================== UTILS ==================== */
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtAmt(n) { return Math.abs(Math.round(n)).toLocaleString('en-PK'); }
+function fmtDate(ts) {
+  var d = new Date(ts), m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return String(d.getDate()).padStart(2,'0') + '-' + m[d.getMonth()] + '-' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function fmtPhone(p) { if (!p) return ''; var d = p.replace(/\D/g,''); return d.length === 11 && d.startsWith('0') ? d.slice(0,4)+' '+d.slice(4,7)+' '+d.slice(7) : p; }
+function waLink(phone, text) { var p = phone.replace(/\D/g,''); if (p.startsWith('0')) p = '92' + p.slice(1); return 'https://wa.me/' + p + (text ? '?text=' + encodeURIComponent(text) : ''); }
+function normPhone(p) { return String(p || '').replace(/\D/g, ''); }
+function genId() { return 'F' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase(); }
+
+var toastT;
+function toast(msg) { var t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function() { t.classList.remove('show'); }, 2600); }
+function openModal(id) { var el = document.getElementById(id); if (el) el.classList.add('show'); }
+function closeModal(id) { var el = document.getElementById(id); if (el) el.classList.remove('show'); }
+document.querySelectorAll('.modal').forEach(function(m) { m.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); }); });
+
+/* ==================== INIT ==================== */
+var initialized = false;
+function init() {
+  if (initialized) return;
+  initialized = true;
+  try {
+    if (window.__EMBEDDED_B64__ && typeof LZString !== 'undefined') {
+      try { var decompressed = LZString.decompressFromBase64(window.__EMBEDDED_B64__); if (decompressed) applyEmbedded(JSON.parse(decompressed)); delete window.__EMBEDDED_B64__; } catch(e) { console.warn('Embedded decode failed:', e); }
+    } else {
+      S.contacts = lsGet('gs_contacts', []); S.contactsTrash = lsGet('gs_ct', []); S.slips = lsGet('gs_slips', []); S.deletedSlips = lsGet('gs_dslips', []); S.slipCounter = lsGet('gs_counter', 1000);
+      var ss = lsGet('gs_ssettings', null); if (ss) Object.assign(S.slipSettings, ss);
+      var sd = lsGet('gs_sdesign', null); if (sd) Object.assign(S.slipDesign, sd);
+      S.shopNumbers = lsGet('gs_nums', []); S.dark = lsGet('gs_dark', false);
+      var cb = lsGet('gs_cb', null); if (cb) { S.cb.accounts = cb.accounts || []; S.cb.activeAccountId = cb.activeAccountId; S.cb.entries = cb.entries || []; S.cb.trash = cb.trash || []; }
+      S.myId = lsGet('gs_myid', '');
+      S.myName = lsGet('gs_myname', '');
+      S.friends = lsGet('gs_friends', []);
+      S.incoming = lsGet('gs_incoming', []);
+      S.outgoing = lsGet('gs_outgoing', []);
+    }
+    if (!S.myId) { S.myId = genId(); lsSet('gs_myid', S.myId); }
+    if (!S.cb.accounts || S.cb.accounts.length === 0) { S.cb.accounts = [{ id: 'acc_' + Date.now(), name: 'Main Cash', icon: '💵' }]; S.cb.activeAccountId = S.cb.accounts[0].id; }
+    if (!S.cb.activeAccountId || !S.cb.accounts.find(function(a) { return a.id === S.cb.activeAccountId; })) S.cb.activeAccountId = S.cb.accounts[0].id;
+    if (!Array.isArray(S.cb.entries)) S.cb.entries = [];
+    if (!Array.isArray(S.cb.trash)) S.cb.trash = [];
+    if (!Array.isArray(S.contacts)) S.contacts = [];
+    if (!Array.isArray(S.contactsTrash)) S.contactsTrash = [];
+    if (!Array.isArray(S.slips)) S.slips = [];
+    if (!Array.isArray(S.deletedSlips)) S.deletedSlips = [];
+    if (!Array.isArray(S.shopNumbers)) S.shopNumbers = [];
+    if (!Array.isArray(S.friends)) S.friends = [];
+    if (!Array.isArray(S.incoming)) S.incoming = [];
+    if (!Array.isArray(S.outgoing)) S.outgoing = [];
+    syncCounter(); purgeTrash(); applyTheme(); updateDate();
+    renderHome(); renderCashbook(); renderSlipContacts(); renderSlips(); renderWAContacts(); renderPosSettings();
+    renderFriendsUI();
+    setTimeout(checkIncomingPopup, 800);
+    console.log('✅ App initialized successfully');
+  } catch(err) { console.error('Init error:', err); toast('App init error: ' + err.message); }
+}
+
+function applyEmbedded(d) {
+  if (d.contacts) S.contacts = d.contacts; if (d.contactsTrash) S.contactsTrash = d.contactsTrash;
+  if (d.slips) S.slips = d.slips; if (d.deletedSlips) S.deletedSlips = d.deletedSlips;
+  if (d.slipCounter) S.slipCounter = d.slipCounter;
+  if (d.slipSettings) Object.assign(S.slipSettings, d.slipSettings);
+  if (d.slipDesign) Object.assign(S.slipDesign, d.slipDesign);
+  if (d.shopNumbers) S.shopNumbers = d.shopNumbers;
+  if (d.cashbook) { S.cb.accounts = d.cashbook.accounts || []; S.cb.activeAccountId = d.cashbook.activeAccountId; S.cb.entries = d.cashbook.entries || []; S.cb.trash = d.cashbook.trash || []; }
+  if (typeof d.dark === 'boolean') S.dark = d.dark;
+  if (d.myId) S.myId = d.myId;
+  if (d.myName) S.myName = d.myName;
+  if (d.friends) S.friends = d.friends;
+  if (d.incoming) S.incoming = d.incoming;
+  if (d.outgoing) S.outgoing = d.outgoing;
+  saveAll();
+}
+
+function saveAll() {
+  lsSet('gs_contacts', S.contacts); lsSet('gs_ct', S.contactsTrash); lsSet('gs_slips', S.slips); lsSet('gs_dslips', S.deletedSlips);
+  lsSet('gs_counter', S.slipCounter); lsSet('gs_ssettings', S.slipSettings); lsSet('gs_sdesign', S.slipDesign);
+  lsSet('gs_nums', S.shopNumbers); lsSet('gs_dark', S.dark);
+  lsSet('gs_cb', { accounts: S.cb.accounts, activeAccountId: S.cb.activeAccountId, entries: S.cb.entries, trash: S.cb.trash });
+  lsSet('gs_myid', S.myId); lsSet('gs_myname', S.myName);
+  lsSet('gs_friends', S.friends); lsSet('gs_incoming', S.incoming); lsSet('gs_outgoing', S.outgoing);
+}
+
+function updateDate() { var el = document.getElementById('homeDate'); if (!el) return; try { el.textContent = new Date().toLocaleDateString('en-PK', { weekday: 'long', day: 'numeric', month: 'long' }); } catch(e) { el.textContent = new Date().toDateString(); } }
+function applyTheme() { var html = document.documentElement; if (S.dark) html.classList.add('dark'); else html.classList.remove('dark'); var icon = document.getElementById('darkIcon'); if (icon) icon.className = S.dark ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm'; }
+function toggleDark() { S.dark = !S.dark; applyTheme(); saveAll(); }
+
+function openApp(app) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var target = document.getElementById('screen-' + app); if (target) target.classList.add('active');
+  window.scrollTo(0, 0);
+  var nav = document.getElementById('bottomNav'); if (nav) nav.style.display = (app === 'shared') ? 'none' : 'flex';
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('active', n.dataset.nav === app); });
+  if (app === 'cashbook') renderCashbook();
+  if (app === 'pos') { renderPosSettings(); renderSlips(); renderSlipContacts(); }
+  if (app === 'whatsdirect') renderWAContacts();
+  if (app === 'home') { renderHome(); renderFriendsUI(); }
+}
+
+function renderHome() {
+  var hCb = document.getElementById('hCbCount'); var hSlip = document.getElementById('hSlipCount'); var hCt = document.getElementById('hContactCount'); var hFr = document.getElementById('hFriendCount');
+  if (hCb) hCb.textContent = (S.cb.entries || []).length;
+  if (hSlip) hSlip.textContent = (S.slips || []).length;
+  if (hCt) hCt.textContent = (S.contacts || []).length;
+  if (hFr) hFr.textContent = (S.friends || []).length;
+}
+
+function getActive() { return S.cb.accounts.find(function(a) { return a.id === S.cb.activeAccountId; }); }
+function accEntries(id) { return (S.cb.entries || []).filter(function(e) { return e.accountId === id; }); }
+
+function getFiltered() {
+  var entries = S.cb.filters.scope === 'all' ? S.cb.entries.slice() : accEntries(S.cb.activeAccountId);
+  if (S.cb.filters.type !== 'all') entries = entries.filter(function(e) { return e.type === S.cb.filters.type; });
+  if (S.cb.filters.dateFrom) entries = entries.filter(function(e) { return e.date >= S.cb.filters.dateFrom; });
+  if (S.cb.filters.dateTo) entries = entries.filter(function(e) { return e.date <= S.cb.filters.dateTo + 'T23:59:59'; });
+  if (S.cb.searchQuery) {
+    var q = S.cb.searchQuery.toLowerCase();
+    entries = entries.filter(function(e) { return (e.details && e.details.toLowerCase().indexOf(q) >= 0) || (e.amount && e.amount.toString().indexOf(q) >= 0); });
+  }
+  return entries.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+}
+
+function calcBal(entries) {
+  var inS = 0, outS = 0;
+  entries.forEach(function(e) { if (e.type === 'in') inS += parseFloat(e.amount) || 0; else outS += parseFloat(e.amount) || 0; });
+  return { inS: inS, outS: outS, net: inS - outS };
+}
+
+function renderCashbook() {
+  var a = getActive(); var cbIcon = document.getElementById('cbIcon'); var cbName = document.getElementById('cbName');
+  if (a && cbIcon && cbName) { cbIcon.textContent = a.icon; cbName.textContent = a.name; }
+  var filtered = getFiltered();
+  /* ===== TOTALS NOW USE THE FILTERED RESULTS ===== */
+  var bal = calcBal(filtered);
+  var cbNet = document.getElementById('cbNet'); var cbIn = document.getElementById('cbIn'); var cbOut = document.getElementById('cbOut');
+  if (cbNet) cbNet.textContent = (bal.net >= 0 ? '' : '- ') + 'Rs ' + fmtAmt(bal.net);
+  if (cbIn) cbIn.textContent = 'Rs ' + fmtAmt(bal.inS);
+  if (cbOut) cbOut.textContent = 'Rs ' + fmtAmt(bal.outS);
+
+  var countEl = document.getElementById('cbEntryCount'); if (countEl) countEl.textContent = filtered.length + ' Entries';
+  var dot = document.getElementById('cbFilterDot'); if (dot) dot.classList.toggle('hidden', !hasFilter());
+
+  /* ===== FILTER BANNER ===== */
+  var banner = document.getElementById('cbFilterBanner');
+  var bannerText = document.getElementById('cbFilterBannerText');
+  if (banner && bannerText) {
+    if (hasFilter()) {
+      banner.classList.add('show');
+      var bits = [];
+      if (S.cb.searchQuery) bits.push('"' + S.cb.searchQuery + '"');
+      if (S.cb.filters.type !== 'all') bits.push(S.cb.filters.type === 'in' ? 'Cash In only' : 'Cash Out only');
+      if (S.cb.filters.dateFrom) bits.push('from ' + S.cb.filters.dateFrom);
+      if (S.cb.filters.dateTo) bits.push('to ' + S.cb.filters.dateTo);
+      if (S.cb.filters.scope === 'all') bits.push('all accounts');
+      bannerText.textContent = bits.length ? bits.join(' • ') : 'Filtered';
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  var box = document.getElementById('cbEntries'); var empty = document.getElementById('cbEmpty');
+  if (!box || !empty) return;
+  if (filtered.length === 0) { box.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  box.innerHTML = filtered.map(function(e) {
+    var d = new Date(e.date);
+    var ds = d.toLocaleDateString('en-PK', { day: '2-digit', month: 'short' });
+    var ts = d.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+    var p = e.type === 'in' ? '+' : '-'; var c = e.type === 'in' ? 'text-emerald-600' : 'text-red-600';
+    return '<div class="entry-item ' + e.type + '">' +
+      '<div class="flex-1 flex items-center justify-between gap-2 cursor-pointer min-w-0" onclick="editEntry(\'' + e.id + '\')">' +
+        '<span class="text-sm font-extrabold ' + c + ' shrink-0">' + p + ' Rs ' + fmtAmt(e.amount) + '</span>' +
+        '<span class="text-xs font-semibold truncate">' + esc(e.details || '--') + '</span>' +
+      '</div>' +
+      '<div class="text-[9px] text-slate-400 shrink-0">' + ds + ' ' + ts + '</div>' +
+      '<button onclick="event.stopPropagation();openAction(\'' + e.id + '\')" class="w-7 h-7 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-ellipsis-vertical"></i></button>' +
+    '</div>';
+  }).join('');
+}
+
+function openEntryModal(type) {
+  S.cb.entryType = type; S.cb.editingId = null;
+  var typeEl = document.getElementById('cbEntryType'); var titleEl = document.getElementById('entryTitle'); var amtEl = document.getElementById('cbAmount'); var detEl = document.getElementById('cbDetail');
+  if (typeEl) typeEl.value = type;
+  if (titleEl) titleEl.innerHTML = '<i class="fa-solid ' + (type === 'in' ? 'fa-arrow-down text-emerald-600' : 'fa-arrow-up text-red-600') + '"></i> ' + (type === 'in' ? 'Cash In' : 'Cash Out');
+  if (amtEl) amtEl.value = ''; if (detEl) detEl.value = '';
+  openModal('entryModal');
+}
+
+function editEntry(id) {
+  var e = S.cb.entries.find(function(x) { return x.id === id; }); if (!e) return;
+  S.cb.editingId = id; S.cb.entryType = e.type;
+  var typeEl = document.getElementById('cbEntryType'); var titleEl = document.getElementById('entryTitle'); var amtEl = document.getElementById('cbAmount'); var detEl = document.getElementById('cbDetail');
+  if (typeEl) typeEl.value = e.type;
+  if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-pen"></i> Edit Entry';
+  if (amtEl) amtEl.value = e.amount; if (detEl) detEl.value = e.details || '';
+  openModal('entryModal');
+}
+
+function saveCbEntry(e) {
+  if (e) e.preventDefault();
+  var typeEl = document.getElementById('cbEntryType'); var amtEl = document.getElementById('cbAmount'); var detEl = document.getElementById('cbDetail');
+  if (!typeEl || !amtEl || !detEl) return;
+  var type = typeEl.value; var amount = parseFloat(amtEl.value); var detail = detEl.value.trim();
+  if (!amount || amount <= 0) { toast('Enter valid amount'); return; }
+  if (S.cb.editingId) {
+    var entry = S.cb.entries.find(function(x) { return x.id === S.cb.editingId; });
+    if (entry) { entry.amount = amount; entry.details = detail; entry.date = new Date().toISOString(); }
+    toast('Updated');
+  } else {
+    S.cb.entries.push({ id: 'e_' + Date.now() + Math.random().toString(36).substr(2, 5), accountId: S.cb.activeAccountId, type: type, amount: amount, details: detail, date: new Date().toISOString() });
+    toast('Added');
+  }
+  saveAll(); closeModal('entryModal'); renderCashbook(); renderHome();
+}
+
+function openAction(id) {
+  var e = S.cb.entries.find(function(x) { return x.id === id; }); if (!e) return;
+  S.cb.activeActionId = id;
+  var p = e.type === 'in' ? '+' : '-'; var c = e.type === 'in' ? 'text-emerald-600' : 'text-red-600';
+  var prev = document.getElementById('cbActionPreview');
+  if (prev) prev.innerHTML = '<div class="flex justify-between"><span class="font-extrabold ' + c + '">' + p + ' Rs ' + fmtAmt(e.amount) + '</span><span class="text-slate-500">' + esc(e.details || 'No details') + '</span></div>';
+  openModal('cbActionModal');
+}
+
+function cbActionEdit() { var id = S.cb.activeActionId; closeModal('cbActionModal'); if (id) editEntry(id); }
+
+function cbActionMoveAccount() {
+  var id = S.cb.activeActionId;
+  closeModal('cbActionModal');
+  if (!id) return;
+  var entry = S.cb.entries.find(function(x) { return x.id === id; });
+  if (!entry) return;
+  var list = document.getElementById('moveAccountList');
+  if (!list) return;
+  var others = S.cb.accounts.filter(function(a) { return a.id !== entry.accountId; });
+  if (others.length === 0) { toast('No other account available'); return; }
+  list.innerHTML = others.map(function(a) {
+    return '<button onclick="doMoveAccount(\'' + a.id + '\')" class="acct-item w-full text-left" style="display:flex">' +
+      '<span class="text-xl">' + a.icon + '</span>' +
+      '<div class="flex-1"><div class="text-sm font-bold">' + esc(a.name) + '</div></div>' +
+      '<i class="fa-solid fa-chevron-right text-slate-400 text-xs self-center"></i>' +
+    '</button>';
+  }).join('');
+  openModal('moveAccountModal');
+}
+
+function doMoveAccount(targetAccId) {
+  var id = S.cb.activeActionId; if (!id) return;
+  var entry = S.cb.entries.find(function(x) { return x.id === id; }); if (!entry) return;
+  var targetAcc = S.cb.accounts.find(function(a) { return a.id === targetAccId; }); if (!targetAcc) return;
+  entry.accountId = targetAccId;
+  saveAll(); closeModal('moveAccountModal'); renderCashbook(); renderHome();
+  toast('Moved to ' + targetAcc.name);
+}
+
+function cbActionDelete() {
+  var id = S.cb.activeActionId; closeModal('cbActionModal'); if (!id) return;
+  showConfirm('Move to Trash?', 'Entry will be moved to recycle bin.', function() {
+    var i = S.cb.entries.findIndex(function(x) { return x.id === id; });
+    if (i === -1) return;
+    var removed = S.cb.entries.splice(i, 1)[0]; removed.deletedAt = new Date().toISOString(); S.cb.trash.push(removed);
+    saveAll(); renderCashbook(); renderHome(); toast('Moved to trash');
+  });
+}
+
+function openAccountModal() { renderCbAccounts(); openModal('cbAccountModal'); }
+
+function renderCbAccounts() {
+  var listEl = document.getElementById('cbAccountList'); if (!listEl) return;
+  listEl.innerHTML = S.cb.accounts.map(function(a) {
+    var bal = calcBal(accEntries(a.id)); var active = a.id === S.cb.activeAccountId;
+    return '<div class="acct-item ' + (active ? 'active' : '') + '" onclick="switchAccount(\'' + a.id + '\')">' +
+      '<span class="text-xl">' + a.icon + '</span>' +
+      '<div class="flex-1"><div class="text-sm font-bold">' + esc(a.name) + '</div><div class="text-[10px] text-slate-500">Net: ' + (bal.net >= 0 ? '' : '-') + 'Rs ' + fmtAmt(bal.net) + '</div></div>' +
+      (S.cb.accounts.length > 1 ? '<button onclick="event.stopPropagation();deleteAccount(\'' + a.id + '\')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 text-red-500 flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function switchAccount(id) { S.cb.activeAccountId = id; saveAll(); renderCashbook(); closeModal('cbAccountModal'); }
+function selectCbIcon(el) { document.querySelectorAll('#cbIconSel .chip').forEach(function(c) { c.classList.remove('active'); }); el.classList.add('active'); S.cb.selIcon = el.dataset.icon; }
+
+function addCbAccount() {
+  var nameEl = document.getElementById('newCbAccountName'); if (!nameEl) return;
+  var name = nameEl.value.trim(); if (!name) { toast('Enter name'); return; }
+  var acc = { id: 'acc_' + Date.now(), name: name, icon: S.cb.selIcon };
+  S.cb.accounts.push(acc); S.cb.activeAccountId = acc.id; nameEl.value = '';
+  saveAll(); renderCashbook(); renderCbAccounts(); renderHome(); toast('Account added');
+}
+
+function deleteAccount(id) {
+  if (S.cb.accounts.length <= 1) { toast('Cannot delete last'); return; }
+  var a = S.cb.accounts.find(function(x) { return x.id === id; }); if (!a) return;
+  showConfirm('Delete Account?', 'Type "' + a.name + '" to confirm.', function() {
+    var inputEl = document.getElementById('confirmInput'); var typed = inputEl ? inputEl.value.trim() : '';
+    if (typed !== a.name) { toast('Name does not match'); return; }
+    S.cb.accounts = S.cb.accounts.filter(function(x) { return x.id !== id; });
+    var removed = S.cb.entries.filter(function(e) { return e.accountId === id; });
+    S.cb.entries = S.cb.entries.filter(function(e) { return e.accountId !== id; });
+    var accCopy = Object.assign({}, a); accCopy.deletedAt = new Date().toISOString(); accCopy.type = 'account'; S.cb.trash.push(accCopy);
+    removed.forEach(function(e) { e.deletedAt = new Date().toISOString(); S.cb.trash.push(e); });
+    if (S.cb.activeAccountId === id) S.cb.activeAccountId = S.cb.accounts[0].id;
+    saveAll(); renderCashbook(); renderCbAccounts(); renderHome(); toast('Account deleted');
+  }, true, a.name);
+}
+
+function selectChip(el) { var g = el.dataset.cbf; document.querySelectorAll('[data-cbf="' + g + '"]').forEach(function(c) { c.classList.remove('active'); }); el.classList.add('active'); }
+
+function openFilterModal() {
+  var si = document.getElementById('cbSearchInput'); var ff = document.getElementById('cbFilterFrom'); var ft = document.getElementById('cbFilterTo');
+  if (si) si.value = S.cb.searchQuery || ''; if (ff) ff.value = S.cb.filters.dateFrom || ''; if (ft) ft.value = S.cb.filters.dateTo || '';
+  document.querySelectorAll('[data-cbf="scope"]').forEach(function(c) { c.classList.toggle('active', c.dataset.val === S.cb.filters.scope); });
+  document.querySelectorAll('[data-cbf="type"]').forEach(function(c) { c.classList.toggle('active', c.dataset.val === S.cb.filters.type); });
+  openModal('cbFilterModal');
+}
+
+function applyCbFilters() {
+  var scope = document.querySelector('[data-cbf="scope"].active'); var type = document.querySelector('[data-cbf="type"].active');
+  var ff = document.getElementById('cbFilterFrom'); var ft = document.getElementById('cbFilterTo'); var si = document.getElementById('cbSearchInput');
+  S.cb.filters.scope = scope ? scope.dataset.val : 'current';
+  S.cb.filters.type = type ? type.dataset.val : 'all';
+  S.cb.filters.dateFrom = ff ? ff.value : ''; S.cb.filters.dateTo = ft ? ft.value : ''; S.cb.searchQuery = si ? si.value : '';
+  saveAll(); closeModal('cbFilterModal'); renderCashbook();
+  if (hasFilter()) toast('Showing filtered totals');
+}
+
+function resetCbFilters() {
+  S.cb.filters = { scope: 'current', type: 'all', dateFrom: '', dateTo: '' };
+  S.cb.searchQuery = '';
+  saveAll(); closeModal('cbFilterModal'); renderCashbook(); toast('Filters cleared');
+}
+
+function hasFilter() { return S.cb.searchQuery.trim() !== '' || S.cb.filters.dateFrom || S.cb.filters.dateTo || S.cb.filters.type !== 'all' || S.cb.filters.scope === 'all'; }
+
+function openAnalyticsModal() {
+  var entries = getFiltered();
+  var bal = calcBal(entries);
+  var anIn = document.getElementById('anIn'); var anOut = document.getElementById('anOut'); var anNet = document.getElementById('anNet');
+  if (anIn) anIn.textContent = 'Rs ' + fmtAmt(bal.inS); if (anOut) anOut.textContent = 'Rs ' + fmtAmt(bal.outS);
+  if (anNet) anNet.textContent = (bal.net >= 0 ? '' : '-') + 'Rs ' + fmtAmt(bal.net);
+  openModal('analyticsModal'); setTimeout(function() { drawChart(entries); }, 80);
+}
+
+function drawChart(entries) {
+  var canvas = document.getElementById('anChart'); if (!canvas) return;
+  var ctx = canvas.getContext('2d'); var w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  var days = [];
+  for (var i = 6; i >= 0; i--) { var d = new Date(); d.setDate(d.getDate() - i); days.push({ date: d.toISOString().split('T')[0], label: d.toLocaleDateString('en-PK', { weekday: 'short' }), in: 0, out: 0 }); }
+  entries.forEach(function(e) { var day = e.date.split('T')[0]; var dd = days.find(function(x) { return x.date === day; }); if (dd) { if (e.type === 'in') dd.in += parseFloat(e.amount) || 0; else dd.out += parseFloat(e.amount) || 0; } });
+  var maxVal = Math.max.apply(null, days.map(function(d) { return Math.max(d.in, d.out); }).concat([1]));
+  var barW = 20; var gap = (w - 40) / 7;
+  days.forEach(function(d, i) {
+    var x = 20 + i * gap + gap / 2;
+    var inH = (d.in / maxVal) * (h - 50); var outH = (d.out / maxVal) * (h - 50);
+    ctx.fillStyle = '#10b981'; ctx.fillRect(x - barW, h - 30 - inH, barW/2 - 1, inH);
+    ctx.fillStyle = '#ef4444'; ctx.fillRect(x + 1, h - 30 - outH, barW/2 - 1, outH);
+    ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(d.label, x, h - 10);
+  });
+}
+
+function openStatementExport() {
+  var entries = accEntries(S.cb.activeAccountId).sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  var bal = calcBal(entries);
+  var acc = getActive();
+  var rows = entries.map(function(e) {
+    var d = new Date(e.date);
+    var cls = e.type === 'in' ? 'color:#16a34a;font-weight:700' : 'color:#dc2626;font-weight:700';
+    var p = e.type === 'in' ? '+' : '-';
+    return '<tr><td style="padding:6px;border-bottom:1px solid #e2e8f0">' + d.toLocaleDateString('en-PK') + ' ' + d.toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'}) + '</td><td style="padding:6px;border-bottom:1px solid #e2e8f0">' + esc(e.details || '--') + '</td><td style="padding:6px;border-bottom:1px solid #e2e8f0;text-align:right;' + cls + '">' + p + ' Rs ' + fmtAmt(e.amount) + '</td></tr>';
+  }).join('');
+  var el = document.getElementById('stmtPreview'); if (!el) return;
+  el.innerHTML =
+    '<div style="display:flex;justify-content:space-between;border-bottom:2px solid #3b82f6;padding-bottom:8px;margin-bottom:12px">' +
+      '<h2 style="font-size:16px"><span>' + (acc ? acc.icon : '💳') + '</span> ' + (acc ? esc(acc.name) : 'Cash Book') + '</h2>' +
+      '<div style="font-size:10px;color:#64748b">' + new Date().toLocaleDateString('en-PK') + '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;text-align:center">' +
+      '<div style="background:#dcfce7;color:#166534;padding:8px;border-radius:6px;font-size:11px"><strong>In</strong><br>Rs ' + fmtAmt(bal.inS) + '</div>' +
+      '<div style="background:#fee2e2;color:#991b1b;padding:8px;border-radius:6px;font-size:11px"><strong>Out</strong><br>Rs ' + fmtAmt(bal.outS) + '</div>' +
+      '<div style="background:#dbeafe;color:#1e40af;padding:8px;border-radius:6px;font-size:11px"><strong>Net</strong><br>' + (bal.net >= 0 ? '' : '-') + 'Rs ' + fmtAmt(bal.net) + '</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:11px">' +
+      '<thead><tr style="background:#f1f5f9"><th style="padding:6px;text-align:left">Date</th><th style="padding:6px;text-align:left">Details</th><th style="padding:6px;text-align:right">Amount</th></tr></thead>' +
+      '<tbody>' + (rows || '<tr><td colspan="3" style="text-align:center;padding:12px;color:#94a3b8">No entries</td></tr>') + '</tbody>' +
+    '</table>';
+  openModal('stmtModal');
+}
+
+function downloadStatementPNG() {
+  var el = document.getElementById('stmtPreview');
+  if (!el || !window.html2canvas) { toast('Not available'); return; }
+  try {
+    window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(function(canvas) {
+      var a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'statement_' + new Date().toISOString().split('T')[0] + '.png';
+      a.click(); toast('PNG saved');
+    }).catch(function() { toast('Failed'); });
+  } catch(e) { toast('Failed'); }
+}
+
+function downloadStatementPDF() {
+  var el = document.getElementById('stmtPreview');
+  if (!el || !window.html2canvas) { toast('Not available'); return; }
+  toast('Preparing PDF...');
+  window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(function(canvas) {
+    var imgData = canvas.toDataURL('image/jpeg', 0.92);
+    var pdf = buildPDFWithImage(imgData, canvas.width, canvas.height, 595, 842, 20);
+    var blob = new Blob([pdf], { type: 'application/pdf' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'statement_' + new Date().toISOString().split('T')[0] + '.pdf';
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
+    toast('PDF saved');
+  }).catch(function() { toast('PDF failed'); });
+}
+
+function buildPDFWithImage(dataURL, imgW, imgH, pdfW, pdfH, margin) {
+  var base64 = dataURL.split(',')[1];
+  var binary = atob(base64);
+  var imgBytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) imgBytes[i] = binary.charCodeAt(i);
+  var usableW = pdfW - margin * 2; var usableH = pdfH - margin * 2;
+  var scale = usableW / imgW; var drawW = usableW; var drawH = imgH * scale;
+  var pagesNeeded = Math.max(1, Math.ceil(drawH / usableH));
+  var objects = [];
+  function addObj(str) { objects.push(str); return objects.length; }
+  var catalogId = 1; addObj('');
+  var pagesId = 2; addObj('');
+  var imgId = 3;
+  var pageIds = []; var contentIds = [];
+  for (var p = 0; p < pagesNeeded; p++) {
+    var clipY = p * usableH;
+    var content = '';
+    var imgBottomY = margin + usableH - drawH + clipY;
+    content += 'q\n' + margin + ' ' + margin + ' ' + usableW + ' ' + usableH + ' re W n\n' + drawW + ' 0 0 ' + drawH + ' ' + margin + ' ' + imgBottomY + ' cm\n/Im1 Do\nQ\n';
+    contentIds.push(addObj('<< /Length ' + content.length + ' >>\nstream\n' + content + 'endstream'));
+    pageIds.push(addObj('<< /Type /Page /Parent ' + pagesId + ' 0 R /MediaBox [0 0 ' + pdfW + ' ' + pdfH + '] /Contents ' + contentIds[p] + ' 0 R /Resources << /XObject << /Im1 ' + imgId + ' 0 R >> >> >>'));
+  }
+  objects[catalogId - 1] = '<< /Type /Catalog /Pages ' + pagesId + ' 0 R >>';
+  objects[pagesId - 1] = '<< /Type /Pages /Kids [' + pageIds.map(function(id) { return id + ' 0 R'; }).join(' ') + '] /Count ' + pageIds.length + ' >>';
+  var imgHeader = '<< /Type /XObject /Subtype /Image /Width ' + imgW + ' /Height ' + imgH + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + imgBytes.length + ' >>\nstream\n';
+  var imgFooter = '\nendstream';
+  var parts = []; var offsets = []; var currentOffset = 0;
+  function pushStr(s) { var bytes = new TextEncoder().encode(s); parts.push(bytes); currentOffset += bytes.length; }
+  function pushBytes(b) { parts.push(b); currentOffset += b.length; }
+  pushStr('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  for (var i = 0; i < objects.length; i++) {
+    offsets[i] = currentOffset;
+    if (i === imgId - 1) { pushStr((i + 1) + ' 0 obj\n'); pushStr(imgHeader); pushBytes(imgBytes); pushStr(imgFooter); pushStr('\nendobj\n'); }
+    else { pushStr((i + 1) + ' 0 obj\n' + objects[i] + '\nendobj\n'); }
+  }
+  var xrefOffset = currentOffset;
+  pushStr('xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n');
+  for (var j = 0; j < objects.length; j++) pushStr(String(offsets[j]).padStart(10, '0') + ' 00000 n \n');
+  pushStr('trailer\n<< /Size ' + (objects.length + 1) + ' /Root ' + catalogId + ' 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF\n');
+  var totalLen = 0; parts.forEach(function(p) { totalLen += p.length; });
+  var result = new Uint8Array(totalLen); var pos = 0;
+  parts.forEach(function(p) { result.set(p, pos); pos += p.length; });
+  return result;
+}
+
+/* ==================== FRIENDS SYSTEM ==================== */
+function snapshotMyData() {
+  return {
+    contacts: S.contacts,
+    slips: S.slips,
+    cashbook: { accounts: S.cb.accounts, activeAccountId: S.cb.activeAccountId, entries: S.cb.entries },
+    owner: S.myName || S.slipDesign.shopName || 'Gillani User'
+  };
+}
+
+function renderFriendsUI() {
+  /* Home badge + count */
+  var badge = document.getElementById('friendReqBadge');
+  var hFr = document.getElementById('hFriendCount');
+  if (hFr) hFr.textContent = (S.friends || []).length;
+  var incCount = (S.incoming || []).length;
+  if (badge) {
+    if (incCount > 0) { badge.textContent = incCount; badge.classList.remove('hidden'); }
+    else { badge.classList.add('hidden'); }
+  }
+  var incCountEl = document.getElementById('incomingCount');
+  if (incCountEl) {
+    if (incCount > 0) { incCountEl.textContent = incCount; incCountEl.classList.remove('hidden'); }
+    else incCountEl.classList.add('hidden');
+  }
+  var idInput = document.getElementById('myFriendId');
+  if (idInput) idInput.value = S.myId || '--';
+  var nameInput = document.getElementById('frMyName');
+  if (nameInput && !nameInput.value) nameInput.value = S.myName || '';
+
+  /* Incoming list */
+  var inBox = document.getElementById('frIncomingList'); var inEmpty = document.getElementById('frIncomingEmpty');
+  if (inBox && inEmpty) {
+    if (!S.incoming.length) { inBox.innerHTML = ''; inEmpty.style.display = 'block'; }
+    else {
+      inEmpty.style.display = 'none';
+      inBox.innerHTML = S.incoming.map(function(r) {
+        return '<div class="friend-card">' +
+          '<div class="friend-av">' + esc((r.fromName || '?').charAt(0).toUpperCase()) + '</div>' +
+          '<div class="flex-1 min-w-0"><div class="text-sm font-bold truncate">' + esc(r.fromName || 'Unknown') + '</div><div class="text-[10px] text-slate-500">ID: ' + esc(r.fromId) + '</div><div class="text-[10px] text-slate-400">' + fmtDate(r.ts) + '</div></div>' +
+          '<div class="flex gap-1"><button onclick="acceptIncoming(\'' + r.id + '\')" class="px-2 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-bold">✓</button><button onclick="declineIncoming(\'' + r.id + '\')" class="px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-bold">✕</button></div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  /* Outgoing list */
+  var outBox = document.getElementById('frOutgoingList'); var outEmpty = document.getElementById('frOutgoingEmpty');
+  if (outBox && outEmpty) {
+    if (!S.outgoing.length) { outBox.innerHTML = ''; outEmpty.style.display = 'block'; }
+    else {
+      outEmpty.style.display = 'none';
+      outBox.innerHTML = S.outgoing.map(function(r) {
+        var statusColor = r.status === 'accepted' ? 'text-emerald-600' : (r.status === 'declined' ? 'text-red-600' : 'text-amber-600');
+        var statusText = r.status === 'accepted' ? 'Accepted' : (r.status === 'declined' ? 'Declined' : 'Pending');
+        return '<div class="friend-card">' +
+          '<div class="friend-av" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)">' + esc((r.toName || '?').charAt(0).toUpperCase()) + '</div>' +
+          '<div class="flex-1 min-w-0"><div class="text-sm font-bold truncate">' + esc(r.toName || 'Unknown') + '</div><div class="text-[10px] text-slate-500">To ID: ' + esc(r.toId) + '</div><div class="text-[10px] ' + statusColor + ' font-bold">' + statusText + '</div></div>' +
+          '<button onclick="cancelOutgoing(\'' + r.id + '\')" class="px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-bold">Cancel</button>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  /* Friends list */
+  var frBox = document.getElementById('frFriendsList'); var frEmpty = document.getElementById('frFriendsEmpty');
+  if (frBox && frEmpty) {
+    if (!S.friends.length) { frBox.innerHTML = ''; frEmpty.style.display = 'block'; }
+    else {
+      frEmpty.style.display = 'none';
+      frBox.innerHTML = S.friends.map(function(f) {
+        return '<div class="friend-card">' +
+          '<div class="friend-av">' + esc((f.name || '?').charAt(0).toUpperCase()) + '</div>' +
+          '<div class="flex-1 min-w-0"><div class="text-sm font-bold truncate">' + esc(f.name || 'Friend') + '</div><div class="text-[10px] text-slate-500">ID: ' + esc(f.id) + '</div></div>' +
+          '<div class="flex gap-1"><button onclick="viewFriendData(\'' + f.id + '\')" class="px-2 py-1 bg-violet-600 text-white rounded-lg text-[10px] font-bold"><i class="fa-solid fa-eye"></i></button><button onclick="removeFriend(\'' + f.id + '\')" class="px-2 py-1 bg-red-100 text-red-600 rounded-lg text-[10px] font-bold">✕</button></div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+}
+
+function switchFriendTab(tab) {
+  S.friendTab = tab;
+  document.querySelectorAll('[data-fr-tab]').forEach(function(b) { b.classList.toggle('active', b.dataset.frTab === tab); });
+  document.querySelectorAll('#friendsModal .tab-content').forEach(function(t) { t.classList.remove('active'); });
+  var el = document.getElementById('fr-tab-' + tab); if (el) el.classList.add('active');
+}
+
+function copyMyFriendId() {
+  var v = S.myId;
+  if (!v) return;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(function() { toast('ID copied'); });
+    else { var ta = document.createElement('textarea'); ta.value = v; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('ID copied'); }
+  } catch(e) { toast('Copy failed'); }
+}
+
+function sendFriendRequest() {
+  var targetEl = document.getElementById('frTargetId');
+  var nameEl = document.getElementById('frMyName');
+  if (!targetEl || !nameEl) return;
+  var target = targetEl.value.trim();
+  var myName = nameEl.value.trim();
+  if (!target) { toast('Enter friend ID or phone'); return; }
+  if (!myName) { toast('Enter your name'); return; }
+  if (target.toUpperCase() === S.myId.toUpperCase()) { toast('That is your own ID'); return; }
+  if (S.friends.find(function(f) { return f.id.toUpperCase() === target.toUpperCase(); })) { toast('Already friends'); return; }
+
+  S.myName = myName;
+  var req = {
+    id: 'req_' + Date.now() + Math.random().toString(36).slice(2, 5),
+    toId: target,
+    toName: target,
+    fromId: S.myId,
+    fromName: myName,
+    data: snapshotMyData(),
+    ts: Date.now(),
+    status: 'pending'
+  };
+  S.outgoing.unshift(req);
+  saveAll();
+  targetEl.value = '';
+  renderFriendsUI();
+  switchFriendTab('outgoing');
+  toast('✅ Request sent to ' + target);
+}
+
+function cancelOutgoing(id) {
+  S.outgoing = S.outgoing.filter(function(r) { return r.id !== id; });
+  saveAll(); renderFriendsUI(); toast('Cancelled');
+}
+
+function acceptIncoming(id) {
+  var idx = S.incoming.findIndex(function(r) { return r.id === id; });
+  if (idx === -1) return;
+  var req = S.incoming.splice(idx, 1)[0];
+  S.friends.unshift({
+    id: req.fromId,
+    name: req.fromName || 'Friend',
+    phone: req.fromPhone || '',
+    data: req.data || {},
+    acceptedAt: Date.now()
+  });
+  saveAll(); renderFriendsUI(); renderHome(); toast('✅ Friend added');
+}
+
+function declineIncoming(id) {
+  S.incoming = S.incoming.filter(function(r) { return r.id !== id; });
+  saveAll(); renderFriendsUI(); toast('Declined');
+}
+
+function removeFriend(id) {
+  showConfirm('Remove Friend?', 'You will no longer see their data.', function() {
+    S.friends = S.friends.filter(function(f) { return f.id !== id; });
+    saveAll(); renderFriendsUI(); renderHome(); toast('Removed');
+  });
+}
+
+function viewFriendData(id) {
+  var f = S.friends.find(function(x) { return x.id === id; });
+  if (!f) return;
+  S.friendViewingId = id;
+  var nameEl = document.getElementById('friendDataName');
+  if (nameEl) nameEl.textContent = (f.name || 'Friend') + "'s Data";
+  var content = document.getElementById('friendDataContent');
+  if (!content) return;
+  var d = f.data || {};
+  var contacts = d.contacts || [];
+  var slips = d.slips || [];
+  var cb = d.cashbook || { entries: [] };
+  var entries = cb.entries || [];
+  var inS = entries.filter(function(e) { return e.type === 'in'; }).reduce(function(s, e) { return s + (+e.amount || 0); }, 0);
+  var outS = entries.filter(function(e) { return e.type === 'out'; }).reduce(function(s, e) { return s + (+e.amount || 0); }, 0);
+  var net = inS - outS;
+  var html =
+    '<div class="bg-gradient-to-r from-violet-500 to-purple-600 rounded-2xl p-3 text-white mb-3">' +
+      '<h2 class="font-black text-base">' + esc(f.name || 'Friend') + '</h2>' +
+      '<p class="text-[10px] opacity-80">ID: ' + esc(f.id) + '</p>' +
+    '</div>' +
+    '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">💰 Summary</h3><div class="grid grid-cols-3 gap-2">' +
+      '<div class="balance-card"><div class="label">Net</div><div class="value text-violet-600">' + (net >= 0 ? '' : '-') + 'Rs ' + fmtAmt(net) + '</div></div>' +
+      '<div class="balance-card"><div class="label">In</div><div class="value text-emerald-600">Rs ' + fmtAmt(inS) + '</div></div>' +
+      '<div class="balance-card"><div class="label">Out</div><div class="value text-red-600">Rs ' + fmtAmt(outS) + '</div></div>' +
+    '</div></div>';
+  html += '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">💳 Entries (' + entries.length + ')</h3><div class="space-y-1.5" style="max-height:300px;overflow-y:auto">' +
+    (entries.length ? entries.slice().reverse().slice(0, 80).map(function(e) {
+      var p = e.type === 'in' ? '+' : '-'; var c = e.type === 'in' ? 'text-emerald-600' : 'text-red-600';
+      return '<div class="entry-item ' + e.type + '"><span class="text-xs font-extrabold ' + c + '">' + p + ' Rs ' + fmtAmt(e.amount) + '</span><span class="flex-1 text-[11px] text-slate-500 truncate">' + esc(e.details || '--') + '</span><span class="text-[9px] text-slate-400">' + new Date(e.date).toLocaleDateString('en-PK') + '</span></div>';
+    }).join('') : '<p class="text-center text-xs text-slate-400 py-3">No entries</p>') +
+  '</div></div>';
+  html += '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">🧾 Slips (' + slips.length + ')</h3><div class="space-y-1.5" style="max-height:200px;overflow-y:auto">' +
+    (slips.length ? slips.slice(0, 50).map(function(s) {
+      return '<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-lg px-2 py-1.5"><div class="min-w-0 flex-1"><div class="text-[11px] font-bold truncate">#' + s.id + ' ' + esc(s.name) + '</div><div class="text-[9px] text-slate-500">' + fmtDate(s.timestamp) + '</div></div><span class="text-[11px] font-extrabold text-orange-600">Rs.' + fmtAmt(s.amount) + '</span></div>';
+    }).join('') : '<p class="text-center text-xs text-slate-400 py-3">No slips</p>') +
+  '</div></div>';
+  html += '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">👥 Contacts (' + contacts.length + ')</h3><div class="space-y-1.5" style="max-height:200px;overflow-y:auto">' +
+    (contacts.length ? contacts.slice(0, 50).map(function(c) {
+      return '<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-lg px-2 py-1.5"><div class="min-w-0 flex-1"><div class="text-[11px] font-bold truncate">' + esc(c.name) + '</div><div class="text-[9px] text-slate-500">+' + c.phone + '</div></div><a href="' + waLink(c.phone) + '" target="_blank" class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-brands fa-whatsapp text-[10px]"></i></a></div>';
+    }).join('') : '<p class="text-center text-xs text-slate-400 py-3">No contacts</p>') +
+  '</div></div>';
+  html += '<div class="p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg"><p class="text-[10px] text-amber-800 dark:text-amber-300"><b>ℹ️ Read-only.</b> This is a snapshot shared by your friend.</p></div>';
+  content.innerHTML = html;
+  openModal('friendDataModal');
+}
+
+function checkIncomingPopup() {
+  if (!S.incoming || !S.incoming.length) return;
+  if (S.popupRequestId) return;
+  var req = S.incoming[0];
+  S.popupRequestId = req.id;
+  var title = document.getElementById('frReqTitle');
+  var msg = document.getElementById('frReqMsg');
+  if (title) title.textContent = 'Friend Request';
+  if (msg) msg.textContent = (req.fromName || 'Someone') + ' (' + req.fromId + ') wants to be your friend';
+  openModal('friendReqReceivedModal');
+}
+
+function acceptIncomingFromPopup() {
+  var id = S.popupRequestId;
+  closeModal('friendReqReceivedModal');
+  S.popupRequestId = null;
+  if (id) acceptIncoming(id);
+  setTimeout(checkIncomingPopup, 400);
+}
+
+function declineIncomingFromPopup() {
+  var id = S.popupRequestId;
+  closeModal('friendReqReceivedModal');
+  S.popupRequestId = null;
+  if (id) declineIncoming(id);
+  setTimeout(checkIncomingPopup, 400);
+}
+
+/* ==================== POS / CONTACTS / OTHER ==================== */
+function renderSlipContacts() {
+  var sel = document.getElementById('slipContact'); if (!sel) return;
+  sel.innerHTML = '<option value="">-- Walk-in --</option>' + S.contacts.map(function(c) { return '<option value="' + c.id + '">' + esc(c.name) + ' (+' + c.phone + ')</option>'; }).join('');
+}
+
+function onSlipContactChange() {
+  var idEl = document.getElementById('slipContact'); var inp = document.getElementById('slipCustomName'); if (!idEl || !inp) return;
+  if (idEl.value) { inp.disabled = true; inp.style.opacity = '0.5'; } else { inp.disabled = false; inp.style.opacity = '1'; }
+}
+
+function getScale() { return (S.slipSettings.textScale || 100) / 100; }
+function sz(n) { return Math.round(n * getScale()); }
+
+function createSlip() {
+  var cidEl = document.getElementById('slipContact'); var amtEl = document.getElementById('slipAmount'); var nameEl = document.getElementById('slipCustomName'); var noteEl = document.getElementById('slipNote');
+  if (!cidEl || !amtEl) return;
+  var cid = cidEl.value; var amount = parseFloat(amtEl.value); var customName = nameEl ? nameEl.value.trim() : ''; var note = noteEl ? noteEl.value.trim() : '';
+  var contact = cid ? S.contacts.find(function(c) { return c.id === cid; }) : null; var name = contact ? contact.name : customName;
+  if (!name) { toast('Select contact or enter name'); return; }
+  if (!amount || amount <= 0) { toast('Enter valid amount'); return; }
+  var id = S.slipCounter++; saveAll();
+  var slip = { id: String(id), contactId: cid || null, name: name, phone: contact ? contact.phone : '', amount: amount, note: note, timestamp: Date.now() };
+  S.slips.unshift(slip); saveAll(); S.currentSlip = slip;
+  var printArea = document.getElementById('printArea'); if (printArea) printArea.innerHTML = buildSlip(slip);
+  openModal('slipModal');
+  cidEl.value = ''; amtEl.value = ''; if (nameEl) nameEl.value = ''; if (noteEl) noteEl.value = '';
+  onSlipContactChange(); renderSlips(); renderHome(); toast('Slip #' + id + ' created');
+}
+
+function buildSlip(s) {
+  var dt = fmtDate(s.timestamp); var amt = fmtAmt(s.amount); var nums = '';
+  if (S.shopNumbers.length > 0) {
+    nums = '<div style="margin-top:8px;padding-top:6px;border-top:1px dashed #999;text-align:center"><div style="font-size:' + sz(11) + 'px;font-weight:800;margin-bottom:3px">📞 Contact</div>' +
+      S.shopNumbers.map(function(n) { return '<div style="font-size:' + sz(11) + 'px;font-weight:700">' + esc(n.name) + ': ' + esc(n.phone) + '</div>'; }).join('') + '</div>';
+  }
+  var preset = S.slipSettings.preset;
+  if (preset === 'modern') {
+    return '<div style="width:280px;background:#0f172a;color:#e2e8f0;padding:16px;border-radius:12px;font-family:sans-serif">' +
+      '<div style="text-align:center;font-size:' + sz(20) + 'px;font-weight:800;color:#f97316">' + esc(S.slipDesign.shopName) + '</div>' +
+      (S.slipDesign.subtitle ? '<div style="text-align:center;font-size:' + sz(10) + 'px;color:#64748b;margin-bottom:10px">' + esc(S.slipDesign.subtitle) + '</div>' : '') +
+      '<div style="background:#1e293b;border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid #334155">' +
+        '<div style="display:flex;justify-content:space-between;font-size:' + sz(10) + 'px;color:#94a3b8;margin-bottom:5px"><span>#' + s.id + '</span><span>' + dt + '</span></div>' +
+        '<div style="font-size:' + sz(16) + 'px;font-weight:800;color:#fff">' + esc(s.name) + '</div>' +
+        (s.phone ? '<div style="font-size:' + sz(13) + 'px;color:#f97316;font-weight:700">📞 ' + esc(s.phone) + '</div>' : '') +
+      '</div>' +
+      '<div style="text-align:center;font-size:' + sz(28) + 'px;font-weight:900;color:#4ade80;margin:8px 0;background:#1e293b;padding:10px;border-radius:10px;border:2px solid #4ade80">Rs. ' + amt + '</div>' +
+      (s.note ? '<div style="text-align:center;font-size:' + sz(12) + 'px;color:#94a3b8">📝 ' + esc(s.note) + '</div>' : '') +
+      nums.replace(/#999/g, '#475569') +
+      '<div style="text-align:center;font-size:' + sz(10) + 'px;color:#64748b;margin-top:10px;border-top:1px solid #334155;padding-top:6px">' + esc(S.slipDesign.footer) + '</div>' +
+    '</div>';
+  }
+  if (preset === 'classic') {
+    return '<div style="width:280px;background:#fffef5;color:#2c1810;padding:14px;font-family:Georgia,serif;border:3px double #8b7355">' +
+      '<div style="text-align:center;font-size:' + sz(18) + 'px;font-weight:900;border-bottom:2px double #8b7355;padding-bottom:6px;margin-bottom:6px;font-style:italic">' + esc(S.slipDesign.shopName) + '</div>' +
+      (S.slipDesign.subtitle ? '<div style="text-align:center;font-size:' + sz(10) + 'px;color:#8b7355;margin-bottom:8px">-- ' + esc(S.slipDesign.subtitle) + ' --</div>' : '') +
+      '<div style="text-align:center;font-size:' + sz(11) + 'px;margin-bottom:6px;color:#555">' + dt + '</div>' +
+      '<div style="border:2px solid #8b7355;padding:8px;margin-bottom:8px"><div style="font-size:' + sz(12) + 'px;font-weight:700">Receipt: #' + s.id + '</div><div style="font-size:' + sz(16) + 'px;font-weight:900">' + esc(s.name) + '</div>' + (s.phone ? '<div style="font-size:' + sz(12) + 'px">Tel: ' + esc(s.phone) + '</div>' : '') + '</div>' +
+      '<div style="text-align:center;font-size:' + sz(26) + 'px;font-weight:900;margin:8px 0;background:#8b7355;color:#fff;padding:8px;border-radius:4px">Rs. ' + amt + '</div>' +
+      nums.replace(/#999/g, '#8b7355') +
+      '<div style="text-align:center;font-size:' + sz(10) + 'px;border-top:2px double #8b7355;padding-top:6px;margin-top:8px;color:#8b7355">' + esc(S.slipDesign.footer) + '</div>' +
+    '</div>';
+  }
+  return '<div style="width:280px;background:#fff;color:#000;padding:14px;font-family:\'Courier New\',monospace">' +
+    '<div style="text-align:center;font-size:' + sz(20) + 'px;font-weight:900">' + esc(S.slipDesign.shopName) + '</div>' +
+    (S.slipDesign.subtitle ? '<div style="text-align:center;font-size:' + sz(10) + 'px;color:#555;margin:3px 0 8px">' + esc(S.slipDesign.subtitle) + '</div>' : '') +
+    '<div style="border-top:2px solid #000;border-bottom:2px solid #000;padding:4px 0;text-align:center;font-size:' + sz(11) + 'px;font-weight:700;margin-bottom:8px">' + dt + '</div>' +
+    '<div style="text-align:center;font-size:' + sz(13) + 'px;font-weight:800;margin-bottom:8px">Bill # ' + s.id + '</div>' +
+    '<div style="font-size:' + sz(16) + 'px;font-weight:900;margin-bottom:4px;background:#f5f5f5;padding:6px;border-radius:4px">👤 ' + esc(s.name) + '</div>' +
+    '<div style="font-size:' + sz(30) + 'px;font-weight:900;text-align:center;margin:10px 0;background:#000;color:#fff;padding:8px;border-radius:6px">Rs. ' + amt + '</div>' +
+    (s.phone ? '<div style="font-size:' + sz(14) + 'px;text-align:center;margin-bottom:4px;font-weight:800;background:#f0f0f0;padding:5px;border-radius:4px">📞 ' + esc(s.phone) + '</div>' : '') +
+    (s.note ? '<div style="font-size:' + sz(12) + 'px;text-align:center;color:#444;margin-bottom:4px">📝 ' + esc(s.note) + '</div>' : '') +
+    nums +
+    '<div style="border-top:2px dashed #000;margin-top:10px;padding-top:6px;text-align:center;font-size:' + sz(11) + 'px;font-weight:700">' + esc(S.slipDesign.footer) + '</div>' +
+  '</div>';
+}
+
+function shareSlipWhatsApp() {
+  if (!S.currentSlip) return;
+  var s = S.currentSlip;
+  var text = '🔥 *' + S.slipDesign.shopName + '*\n━━━━━━━━━━━━━━\n📄 *Bill #' + s.id + '*\n👤 *Customer:* ' + s.name + '\n💰 *Amount:* Rs. ' + fmtAmt(s.amount) + '\n';
+  if (s.phone) text += '📞 *Phone:* ' + fmtPhone(s.phone) + '\n';
+  if (s.note) text += '📝 *Note:* ' + s.note + '\n';
+  text += '🕒 ' + fmtDate(s.timestamp) + '\n━━━━━━━━━━━━━━\n✨ ' + S.slipDesign.footer;
+  window.open(s.phone ? waLink(s.phone, text) : 'https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function downloadSlipPNG() {
+  if (!S.currentSlip) return;
+  var el = document.getElementById('printArea'); if (!el || !el.firstElementChild) return;
+  el = el.firstElementChild;
+  if (!window.html2canvas) { toast('Not available'); return; }
+  try {
+    window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(function(canvas) {
+      var a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = 'Slip_' + S.currentSlip.id + '.png'; a.click(); toast('PNG saved');
+    }).catch(function() { toast('Failed'); });
+  } catch(e) { toast('Failed'); }
+}
+
+function renderSlips() {
+  var searchEl = document.getElementById('slipSearch'); var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  var list = S.slips;
+  if (q) list = list.filter(function(s) { return s.name.toLowerCase().indexOf(q) >= 0 || s.id.indexOf(q) >= 0 || s.amount.toString().indexOf(q) >= 0; });
+  var box = document.getElementById('slipList'); var empty = document.getElementById('slipEmpty');
+  if (!box || !empty) return;
+  if (list.length === 0) { box.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  box.innerHTML = list.map(function(s) {
+    return '<div class="card flex items-center justify-between gap-2 cursor-pointer" onclick="viewSlip(\'' + s.id + '\')">' +
+      '<div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 mb-0.5"><span class="text-[10px] font-bold text-orange-600">#' + s.id + '</span><span class="text-[10px] text-slate-400">' + fmtDate(s.timestamp) + '</span></div><p class="text-sm font-bold truncate">' + esc(s.name) + '</p></div>' +
+      '<div class="flex items-center gap-2"><span class="text-sm font-extrabold text-orange-600">Rs.' + fmtAmt(s.amount) + '</span>' +
+      '<button onclick="event.stopPropagation();deleteSlip(\'' + s.id + '\')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 text-red-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-trash"></i></button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function viewSlip(id) {
+  var s = S.slips.find(function(x) { return x.id === id; }); if (!s) return;
+  S.currentSlip = s; var printArea = document.getElementById('printArea'); if (printArea) printArea.innerHTML = buildSlip(s);
+  openModal('slipModal');
+}
+
+function deleteSlip(id) {
+  showConfirm('Delete Slip?', 'Slip #' + id + ' to trash?', function() {
+    var i = S.slips.findIndex(function(s) { return s.id === id; }); if (i === -1) return;
+    var removed = S.slips.splice(i, 1)[0]; removed.deletedAt = Date.now(); S.deletedSlips.push(removed);
+    saveAll(); renderSlips(); renderHome(); toast('Moved to trash');
+  });
+}
+
+function clearAllSlips() {
+  if (S.slips.length === 0) { toast('No slips'); return; }
+  showConfirm('Clear All?', 'Type "ok" to confirm', function() {
+    S.slips.forEach(function(s) { s.deletedAt = Date.now(); S.deletedSlips.push(s); }); S.slips = [];
+    saveAll(); renderSlips(); renderHome(); toast('All cleared');
+  }, true, 'ok');
+}
+
+function switchPosTab(tab) {
+  document.querySelectorAll('[data-pos-tab]').forEach(function(b) { b.classList.toggle('active', b.dataset.posTab === tab); });
+  document.querySelectorAll('#screen-pos .tab-content').forEach(function(t) { t.classList.remove('active'); });
+  var target = document.getElementById('pos-tab-' + tab); if (target) target.classList.add('active');
+}
+
+function renderPosSettings() {
+  var grid = document.getElementById('posPresetGrid');
+  if (grid) {
+    var presets = [{ id: 'thermal_mega', name: 'Thermal' }, { id: 'modern', name: 'Modern' }, { id: 'classic', name: 'Classic' }];
+    grid.innerHTML = presets.map(function(p) {
+      var cls = S.slipSettings.preset === p.id ? 'border-orange-600 bg-orange-50 dark:bg-orange-950 text-orange-600' : 'border-slate-200 dark:border-slate-700';
+      return '<button onclick="selectPreset(\'' + p.id + '\')" class="p-2 rounded-lg border-2 text-xs font-bold ' + cls + '">' + p.name + '</button>';
+    }).join('');
+  }
+  var sn = document.getElementById('posShopName'); var sub = document.getElementById('posSubtitle'); var ft = document.getElementById('posFooter');
+  if (sn) sn.value = S.slipDesign.shopName || ''; if (sub) sub.value = S.slipDesign.subtitle || ''; if (ft) ft.value = S.slipDesign.footer || '';
+  renderShopNumbers();
+}
+
+function selectPreset(id) { S.slipSettings.preset = id; saveAll(); renderPosSettings(); toast('Design: ' + id); }
+
+function saveShopInfo() {
+  var sn = document.getElementById('posShopName'); var sub = document.getElementById('posSubtitle'); var ft = document.getElementById('posFooter');
+  if (sn) S.slipDesign.shopName = sn.value.trim(); if (sub) S.slipDesign.subtitle = sub.value.trim(); if (ft) S.slipDesign.footer = ft.value.trim();
+  saveAll(); toast('Saved');
+}
+
+function renderShopNumbers() {
+  var box = document.getElementById('posShopNumbers'); if (!box) return;
+  if (S.shopNumbers.length === 0) { box.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">No numbers yet</p>'; return; }
+  box.innerHTML = S.shopNumbers.map(function(n, i) {
+    return '<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-lg px-3 py-1.5"><div><div class="text-xs font-bold">' + esc(n.name) + '</div><div class="text-[10px] text-slate-400">' + fmtPhone(n.phone) + '</div></div><button onclick="removeShopNumber(' + i + ')" class="text-red-400 text-xs"><i class="fa-solid fa-xmark"></i></button></div>';
+  }).join('');
+}
+
+function addShopNumber() {
+  var n = document.getElementById('posNumName'); var p = document.getElementById('posNumPhone'); if (!n || !p) return;
+  var name = n.value.trim(); var phone = p.value.trim(); if (!name || !phone) { toast('Enter both'); return; }
+  S.shopNumbers.push({ name: name, phone: phone }); saveAll(); n.value = ''; p.value = ''; renderShopNumbers(); toast('Added');
+}
+
+function removeShopNumber(i) { S.shopNumbers.splice(i, 1); saveAll(); renderShopNumbers(); }
+
+function renderWAContacts() {
+  var searchEl = document.getElementById('waSearch'); var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  var list = S.contacts;
+  if (q) list = list.filter(function(c) { return c.name.toLowerCase().indexOf(q) >= 0 || c.phone.indexOf(q) >= 0; });
+  var countEl = document.getElementById('waCount'); if (countEl) countEl.textContent = list.length;
+  var grid = document.getElementById('waGrid'); var empty = document.getElementById('waEmpty'); if (!grid || !empty) return;
+  if (list.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = list.map(function(c) {
+    var av = c.picture ? '<img src="' + c.picture + '" onclick="openImg(\'' + c.id + '\')" class="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700 cursor-pointer" alt="">' : '<div onclick="openImg(\'' + c.id + '\')" class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-lg cursor-pointer">' + esc(c.name.charAt(0).toUpperCase()) + '</div>';
+    return '<div class="bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200 dark:border-slate-700 shadow-sm">' +
+      '<div class="flex items-start justify-between gap-2 mb-2">' +
+        '<div class="flex items-center gap-2 min-w-0">' + av + '<div class="min-w-0"><h3 class="font-bold text-sm truncate">' + esc(c.name) + '</h3><p class="text-[10px] text-slate-500 font-mono">+' + c.phone + '</p></div></div>' +
+        '<div class="flex gap-1"><button onclick="editWAContact(\'' + c.id + '\')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-pen"></i></button><button onclick="delWAContact(\'' + c.id + '\')" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-trash"></i></button></div>' +
+      '</div>' +
+      '<div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-700">' +
+        '<a href="' + waLink(c.phone) + '" target="_blank" class="flex items-center justify-center gap-1 py-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-lg text-[10px] font-bold border border-emerald-200"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>' +
+        '<a href="tel:+' + c.phone + '" class="flex items-center justify-center gap-1 py-1.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-bold border border-blue-200"><i class="fa-solid fa-phone"></i> Call</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openWAContactModal() {
+  var ids = ['waContactId', 'waName', 'waPhone']; ids.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  var prev = document.getElementById('waPicPreview'); if (prev) prev.src = 'https://placehold.co/80x80/e2e8f0/64748b?text=?';
+  var size = document.getElementById('waPicSize'); if (size) size.textContent = '~0 KB';
+  var title = document.getElementById('waContactTitle'); if (title) title.innerHTML = '<i class="fa-solid fa-user-plus text-emerald-600"></i> Add Contact';
+  S.waPic = ''; openModal('waContactModal');
+}
+
+function editWAContact(id) {
+  var c = S.contacts.find(function(x) { return x.id === id; }); if (!c) return;
+  var ids = { waContactId: id, waName: c.name, waCC: c.cc || '+92', waPhone: c.raw || c.phone };
+  Object.keys(ids).forEach(function(k) { var el = document.getElementById(k); if (el) el.value = ids[k]; });
+  var title = document.getElementById('waContactTitle'); if (title) title.innerHTML = '<i class="fa-solid fa-user-pen text-emerald-600"></i> Edit Contact';
+  var prev = document.getElementById('waPicPreview'); if (prev) prev.src = c.picture || 'https://placehold.co/80x80/e2e8f0/64748b?text=?';
+  var size = document.getElementById('waPicSize'); if (size) size.textContent = c.picture ? 'Saved' : '~0 KB';
+  S.waPic = c.picture || ''; openModal('waContactModal');
+}
+
+function handleWAPic(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var c = document.createElement('canvas'); var ctx = c.getContext('2d'); var MAX = 160; var w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h *= MAX/w; w = MAX; } } else { if (h > MAX) { w *= MAX/h; h = MAX; } }
+      c.width = w; c.height = h; ctx.drawImage(img, 0, 0, w, h);
+      S.waPic = c.toDataURL('image/jpeg', 0.55);
+      var prev = document.getElementById('waPicPreview'); if (prev) prev.src = S.waPic;
+      var kb = (Math.ceil((S.waPic.length - 22) * 3 / 4) / 1024).toFixed(1);
+      var size = document.getElementById('waPicSize'); if (size) size.textContent = '~' + kb + ' KB';
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(f);
+}
+
+function saveWAContact(e) {
+  if (e) e.preventDefault();
+  var idEl = document.getElementById('waContactId'); var nameEl = document.getElementById('waName'); var ccEl = document.getElementById('waCC'); var phoneEl = document.getElementById('waPhone');
+  if (!nameEl || !phoneEl) return;
+  var id = idEl ? idEl.value : ''; var name = nameEl.value.trim(); var cc = ccEl ? ccEl.value : '+92'; var raw = phoneEl.value.trim();
+  if (!name || !raw) { toast('Fill fields'); return; }
+  var phone = cc.replace(/\D/g, '') + raw.replace(/\D/g, '');
+  if (id) {
+    var c = S.contacts.find(function(x) { return x.id === id; });
+    if (c) { c.name = name; c.cc = cc; c.raw = raw; c.phone = phone; if (S.waPic) c.picture = S.waPic; }
+    toast('Updated');
+  } else {
+    S.contacts.unshift({ id: 'c_' + Date.now(), name: name, cc: cc, raw: raw, phone: phone, picture: S.waPic, createdAt: Date.now() });
+    toast('Saved');
+  }
+  saveAll(); renderWAContacts(); renderSlipContacts(); renderHome(); closeModal('waContactModal');
+}
+
+function delWAContact(id) {
+  var i = S.contacts.findIndex(function(c) { return c.id === id; }); if (i === -1) return;
+  var removed = S.contacts.splice(i, 1)[0];
+  S.contactsTrash.unshift({ id: 't_' + Date.now(), contact: removed, deletedAt: Date.now() });
+  saveAll(); renderWAContacts(); renderSlipContacts(); renderHome(); toast('Moved to trash');
+}
+
+function openImg(id) {
+  var c = S.contacts.find(function(x) { return x.id === id; }); if (!c) return;
+  var nameEl = document.getElementById('imgName'); var phoneEl = document.getElementById('imgPhone'); var imgEl = document.getElementById('imgLarge');
+  if (nameEl) nameEl.textContent = c.name; if (phoneEl) phoneEl.textContent = '+' + c.phone;
+  if (imgEl) imgEl.src = c.picture || 'https://placehold.co/400x400/10b981/ffffff?text=' + encodeURIComponent(c.name.charAt(0).toUpperCase());
+  openModal('imageModal');
+}
+
+function waQuickChat() {
+  var v = document.getElementById('waQuickPhone'); if (!v || !v.value.trim()) { toast('Enter number'); return; }
+  var d = v.value.trim().replace(/\D/g, ''); if (d.length < 5) { toast('Invalid'); return; }
+  window.open('https://wa.me/' + d, '_blank');
+}
+
+function purgeTrash() {
+  var now = Date.now(); var th = 30 * 86400000;
+  S.contactsTrash = S.contactsTrash.filter(function(t) { return (now - t.deletedAt) < th; });
+  S.deletedSlips = S.deletedSlips.filter(function(s) { return (now - (s.deletedAt || 0)) < th; });
+  S.cb.trash = S.cb.trash.filter(function(t) { return (now - new Date(t.deletedAt || 0).getTime()) < th; });
+  saveAll();
+}
+
+function openTrash(tab) { switchTrashTab(tab || 'contacts'); openModal('trashModal'); }
+
+function switchTrashTab(tab) {
+  S.trashTab = tab;
+  document.querySelectorAll('[data-trash-tab]').forEach(function(b) { b.classList.toggle('active', b.dataset.trashTab === tab); });
+  var box = document.getElementById('trashContent'); if (!box) return;
+  if (tab === 'contacts') {
+    if (S.contactsTrash.length === 0) { box.innerHTML = '<p class="text-center text-xs text-slate-400 py-6">Empty</p>'; return; }
+    box.innerHTML = S.contactsTrash.map(function(t) {
+      return '<div class="trash-item"><div class="flex-1 min-w-0"><div class="text-xs font-bold truncate">' + esc(t.contact.name) + '</div><div class="text-[10px] text-slate-500">+' + t.contact.phone + '</div></div><button onclick="restoreContact(\'' + t.id + '\')" class="px-2 py-1 bg-green-100 text-green-700 rounded text-[10px] font-bold">↩️</button><button onclick="permDelContact(\'' + t.id + '\')" class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold">✕</button></div>';
+    }).join('');
+  } else if (tab === 'slips') {
+    if (S.deletedSlips.length === 0) { box.innerHTML = '<p class="text-center text-xs text-slate-400 py-6">Empty</p>'; return; }
+    box.innerHTML = S.deletedSlips.map(function(s) {
+      return '<div class="trash-item"><div class="flex-1 min-w-0"><div class="text-xs font-bold">#' + s.id + ' ' + esc(s.name) + ' -- Rs.' + fmtAmt(s.amount) + '</div></div><button onclick="restoreSlip(\'' + s.id + '\')" class="px-2 py-1 bg-green-100 text-green-700 rounded text-[10px] font-bold">↩️</button><button onclick="permDelSlip(\'' + s.id + '\')" class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold">✕</button></div>';
+    }).join('');
+  } else {
+    if (S.cb.trash.length === 0) { box.innerHTML = '<p class="text-center text-xs text-slate-400 py-6">Empty</p>'; return; }
+    box.innerHTML = S.cb.trash.map(function(item, i) {
+      var label = item.type === 'account' ? '💳 ' + esc(item.name) : (item.type === 'in' ? '+' : '-') + ' Rs ' + fmtAmt(item.amount) + ' ' + esc(item.details || '');
+      return '<div class="trash-item"><div class="flex-1"><div class="text-xs font-bold">' + label + '</div></div><button onclick="restoreCb(' + i + ')" class="px-2 py-1 bg-green-100 text-green-700 rounded text-[10px] font-bold">↩️</button><button onclick="permDelCb(' + i + ')" class="px-2 py-1 bg-red-100 text-red-700 rounded text-[10px] font-bold">✕</button></div>';
+    }).join('');
+  }
+}
+
+function restoreContact(id) {
+  var i = S.contactsTrash.findIndex(function(t) { return t.id === id; }); if (i === -1) return;
+  var item = S.contactsTrash.splice(i, 1)[0]; S.contacts.unshift(item.contact);
+  saveAll(); switchTrashTab('contacts'); renderWAContacts(); renderSlipContacts(); renderHome(); toast('Restored');
+}
+function permDelContact(id) { S.contactsTrash = S.contactsTrash.filter(function(t) { return t.id !== id; }); saveAll(); switchTrashTab('contacts'); toast('Deleted'); }
+function restoreSlip(id) {
+  var i = S.deletedSlips.findIndex(function(s) { return s.id === id; }); if (i === -1) return;
+  var item = S.deletedSlips.splice(i, 1)[0]; delete item.deletedAt; S.slips.unshift(item);
+  saveAll(); switchTrashTab('slips'); renderSlips(); renderHome(); toast('Restored');
+}
+function permDelSlip(id) { S.deletedSlips = S.deletedSlips.filter(function(s) { return s.id !== id; }); saveAll(); switchTrashTab('slips'); toast('Deleted'); }
+function restoreCb(i) {
+  var item = S.cb.trash.splice(i, 1)[0]; delete item.deletedAt;
+  if (item.type === 'account') { delete item.type; S.cb.accounts.push(item); }
+  else { S.cb.entries.push(item); }
+  saveAll(); renderCashbook(); switchTrashTab('cashbook'); toast('Restored');
+}
+function permDelCb(i) { S.cb.trash.splice(i, 1); saveAll(); switchTrashTab('cashbook'); toast('Deleted'); }
+
+function emptyAllTrash() {
+  showConfirm('Empty Trash?', 'Type "ok" to confirm', function() {
+    S.contactsTrash = []; S.deletedSlips = []; S.cb.trash = [];
+    saveAll(); switchTrashTab(S.trashTab); toast('Emptied');
+  }, true, 'ok');
+}
+
+function showConfirm(title, msg, action, requireInput, expected) {
+  var t = document.getElementById('confirmTitle'); var m = document.getElementById('confirmMsg'); var w = document.getElementById('confirmInputWrap'); var i = document.getElementById('confirmInput');
+  if (t) t.textContent = title; if (m) m.textContent = msg;
+  if (w) w.classList.toggle('hidden', !requireInput);
+  if (i) { i.value = ''; i.dataset.expected = expected || ''; }
+  S.confirmAction = action; openModal('confirmModal');
+}
+function executeConfirm() {
+  var inputEl = document.getElementById('confirmInput'); var expected = inputEl ? inputEl.dataset.expected : ''; var typed = inputEl ? inputEl.value.trim() : '';
+  if (expected && typed !== expected) { toast('Input does not match'); return; }
+  if (S.confirmAction) S.confirmAction();
+  closeModal('confirmModal'); S.confirmAction = null;
+}
+
+function exportEmbeddedHTML() {
+  try {
+    toast('Preparing...'); openApp('home');
+    var data = {
+      contacts: S.contacts, contactsTrash: S.contactsTrash, slips: S.slips, deletedSlips: S.deletedSlips, slipCounter: S.slipCounter,
+      slipSettings: S.slipSettings, slipDesign: S.slipDesign, shopNumbers: S.shopNumbers,
+      cashbook: { accounts: S.cb.accounts, activeAccountId: S.cb.activeAccountId, entries: S.cb.entries, trash: S.cb.trash },
+      dark: S.dark, myId: S.myId, myName: S.myName, friends: S.friends, incoming: S.incoming, outgoing: S.outgoing
+    };
+    var json = JSON.stringify(data); var encoded = LZString.compressToBase64(json);
+    var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    html = html.replace(/<script id="__embedded__"[\s\S]*?<\/script>/gi, '');
+    var scriptTag = '<script id="__embedded__">window.__EMBEDDED_B64__="' + encoded + '";<\/script>';
+    html = html.replace(/<body([^>]*)>/i, '<body$1>' + scriptTag);
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = 'GillaniSuite_' + new Date().toISOString().slice(0, 10) + '.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
+    toast('✅ HTML downloaded!'); closeModal('settingsModal');
+  } catch(e) { console.error('Export failed:', e); toast('Export failed: ' + e.message); }
+}
+
+function generateShareCode() {
+  try {
+    if (typeof LZString === 'undefined') { toast('LZString not loaded'); return; }
+    var data = { app: 'GillaniSuite', v: 1, at: new Date().toISOString(), owner: S.slipDesign.shopName || 'Gillani Suite', contacts: S.contacts, slips: S.slips, cashbook: { accounts: S.cb.accounts, activeAccountId: S.cb.activeAccountId, entries: S.cb.entries } };
+    var json = JSON.stringify(data); var compressed = LZString.compressToBase64(json); var code = 'GS1:' + compressed;
+    var box = document.getElementById('shareCodeBox'); var ta = document.getElementById('shareCodeText');
+    if (ta) ta.value = code; if (box) box.classList.remove('hidden');
+    toast('✅ Code ready!');
+  } catch(e) { console.error('Share failed:', e); toast('Failed: ' + e.message); }
+}
+
+function copyShareCode() {
+  var ta = document.getElementById('shareCodeText'); if (!ta || !ta.value) { toast('No code'); return; }
+  ta.select();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(ta.value).then(function() { toast('Copied!'); }).catch(function() { document.execCommand('copy'); toast('Copied!'); }); }
+    else { document.execCommand('copy'); toast('Copied!'); }
+  } catch(e) { toast('Copy failed'); }
+}
+
+function shareViaWhatsApp() {
+  var ta = document.getElementById('shareCodeText'); if (!ta || !ta.value) { toast('No code'); return; }
+  var text = '🔗 Shared data code:\n\n' + ta.value + '\n\nPaste in app under Settings → View Shared Data';
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function openViewSharedModal() { closeModal('settingsModal'); var input = document.getElementById('viewCodeInput'); if (input) input.value = ''; openModal('viewSharedModal'); }
+
+function loadSharedData() {
+  var input = document.getElementById('viewCodeInput'); if (!input || !input.value.trim()) { toast('Paste code first'); return; }
+  var code = input.value.trim();
+  try {
+    if (typeof LZString === 'undefined') { toast('LZString not loaded'); return; }
+    var data;
+    if (code.indexOf('GS1:') === 0) { var comp = code.substring(4); var json = LZString.decompressFromBase64(comp); if (!json) throw new Error('Invalid code'); data = JSON.parse(json); }
+    else { data = JSON.parse(code); }
+    if (!data) throw new Error('No data');
+    S.sharedData = { data: data, code: code };
+    closeModal('viewSharedModal'); showSharedView(); toast('✅ Loaded');
+  } catch(e) { console.error('Load failed:', e); toast('Failed: ' + e.message); }
+}
+
+function showSharedView() {
+  if (!S.sharedData) return;
+  var data = S.sharedData.data; var contacts = data.contacts || []; var slips = data.slips || [];
+  var cb = data.cashbook || { entries: [] }; var entries = cb.entries || [];
+  var inS = entries.filter(function(e) { return e.type === 'in'; }).reduce(function(s, e) { return s + (+e.amount || 0); }, 0);
+  var outS = entries.filter(function(e) { return e.type === 'out'; }).reduce(function(s, e) { return s + (+e.amount || 0); }, 0);
+  var net = inS - outS;
+  var label = document.getElementById('sharedLabel'); if (label) label.textContent = (data.owner || 'Shared') + ' • Read-only';
+  var titleEl = document.getElementById('sharedTitle'); if (titleEl) titleEl.textContent = '📊 ' + (data.owner || 'Shared Data');
+  var content = document.getElementById('sharedContent'); if (!content) return;
+  var html =
+    '<div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-4 text-white mb-3">' +
+      '<h2 class="font-black text-lg">' + esc(data.owner || 'Shared Data') + '</h2>' +
+      '<p class="text-[10px] opacity-80">Shared: ' + (data.at ? new Date(data.at).toLocaleString('en-PK') : '--') + '</p>' +
+      '<div class="grid grid-cols-3 gap-2 mt-3">' +
+        '<div class="bg-white/20 rounded-lg p-2 text-center"><div class="text-[9px] opacity-80 font-bold">Contacts</div><div class="text-sm font-black">' + contacts.length + '</div></div>' +
+        '<div class="bg-white/20 rounded-lg p-2 text-center"><div class="text-[9px] opacity-80 font-bold">Slips</div><div class="text-sm font-black">' + slips.length + '</div></div>' +
+        '<div class="bg-white/20 rounded-lg p-2 text-center"><div class="text-[9px] opacity-80 font-bold">Entries</div><div class="text-sm font-black">' + entries.length + '</div></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">💰 Summary</h3><div class="grid grid-cols-3 gap-2">' +
+      '<div class="balance-card"><div class="label">Net</div><div class="value text-indigo-600">' + (net >= 0 ? '' : '-') + 'Rs ' + fmtAmt(net) + '</div></div>' +
+      '<div class="balance-card"><div class="label">In</div><div class="value text-emerald-600">Rs ' + fmtAmt(inS) + '</div></div>' +
+      '<div class="balance-card"><div class="label">Out</div><div class="value text-red-600">Rs ' + fmtAmt(outS) + '</div></div>' +
+    '</div></div>';
+  if (contacts.length) {
+    html += '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">👥 Contacts (' + contacts.length + ')</h3><div class="space-y-1.5" style="max-height:280px;overflow-y:auto">' +
+      contacts.map(function(c) { return '<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-lg px-3 py-2"><div><div class="text-xs font-bold">' + esc(c.name) + '</div><div class="text-[10px] text-slate-500">+' + c.phone + '</div></div><a href="' + waLink(c.phone) + '" target="_blank" class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-brands fa-whatsapp text-xs"></i></a></div>'; }).join('') +
+    '</div></div>';
+  }
+  if (slips.length) {
+    html += '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">🧾 Slips (' + slips.length + ')</h3><div class="space-y-1.5" style="max-height:280px;overflow-y:auto">' +
+      slips.map(function(s) { return '<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-lg px-3 py-2"><div class="min-w-0 flex-1"><div class="text-xs font-bold truncate">#' + s.id + ' ' + esc(s.name) + '</div><div class="text-[10px] text-slate-500">' + fmtDate(s.timestamp) + '</div></div><span class="text-xs font-extrabold text-orange-600">Rs.' + fmtAmt(s.amount) + '</span></div>'; }).join('') +
+    '</div></div>';
+  }
+  if (entries.length) {
+    html += '<div class="card mb-3"><h3 class="text-xs font-bold mb-2 text-slate-500 uppercase">💳 Entries (' + entries.length + ')</h3><div class="space-y-1.5" style="max-height:400px;overflow-y:auto">' +
+      entries.slice(0, 100).map(function(e) { var p = e.type === 'in' ? '+' : '-'; var c = e.type === 'in' ? 'text-emerald-600' : 'text-red-600'; return '<div class="entry-item ' + e.type + '"><span class="text-sm font-extrabold ' + c + '">' + p + ' Rs ' + fmtAmt(e.amount) + '</span><span class="flex-1 text-xs text-slate-500 truncate">' + esc(e.details || '--') + '</span><span class="text-[9px] text-slate-400">' + new Date(e.date).toLocaleDateString('en-PK') + '</span></div>'; }).join('') +
+    '</div></div>';
+  }
+  html += '<div class="card bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 mb-3"><p class="text-[11px] text-amber-800 dark:text-amber-300"><b>ℹ️ Read-only view.</b> Your own data is untouched.</p></div>';
+  content.innerHTML = html;
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var sharedScreen = document.getElementById('screen-shared'); if (sharedScreen) sharedScreen.classList.add('active');
+  window.scrollTo(0, 0);
+  var nav = document.getElementById('bottomNav'); if (nav) nav.style.display = 'none';
+}
+
+function closeSharedView() { S.sharedData = null; openApp('home'); }
+
+function exportBackup() {
+  var data = {
+    version: 1, exportedAt: new Date().toISOString(), contacts: S.contacts, contactsTrash: S.contactsTrash, slips: S.slips, deletedSlips: S.deletedSlips,
+    slipCounter: S.slipCounter, slipSettings: S.slipSettings, slipDesign: S.slipDesign, shopNumbers: S.shopNumbers,
+    cashbook: { accounts: S.cb.accounts, activeAccountId: S.cb.activeAccountId, entries: S.cb.entries, trash: S.cb.trash }, dark: S.dark,
+    myId: S.myId, myName: S.myName, friends: S.friends, incoming: S.incoming, outgoing: S.outgoing
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'GillaniSuite_Backup_' + new Date().toISOString().slice(0, 10) + '.json'; a.click();
+  toast('Backup downloaded');
+}
+
+function importBackup(e) {
+  var f = e.target.files[0]; if (!f) return;
+  var r = new FileReader();
+  r.onload = function(ev) {
+    try {
+      var d = JSON.parse(ev.target.result);
+      if (d.contacts) S.contacts = d.contacts; if (d.contactsTrash) S.contactsTrash = d.contactsTrash;
+      if (d.slips) S.slips = d.slips; if (d.deletedSlips) S.deletedSlips = d.deletedSlips;
+      if (d.slipCounter) S.slipCounter = d.slipCounter;
+      if (d.slipSettings) Object.assign(S.slipSettings, d.slipSettings); if (d.slipDesign) Object.assign(S.slipDesign, d.slipDesign);
+      if (d.shopNumbers) S.shopNumbers = d.shopNumbers;
+      if (d.cashbook) { S.cb.accounts = d.cashbook.accounts || S.cb.accounts; S.cb.activeAccountId = d.cashbook.activeAccountId || S.cb.activeAccountId; S.cb.entries = d.cashbook.entries || []; S.cb.trash = d.cashbook.trash || []; }
+      if (typeof d.dark === 'boolean') S.dark = d.dark;
+      if (d.myId) S.myId = d.myId;
+      if (d.myName) S.myName = d.myName;
+      if (d.friends) S.friends = d.friends;
+      if (d.incoming) S.incoming = d.incoming;
+      if (d.outgoing) S.outgoing = d.outgoing;
+      saveAll(); applyTheme(); renderHome(); renderCashbook(); renderSlips(); renderWAContacts(); renderPosSettings(); renderFriendsUI();
+      openApp('home'); toast('Restored ✅');
+    } catch(err) { toast('Invalid file'); }
+  };
+  r.readAsText(f); e.target.value = '';
+}
+
+function showResetConfirm() {
+  showConfirm('Reset All Data?', 'Type "RESET" to permanently delete ALL data', function() {
+    var input = document.getElementById('confirmInput'); if (!input || input.value.trim() !== 'RESET') { toast('Type RESET'); return; }
+    localStorage.clear(); location.reload();
+  }, true, 'RESET');
+}
+
+function syncCounter() {
+  var max = S.slipCounter || 1000;
+  S.slips.forEach(function(s) { var n = parseInt(s.id); if (!isNaN(n) && n >= max) max = n + 1; });
+  S.deletedSlips.forEach(function(s) { var n = parseInt(s.id); if (!isNaN(n) && n >= max) max = n + 1; });
+  S.slipCounter = max;
+}
+
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { document.querySelectorAll('.modal.show').forEach(function(m) { m.classList.remove('show'); }); } });
+
+if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
+console.log('%c🏛️ Gillani Suite v6.0 -- Filtered Totals + Friends','color:#6366f1;font-size:16px;font-weight:900');
+</script>
+<!-- WEBBOX_DB_INJECT_V1 -->
+<!--
+  ============================================================
+  WebBox Database — Auto-generated by DB Manager
+  ============================================================
+  Project URL:     https://adrborutoqcrubomedeb.supabase.co
+  Publishable Key: sb_publishable_uWaxWIAwOgvItH_nA9ODMw_rOtSNcUK
+  API Key:         wbp_JzYoD0g7UPLS3GmAPLQxzz3Ajo4yI07EIMwcdHAQ
+  ============================================================
+  Use in your JS:
+    await WEBBOX_DB.insert('users', { name: 'Ali' });
+    const { documents } = await WEBBOX_DB.select('users');
+    await WEBBOX_DB.update(docId, { name: 'Updated' });
+    await WEBBOX_DB.remove(docId);
+  ============================================================
+-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var PROJECT_URL = 'https://adrborutoqcrubomedeb.supabase.co';
+  var PUBLISHABLE_KEY = 'sb_publishable_uWaxWIAwOgvItH_nA9ODMw_rOtSNcUK';
+  var API_KEY = 'wbp_JzYoD0g7UPLS3GmAPLQxzz3Ajo4yI07EIMwcdHAQ';
+
+  window.WEBBOX_DB = {
+    projectUrl: PROJECT_URL,
+    publishableKey: PUBLISHABLE_KEY,
+    key: API_KEY,
+    _client: null,
+    _get: function(){
+      if (!this._client) this._client = window.supabase.createClient(PROJECT_URL, PUBLISHABLE_KEY);
+      return this._client;
+    },
+    insert: async function(collection, data){
+      var r = await this._get().rpc('db_api_insert', { p_key: API_KEY, p_collection: collection, p_data: data });
+      return r.data;
+    },
+    select: async function(collection, limit){
+      var r = await this._get().rpc('db_api_select', { p_key: API_KEY, p_collection: collection, p_limit: limit || 100 });
+      return r.data;
+    },
+    update: async function(docId, data){
+      var r = await this._get().rpc('db_api_update', { p_key: API_KEY, p_doc_id: docId, p_data: data });
+      return r.data;
+    },
+    remove: async function(docId){
+      var r = await this._get().rpc('db_api_delete', { p_key: API_KEY, p_doc_id: docId });
+      return r.data;
+    }
+  };
+  console.log('[WebBox DB] Ready! URL=' + PROJECT_URL + ' Key=' + API_KEY.slice(0,12) + '...');
+})();
+</script>
+<!-- /WEBBOX_DB_INJECT_V1 -->
+</body>
+</html>
